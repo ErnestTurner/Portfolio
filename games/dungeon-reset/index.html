@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111a1d"><meta name="description" content="The heroes get the adventure. You clean up afterward. A dungeon caretaker game by Ernest Turner.">
+  <title>Dungeon Reset — Clock in. Clean up.</title><link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="masthead"><a class="brand" href="#" id="brand" aria-label="Dungeon Reset home"><span class="brand-mark">DR</span><span>DUNGEON <b>RESET</b><small>DEPARTMENT OF AFTERMATH</small></span></a><div class="header-right"><span class="edition">THE NIGHT SHIFT <i>•</i> v1.0.0</span><button id="sound" class="icon-button" aria-label="Mute all audio" title="Mute all audio (M)">SOUND ON</button><button id="pause" class="icon-button" title="Pause (Esc)">PAUSE <kbd>Ⅱ</kbd></button></div></header>
+    <main>
+      <section class="shift-bar" aria-label="Shift status"><div class="phase-heading"><span id="phase-tag" class="eyebrow">EST. 1347 · STILL UNDERSTAFFED</span><h1 id="phase-title">Another day. Another dungeon.</h1></div><div class="stats"><div><span>RAID</span><strong id="wave">01 <em>/ 05</em></strong></div><div class="timer-stat"><span id="timer-label">NEXT PARTY</span><strong id="timer">01:35</strong></div><div><span>SHIFT SCORE</span><strong id="score">00000</strong></div></div></section>
+      <div class="play-layout">
+        <section class="room-wrap" aria-label="Dungeon room"><div class="room-topline"><span><i class="live-dot"></i> ROOM 01 <b>THE USUAL MESS</b></span><span id="room-status">Caretaker wanted. Experience inevitable.</span></div><div id="game" role="application" aria-label="Dungeon room. Drag monsters to matching circles. Hold other objects to repair. All tasks are also available in the work order panel."></div><div class="room-bottom"><span id="room-tip">THE HEROES GET THE ADVENTURE. YOU CLEAN UP AFTERWARD.</span><button id="fullscreen" title="Toggle fullscreen">EXPAND ↗</button></div>
+          <div id="title-screen" class="title-overlay"><div class="title-copy"><span class="eyebrow">A FANTASY WORKPLACE COMEDY</span><h2>DUNGEON<br><span>RESET</span><span class="title-star">✦</span></h2><p>The heroes get the adventure.<br>You clean up afterward.</p><button id="start" class="primary big">CLOCK IN <span>→</span></button><span class="run-length">ONE ROOM. FIVE RAIDS. A 12-MINUTE SHIFT.</span><div class="title-links"><button id="how-to">How to play</button><button id="credits">Credits</button></div></div><div class="caretaker-quote">“I just mopped that.”<span>— you, probably</span></div></div>
+        </section>
+        <aside class="work-panel"><div class="panel-title"><span class="eyebrow">CARETAKER'S CLIPBOARD</span><span class="paper-clip">⊓</span></div><div id="clipboard-intro"><h2>A little job<br>security.</h2><p>Return the staff. Fix the hazards. Make it look like we meant to do this.</p><div class="intro-rule"></div><span class="eyebrow">EMPLOYEE RECORD</span><strong id="best-score" class="best">—</strong><p class="muted">Best completed shift<br>Saved on this browser.</p><div class="stamp">NO HEROES<br>WERE CONSULTED</div></div><div id="active-clipboard" hidden><div class="readiness-heading"><h2>Work order</h2><strong id="readiness">0%</strong></div><div class="meter"><i id="readiness-bar"></i></div><p id="party-note" class="party-note"></p><div id="task-list" aria-label="Repair tasks"></div><div id="inspector"><span class="eyebrow" id="inspect-type">SELECT A JOB</span><h3 id="inspect-name">One mess at a time.</h3><p id="inspect-description">Click an object in the room or choose a task above.</p><div class="meter work-meter"><i id="work-progress"></i></div><button id="work-button" class="primary" disabled>HOLD TO REPAIR <kbd>SPACE</kbd></button></div><button id="open-doors" class="secondary">Ready enough. Open the doors →</button></div></aside>
+      </div>
+      <footer><span><b>DR</b> A GAME BY ERNEST TURNER</span><span>DRAG TO RETURN <i>·</i> HOLD TO FIX <i>·</i> ESC TO PAUSE</span><button id="help-footer">FIELD MANUAL ↗</button></footer>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="modal-layer" class="modal-layer" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"></section></div>
+  <noscript>Dungeon Reset needs JavaScript enabled to play.</noscript>
+  <script src="vendor/phaser.min.js"></script><script src="core.js"></script><script src="game.js"></script>
+</body></html>

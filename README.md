@@ -8,6 +8,7 @@ Ernest's developer portfolio and browser-game showcase.
 
 - Moon Snail becomes the featured playable game
 - Starfall remains preserved as an earlier finished experiment
+- Dungeon Reset is a complete five-raid browser game in the arcade and at its own route
 - Living Town, Gravity Lab, Outpost, and other active projects should be represented honestly by maturity
 - Keep the site lightweight, responsive, and directly useful as portfolio evidence
 
@@ -20,5 +21,6 @@ GitHub is the source of truth for code and version history. Google Drive stores 
 - Portfolio: https://ernest-turner.pages.dev/
 - Moon Snail: https://ernest-turner.pages.dev/games/moon-snail/
 - Preserved Starfall: https://ernest-turner.pages.dev/games/starfall/
+- Dungeon Reset: https://ernest-turner.pages.dev/games/dungeon-reset/
 
 The deployed static files are `index.html` and `games/`. Deploy only those assets, not the entire repository. Cloudflare Pages project: `ernest-turner`, production branch: `main`. Moon Snail's authoritative editable source is in `ErnestTurner/Moon-Snail`.

@@ -1,0 +1,18 @@
+{
+  "game": "Dungeon Reset",
+  "version": "1.0.0",
+  "builtAt": "2026-09-08T13:49:24.805Z",
+  "files": {
+    "assets/dungeon.png": "eebbdc0dfd9db59b14c2d28313ec38d49c10fbc3f3749dd41ec8b19ff0c057e3",
+    "assets/sprites.png": "f8f2ec4d4f0f16248f511d6c072eca222704ec81a5ab4384863da1a1d9168833",
+    "core.js": "dbb442542d082b5b7aabe2fd5b3252330f8d5591ae7ab52e41aa6d5f861df070",
+    "CREDITS.md": "abe75f8ef9592603185f60f8015a320fa094f166b6619b6d55eb0bc9801b2936",
+    "game.js": "4ba0e1b1af4c7188d2972f7ecf2b7b3f33013089552994832c3e02f201def2af",
+    "index.html": "6a33f5b3e88ef5b316a44e0c1a28cfc637cd37dbe771247e6d81ddcd04600eb8",
+    "README.md": "b2fa16f66cb896a1566c6e382d3385915dd54f8580bf2d90cc86d49c7f60ef54",
+    "style.css": "a696ba54c3380e80011fbd4573fb9b935bab290e600b2451f3afe78874c3ceee",
+    "TEST-REPORT.md": "521883c379132654ff0cf3b4d88d32d087f1cc1396231ae2f8f62c29eab22c17",
+    "vendor/PHASER-LICENSE.md": "080f3d5539e766bb556df5b8e86c4f5d581ece35c692b80956ca352b84d29134",
+    "vendor/phaser.min.js": "e92ddef111ba42e92d316979c732311757093688ea1810591cb7aa2858eba7a7"
+  }
+}

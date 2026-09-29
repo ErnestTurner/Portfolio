@@ -22,5 +22,6 @@ GitHub is the source of truth for code and version history. Google Drive stores 
 - Moon Snail: https://ernest-turner.pages.dev/games/moon-snail/
 - Preserved Starfall: https://ernest-turner.pages.dev/games/starfall/
 - Dungeon Reset: https://ernest-turner.pages.dev/games/dungeon-reset/
+- Pocket Mote privacy policy: https://ernest-turner.pages.dev/pocket-mote/privacy/
 
 The deployed static files are `index.html` and `games/`. Deploy only those assets, not the entire repository. Cloudflare Pages project: `ernest-turner`, production branch: `main`. Moon Snail's authoritative editable source is in `ErnestTurner/Moon-Snail`.

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Ernest's Playground crescent snail mark</title>
+  <rect width="512" height="512" rx="96" fill="#0a101a"/>
+  <circle cx="246" cy="246" r="154" fill="#bcadff"/>
+  <circle cx="312" cy="196" r="154" fill="#0a101a"/>
+  <path d="M100 376c0-31 30-51 71-51h204c42 0 61 25 42 49-14 18-40 28-76 28H162c-38 0-62-8-62-26Z" fill="#a3ffd3"/>
+  <path d="M216 357c-82-4-94-105-18-120 65-13 92 73 39 93-34 13-54-29-25-42 18-8 28 19 11 26" fill="none" stroke="#605187" stroke-linecap="round" stroke-width="24"/>
+  <path d="M365 338l15-69m-3 72 51-48" fill="none" stroke="#a3ffd3" stroke-linecap="round" stroke-width="18"/>
+  <circle cx="381" cy="263" r="20" fill="#c9ffe6"/>
+  <circle cx="433" cy="289" r="20" fill="#c9ffe6"/>
+  <circle cx="386" cy="259" r="6" fill="#1d3a44"/>
+  <circle cx="438" cy="285" r="6" fill="#1d3a44"/>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Ernest Turner — Games and Experiments</title>
+  <desc id="desc">Social preview for Ernest's Playground</desc>
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0v48" fill="none" stroke="#243247" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#14243a"/>
+      <stop offset="1" stop-color="#0a101a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity=".45"/>
+  <circle cx="1015" cy="88" r="210" fill="#bcadff" opacity=".08"/>
+  <circle cx="1088" cy="35" r="210" fill="#0a101a"/>
+  <rect x="64" y="58" width="1072" height="514" rx="28" fill="none" stroke="#33445b" stroke-width="2"/>
+  <circle cx="104" cy="98" r="7" fill="#a3ffd3"/>
+  <text x="128" y="106" fill="#a3ffd3" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" letter-spacing="4">ERNEST / PLAYGROUND</text>
+  <text x="88" y="274" fill="#f4f7fb" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="800" letter-spacing="-4">ERNEST TURNER</text>
+  <text x="91" y="344" fill="#bcadff" font-family="Georgia, serif" font-size="48" font-style="italic">Games &amp; experiments</text>
+  <text x="92" y="409" fill="#aab8ca" font-family="Arial, Helvetica, sans-serif" font-size="25">Small games. Curious systems. Things you can play with.</text>
+  <g transform="translate(892 344)">
+    <path d="M0 118c0-17 16-29 39-29h121c24 0 35 14 24 28-8 10-23 16-44 16H35c-22 0-35-5-35-15Z" fill="#a3ffd3"/>
+    <circle cx="74" cy="67" r="55" fill="#bcadff"/>
+    <path d="M84 107C8 103 27 12 78 32c48 18 23 79-10 57-25-17 6-44 20-20" fill="none" stroke="#605187" stroke-linecap="round" stroke-width="10"/>
+    <path d="M158 96l12-45m-3 47 35-31" fill="none" stroke="#a3ffd3" stroke-linecap="round" stroke-width="9"/>
+    <circle cx="171" cy="47" r="11" fill="#c9ffe6"/>
+    <circle cx="205" cy="65" r="11" fill="#c9ffe6"/>
+    <circle cx="174" cy="45" r="3" fill="#1d3a44"/>
+    <circle cx="208" cy="63" r="3" fill="#1d3a44"/>
+  </g>
+  <text x="92" y="529" fill="#71839a" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="2">ERNEST-TURNER.PAGES.DEV</text>
+</svg>

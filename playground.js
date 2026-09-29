@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
   let current = "moon";
-  const order = ["moon", "star", "dungeon"];
+  const order = ["moon", "star", "dungeon", "brain"];
   const games = {
     moon: {
       url: "games/moon-snail/",
@@ -34,6 +34,15 @@
         "Return the monsters, reset the traps, repair the room, and watch five increasingly capable parties discover exactly what you left unfinished.",
       controls:
         "<p><kbd>Drag</kbd> Return monsters</p><p><kbd>Hold</kbd> Repair and refill</p><p><kbd>Esc</kbd> Pause <kbd>M</kbd> Sound</p>",
+    },
+    brain: {
+      url: "games/brain-in-a-jar/",
+      title: "Brain in a Jar",
+      tag: "NEURAL TINKERING TOY",
+      mission: "Change a wire. Change a mind.",
+      description: "Tinker with a tiny creature’s neural wiring.",
+      controls:
+        "<p><kbd>Click / drag</kbd> Move light</p><p><kbd>Slider</kbd> Change selected wire</p><p><kbd>Pause</kbd> then <kbd>Step</kbd> Inspect a tick</p>",
     },
   };
   function choose(name) {

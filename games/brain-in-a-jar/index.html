@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brain in a Jar</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #091014;
+      --panel: #101a20;
+      --panel-2: #152229;
+      --line: #2a3b43;
+      --text: #e8f2f1;
+      --muted: #91a5aa;
+      --cyan: #62e6dd;
+      --amber: #ffd36a;
+      --positive: #59dfb3;
+      --negative: #ff7187;
+      --focus: #fff1ad;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 0%, #14242a 0, var(--bg) 44rem);
+      color: var(--text);
+      font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { width: min(1440px, 100%); margin: 0 auto; padding: clamp(16px, 3vw, 34px); }
+    header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 43px); letter-spacing: -.04em; font-weight: 720; }
+    .eyebrow { color: var(--cyan); text-transform: uppercase; letter-spacing: .16em; font-size: 11px; font-weight: 750; }
+    .subtitle { color: var(--muted); margin: 4px 0 0; }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
+    .arcade-back { color: var(--cyan); text-decoration: none; font-weight: 700; margin-right: 8px; }
+    .arcade-back:hover { text-decoration: underline; }
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--positive); box-shadow: 0 0 12px var(--positive); }
+    .status-dot.paused { background: var(--amber); box-shadow: 0 0 12px var(--amber); }
+    .layout { display: grid; grid-template-columns: minmax(420px, 1.05fr) minmax(500px, .95fr); gap: 18px; align-items: start; }
+    .panel { background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 60px #0005; overflow: hidden; }
+    .panel-head { padding: 16px 18px 13px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .panel-head h2 { margin: 0; font-size: 16px; letter-spacing: .01em; }
+    .panel-head span { color: var(--muted); font-size: 12px; }
+    .room-wrap { padding: 14px; }
+    canvas { width: 100%; height: auto; display: block; border: 1px solid #344a52; border-radius: 10px; background: #071014; touch-action: none; cursor: crosshair; }
+    .controls { display: flex; flex-wrap: wrap; gap: 9px; padding: 0 14px 14px; }
+    button {
+      appearance: none; border: 1px solid #38505a; border-radius: 9px; background: #17262d; color: var(--text);
+      padding: 10px 13px; min-height: 42px; font: inherit; font-weight: 650; cursor: pointer; touch-action: manipulation;
+    }
+    button:hover { border-color: var(--cyan); background: #1b3037; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #62e6dd66; outline-offset: 2px; }
+    button.primary { background: #143a3b; border-color: #3fa9a4; }
+    button[aria-pressed="true"] { color: #061012; background: var(--amber); border-color: var(--amber); }
+    button:disabled { opacity: .42; cursor: not-allowed; }
+    .experiment { margin: 0 14px 14px; padding: 12px 14px; border-left: 3px solid var(--amber); color: #dbe4e3; background: #ffffff08; }
+    .brain-note { color: var(--amber) !important; font-weight: 650; }
+    .brain-body { padding: 14px; }
+    #network { width: 100%; height: auto; display: block; min-height: 315px; background: #0b1419; border: 1px solid #263941; border-radius: 10px; }
+    .node circle { fill: #172831; stroke: #4d6974; stroke-width: 2; }
+    .node.sensor circle { stroke: var(--cyan); }
+    .node.motor circle { stroke: var(--amber); }
+    .node text { fill: var(--text); text-anchor: middle; pointer-events: none; }
+    .node .abbr { font-weight: 750; font-size: 12px; }
+    .node .value { fill: var(--muted); font-size: 11px; }
+    .edge { cursor: pointer; outline: none; }
+    .edge .hit { stroke: transparent; stroke-width: 14; }
+    .edge .wire { fill: none; opacity: .75; transition: opacity .12s, stroke-width .12s; }
+    .edge:hover .wire, .edge:focus .wire, .edge.selected .wire { opacity: 1; }
+    .edge.selected .wire { filter: drop-shadow(0 0 4px var(--focus)); stroke: var(--focus) !important; }
+    .bias-label { fill: var(--muted); font-size: 10px; text-anchor: middle; }
+    .layer-label { fill: #789096; font-size: 10px; text-anchor: middle; letter-spacing: .13em; text-transform: uppercase; }
+    .editor { margin-top: 13px; padding: 13px; background: var(--panel-2); border-radius: 10px; border: 1px solid #30434b; }
+    .editor-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    #selected-name { font-weight: 720; }
+    #weight-readout { font: 700 15px ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--focus); }
+    .range-row { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin: 10px 0; }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); height: 30px; }
+    .connection-title { margin: 16px 0 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+    .connections { max-height: 174px; overflow: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-right: 3px; }
+    .connection-chip { min-height: 34px; padding: 7px 9px; text-align: left; font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .connection-chip.positive { border-left: 3px solid var(--positive); }
+    .connection-chip.negative { border-left: 3px solid var(--negative); }
+    .connection-chip.zero { border-left: 3px solid #6f7e83; }
+    .connection-chip.selected { outline: 2px solid var(--focus); outline-offset: -2px; }
+    .legend { display: flex; gap: 18px; color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .swatch { display: inline-block; width: 17px; height: 3px; vertical-align: middle; margin-right: 6px; }
+    .swatch.pos { background: var(--positive); } .swatch.neg { background: var(--negative); }
+    footer { color: #6f858b; font-size: 12px; margin-top: 14px; }
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } header { align-items: start; flex-direction: column; gap: 8px; } }
+    @media (max-width: 560px) { main { padding: 12px; } .layout { grid-template-columns: minmax(0, 1fr); } .connections { grid-template-columns: 1fr; } .panel-head { align-items: start; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">Behavior bench 01</div>
+        <h1>Brain in a Jar</h1>
+        <p class="subtitle">Open the controller. Touch a wire. Watch the creature change.</p>
+      </div>
+      <div class="status"><a class="arcade-back" href="../../#arcade" target="_top">← Arcade</a><span id="status-dot" class="status-dot"></span><span id="status-text">Running</span></div>
+    </header>
+
+    <div class="layout">
+      <section class="panel" aria-labelledby="room-title">
+        <div class="panel-head">
+          <h2 id="room-title">Bounded room</h2>
+          <span>Click or drag to move the light</span>
+        </div>
+        <div class="room-wrap"><canvas id="room" width="720" height="600" aria-label="Simulation room with creature and movable light"></canvas></div>
+        <div class="controls">
+          <button id="pause" class="primary" type="button">Pause</button>
+          <button id="step" type="button" disabled>Step one tick</button>
+          <button id="swap" type="button" aria-pressed="false">Swap left/right light inputs</button>
+          <button id="reset" type="button">Reset everything</button>
+        </div>
+        <p class="experiment">Move the light. Swap the eyes. Change one connection. Reset to compare.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="brain-title">
+        <div class="panel-head">
+          <h2 id="brain-title">Live neural controller</h2>
+          <span class="brain-note">Hand-wired neural network. No learning or memory.</span>
+        </div>
+        <div class="brain-body">
+          <svg id="network" viewBox="0 0 600 350" role="img" aria-label="Four input, four hidden, two output neural network"></svg>
+          <div class="legend"><span><i class="swatch pos"></i>positive</span><span><i class="swatch neg"></i>negative</span><span>thicker = stronger</span></div>
+          <div class="editor">
+            <div class="editor-top"><span id="selected-name">Connection</span><output id="weight-readout" for="weight">+0.00</output></div>
+            <label class="range-row" for="weight"><span>−4.0</span><input id="weight" type="range" min="-4" max="4" step="0.05"><span>+4.0</span></label>
+            <button id="zero" type="button">Zero selected connection</button>
+          </div>
+          <div class="connection-title">All actual connections — select to edit</div>
+          <div id="connections" class="connections"></div>
+        </div>
+      </section>
+    </div>
+    <footer>Sensor rays are drawn from the creature. Values and activations update every simulation tick.</footer>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // ----- Constants and state -----
+    const canvas = document.querySelector('#room');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const radius = 18, maxWallRange = 105, tickSeconds = 1 / 60;
+    const inputNames = ['Light L', 'Light R', 'Wall FL', 'Wall FR'];
+    const hiddenNames = ['H1', 'H2', 'H3', 'H4'];
+    const outputNames = ['Motor L', 'Motor R'];
+    const original = Object.freeze({
+      ih: [
+        [ 2.40, -0.35,  0.00,  0.00],
+        [-0.35,  2.40,  0.00,  0.00],
+        [ 0.00,  0.00,  3.10,  0.00],
+        [ 0.00,  0.00,  0.00,  3.10]
+      ],
+      ho: [
+        [ 0.00,  2.25,  2.70, -2.70],
+        [ 2.25,  0.00, -2.70,  2.70]
+      ],
+      hb: [-0.30, -0.30, -0.45, -0.45],
+      ob: [0.18, 0.18]
+    });
+    const cloneWeights = () => ({ ih: original.ih.map(r => [...r]), ho: original.ho.map(r => [...r]), hb: [...original.hb], ob: [...original.ob] });
+    const state = {
+      creature: { x: 255, y: 330, angle: -0.25 },
+      light: { x: 535, y: 180 },
+      weights: cloneWeights(), inputs: [0, 0, 0, 0], hidden: [0, 0, 0, 0], outputs: [0, 0],
+      paused: false, swapped: false, dragging: false, selected: { layer: 'ih', to: 0, from: 0 }, tickCount: 0
+    };
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const sigmoid = x => 1 / (1 + Math.exp(-x));
+    const finite = v => Number.isFinite(v) ? v : 0;
+
+    // ----- Sensing: two directional eyes and two wall rays -----
+    function rayDistance(x, y, angle) {
+      const dx = Math.cos(angle), dy = Math.sin(angle);
+      const candidates = [];
+      if (dx > 0) candidates.push((W - radius - x) / dx);
+      if (dx < 0) candidates.push((radius - x) / dx);
+      if (dy > 0) candidates.push((H - radius - y) / dy);
+      if (dy < 0) candidates.push((radius - y) / dy);
+      return Math.min(...candidates.filter(t => t >= 0));
+    }
+    function sampleSensors(creature = state.creature, light = state.light, swapped = state.swapped) {
+      const dx = light.x - creature.x, dy = light.y - creature.y;
+      const distance = Math.hypot(dx, dy);
+      const lightAngle = Math.atan2(dy, dx);
+      const angularSignal = eyeOffset => {
+        const alignment = Math.max(0, Math.cos(lightAngle - (creature.angle + eyeOffset)));
+        const distanceFalloff = 1 / (1 + distance / 250);
+        return clamp(alignment * alignment * distanceFalloff, 0, 1);
+      };
+      let left = angularSignal(-0.48), right = angularSignal(0.48);
+      if (swapped) [left, right] = [right, left];
+      const wall = side => clamp(1 - rayDistance(creature.x, creature.y, creature.angle + side * 0.52) / maxWallRange, 0, 1);
+      return [left, right, wall(-1), wall(1)];
+    }
+
+    // ----- Network: the only behavior controller -----
+    function evaluateNetwork(inputs, weights = state.weights) {
+      const hidden = weights.ih.map((row, h) => Math.tanh(row.reduce((sum, weight, i) => sum + weight * inputs[i], weights.hb[h])));
+      const outputs = weights.ho.map((row, o) => sigmoid(row.reduce((sum, weight, h) => sum + weight * hidden[h], weights.ob[o])));
+      return { hidden: hidden.map(finite), outputs: outputs.map(finite) };
+    }
+
+    // ----- Movement: differential drive plus boundary collision -----
+    function simulationTick() {
+      state.inputs = sampleSensors();
+      const result = evaluateNetwork(state.inputs);
+      state.hidden = result.hidden; state.outputs = result.outputs;
+      const [left, right] = state.outputs;
+      const forward = ((left + right) / 2) * 92;
+      const turn = (right - left) * 3.1;
+      state.creature.angle += turn * tickSeconds;
+      state.creature.x += Math.cos(state.creature.angle) * forward * tickSeconds;
+      state.creature.y += Math.sin(state.creature.angle) * forward * tickSeconds;
+      state.creature.x = clamp(finite(state.creature.x), radius, W - radius);
+      state.creature.y = clamp(finite(state.creature.y), radius, H - radius);
+      state.creature.angle = finite(state.creature.angle);
+      state.tickCount++;
+    }
+
+    // ----- Room drawing -----
+    function line(x1, y1, x2, y2, color, width = 1, dash = []) {
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.stroke(); ctx.setLineDash([]);
+    }
+    function drawRoom() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#071014'; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = '#12232a'; ctx.lineWidth = 1;
+      for (let x = 30; x < W; x += 30) line(x, 0, x, H, '#102027');
+      for (let y = 30; y < H; y += 30) line(0, y, W, y, '#102027');
+      ctx.strokeStyle = '#55727b'; ctx.lineWidth = 4; ctx.strokeRect(2, 2, W - 4, H - 4);
+      const l = state.light;
+      const glow = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, 65);
+      glow.addColorStop(0, '#fff6b8cc'); glow.addColorStop(.18, '#ffd36a88'); glow.addColorStop(1, '#ffd36a00');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(l.x, l.y, 65, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff2a7'; ctx.beginPath(); ctx.arc(l.x, l.y, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffe38b'; ctx.lineWidth = 2; ctx.stroke();
+      const c = state.creature;
+      const rayColors = ['#62e6ddaa', '#62e6ddaa', '#ff718799', '#ff718799'];
+      [-0.48, 0.48].forEach((off, i) => {
+        const len = 82;
+        line(c.x, c.y, c.x + Math.cos(c.angle + off) * len, c.y + Math.sin(c.angle + off) * len, rayColors[i], 2, [5, 5]);
+      });
+      [-0.52, 0.52].forEach((off, i) => {
+        const dist = Math.min(maxWallRange, rayDistance(c.x, c.y, c.angle + off));
+        line(c.x, c.y, c.x + Math.cos(c.angle + off) * dist, c.y + Math.sin(c.angle + off) * dist, rayColors[i + 2], 2);
+      });
+      ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.angle);
+      ctx.fillStyle = '#16272d'; ctx.strokeStyle = '#a5c3c7'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, 0, 24, 17, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#62e6dd'; ctx.beginPath(); ctx.arc(13, -9, 3.5, 0, Math.PI * 2); ctx.arc(13, 9, 3.5, 0, Math.PI * 2); ctx.fill();
+      line(0, 0, 35, 0, '#fff1ad', 3); ctx.fillStyle = '#fff1ad'; ctx.beginPath(); ctx.moveTo(38, 0); ctx.lineTo(29, -5); ctx.lineTo(29, 5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#8ca2a7'; ctx.font = '12px system-ui'; ctx.fillText('heading', c.x + Math.cos(c.angle) * 43 - 20, c.y + Math.sin(c.angle) * 43 - 8);
+    }
+
+    // ----- Network diagram and editor -----
+    const svg = document.querySelector('#network');
+    const NS = 'http://www.w3.org/2000/svg';
+    const positions = { input: [[72,64],[72,137],[72,210],[72,283]], hidden: [[300,64],[300,137],[300,210],[300,283]], output: [[528,119],[528,229]] };
+    const edgeData = [];
+    for (let h = 0; h < 4; h++) for (let i = 0; i < 4; i++) edgeData.push({ layer:'ih', to:h, from:i });
+    for (let o = 0; o < 2; o++) for (let h = 0; h < 4; h++) edgeData.push({ layer:'ho', to:o, from:h });
+    const weightOf = e => state.weights[e.layer][e.to][e.from];
+    const edgeLabel = e => e.layer === 'ih' ? `${inputNames[e.from]} → ${hiddenNames[e.to]}` : `${hiddenNames[e.from]} → ${outputNames[e.to]}`;
+    const isSelected = e => e.layer === state.selected.layer && e.to === state.selected.to && e.from === state.selected.from;
+    function make(tag, attrs = {}) { const el = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); return el; }
+    function selectEdge(e) { state.selected = { ...e }; syncEditor(); renderConnections(); updateDiagram(); }
+    function buildDiagram() {
+      svg.replaceChildren();
+      [['SENSORS',72],['TANH HIDDEN',300],['SIGMOID MOTORS',528]].forEach(([label,x]) => { const t=make('text',{x,y:20,class:'layer-label'}); t.textContent=label; svg.append(t); });
+      edgeData.forEach((e, index) => {
+        const from = e.layer === 'ih' ? positions.input[e.from] : positions.hidden[e.from];
+        const to = e.layer === 'ih' ? positions.hidden[e.to] : positions.output[e.to];
+        const g = make('g',{class:'edge',tabindex:'0',role:'button','aria-label':edgeLabel(e)}); g.dataset.index=index;
+        const path = `M ${from[0]+25} ${from[1]} C ${(from[0]+to[0])/2} ${from[1]}, ${(from[0]+to[0])/2} ${to[1]}, ${to[0]-25} ${to[1]}`;
+        g.append(make('path',{d:path,class:'hit'}), make('path',{d:path,class:'wire'}));
+        g.addEventListener('click',()=>selectEdge(e)); g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();selectEdge(e);}}); svg.append(g);
+      });
+      const layers = [
+        { kind:'input', names:inputNames, values:()=>state.inputs, biases:null },
+        { kind:'hidden', names:hiddenNames, values:()=>state.hidden, biases:()=>state.weights.hb },
+        { kind:'output', names:outputNames, values:()=>state.outputs, biases:()=>state.weights.ob }
+      ];
+      layers.forEach(layer => positions[layer.kind].forEach((p,i) => {
+        const g=make('g',{class:`node ${layer.kind==='input'?'sensor':layer.kind==='output'?'motor':''}`}); g.dataset.kind=layer.kind; g.dataset.index=i;
+        g.append(make('circle',{cx:p[0],cy:p[1],r:25}));
+        const name=make('text',{x:p[0],y:p[1]-3,class:'abbr'}); name.textContent=layer.names[i];
+        const val=make('text',{x:p[0],y:p[1]+13,class:'value'}); val.textContent='0.000';
+        g.append(name,val);
+        if(layer.biases){ const b=make('text',{x:p[0],y:p[1]+39,class:'bias-label'}); b.textContent=`bias ${layer.biases()[i].toFixed(2)}`; g.append(b); }
+        svg.append(g);
+      }));
+    }
+    function updateDiagram() {
+      svg.querySelectorAll('.edge').forEach((g,i) => {
+        const e=edgeData[i], w=weightOf(e), wire=g.querySelector('.wire');
+        wire.setAttribute('stroke',w>0?'#59dfb3':w<0?'#ff7187':'#6f7e83'); wire.setAttribute('stroke-width',String(1+Math.abs(w)*1.25));
+        g.classList.toggle('selected',isSelected(e)); g.setAttribute('aria-label',`${edgeLabel(e)}, weight ${w.toFixed(2)}`);
+      });
+      const layerValues={input:state.inputs,hidden:state.hidden,output:state.outputs};
+      svg.querySelectorAll('.node').forEach(g=>{ const v=layerValues[g.dataset.kind][Number(g.dataset.index)]; g.querySelector('.value').textContent=v.toFixed(3); });
+    }
+    const chips=document.querySelector('#connections');
+    function renderConnections() {
+      chips.replaceChildren();
+      edgeData.forEach(e=>{ const w=weightOf(e), b=document.createElement('button'); b.type='button'; b.className=`connection-chip ${w>0?'positive':w<0?'negative':'zero'}${isSelected(e)?' selected':''}`; b.textContent=`${edgeLabel(e)}  ${w>=0?'+':''}${w.toFixed(2)}`; b.title=b.textContent; b.addEventListener('click',()=>selectEdge(e)); chips.append(b); });
+    }
+    function syncEditor() { const e=state.selected,w=weightOf(e); document.querySelector('#selected-name').textContent=edgeLabel(e); document.querySelector('#weight').value=String(w); document.querySelector('#weight-readout').value=`${w>=0?'+':''}${w.toFixed(2)}`; }
+    function setSelectedWeight(value) { const e=state.selected; state.weights[e.layer][e.to][e.from]=clamp(Number(value),-4,4); state.inputs=sampleSensors(); Object.assign(state,evaluateNetwork(state.inputs)); syncEditor(); renderConnections(); updateDiagram(); }
+
+    // ----- Controls and pointer input -----
+    const pauseButton=document.querySelector('#pause'), stepButton=document.querySelector('#step'), swapButton=document.querySelector('#swap');
+    function syncControls(){ pauseButton.textContent=state.paused?'Resume':'Pause'; stepButton.disabled=!state.paused; swapButton.setAttribute('aria-pressed',String(state.swapped)); document.querySelector('#status-text').textContent=state.paused?'Paused':'Running'; document.querySelector('#status-dot').classList.toggle('paused',state.paused); }
+    pauseButton.addEventListener('click',()=>{state.paused=!state.paused;syncControls();});
+    stepButton.addEventListener('click',()=>{if(state.paused){simulationTick();refresh();}});
+    swapButton.addEventListener('click',()=>{state.swapped=!state.swapped;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();refresh();});
+    document.querySelector('#reset').addEventListener('click',resetEverything);
+    document.querySelector('#weight').addEventListener('input',e=>setSelectedWeight(e.target.value));
+    document.querySelector('#zero').addEventListener('click',()=>setSelectedWeight(0));
+    function resetEverything(){ state.creature={x:255,y:330,angle:-0.25};state.light={x:535,y:180};state.weights=cloneWeights();state.paused=false;state.swapped=false;state.dragging=false;state.selected={layer:'ih',to:0,from:0};state.tickCount=0;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();syncEditor();renderConnections();refresh(); }
+    function pointerPosition(event){const r=canvas.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height};}
+    function moveLight(event){const p=pointerPosition(event);state.light.x=clamp(p.x,12,W-12);state.light.y=clamp(p.y,12,H-12);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));refresh();}
+    canvas.addEventListener('pointerdown',event=>{state.dragging=true;canvas.setPointerCapture(event.pointerId);moveLight(event);});
+    canvas.addEventListener('pointermove',event=>{if(state.dragging)moveLight(event);});
+    canvas.addEventListener('pointerup',()=>{state.dragging=false;}); canvas.addEventListener('pointercancel',()=>{state.dragging=false;});
+
+    function refresh(){drawRoom();updateDiagram();}
+    let previous=performance.now(), accumulator=0;
+    function frame(now){ const elapsed=Math.min(.1,(now-previous)/1000);previous=now;if(!state.paused){accumulator+=elapsed;while(accumulator>=tickSeconds){simulationTick();accumulator-=tickSeconds;}}refresh();requestAnimationFrame(frame); }
+
+    buildDiagram(); resetEverything(); requestAnimationFrame(frame);
+
+    // Small, read-only testing surface used for focused offline verification.
+    window.__brainJarTest = Object.freeze({
+      getState:()=>JSON.parse(JSON.stringify(state)),
+      sampleSensors:(creature,light,swapped=false)=>sampleSensors(creature,light,swapped),
+      evaluate:(inputs,weights=state.weights)=>evaluateNetwork(inputs,weights),
+      tick:simulationTick,
+      reset:resetEverything,
+      setPaused:value=>{state.paused=Boolean(value);syncControls();},
+      setSwapped:value=>{state.swapped=Boolean(value);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();refresh();},
+      setWeight:(layer,to,from,value)=>{state.selected={layer,to,from};setSelectedWeight(value);}
+    });
+  })();
+  </script>
+</body>
+</html>

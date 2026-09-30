@@ -408,6 +408,10 @@ h2 {
   background: #2d2948;
   color: #bca4ff;
 }
+.mirror-art {
+  background: #203943;
+  color: #72f6ef;
+}
 .arrow {
   margin-left: auto;
   color: var(--mint);

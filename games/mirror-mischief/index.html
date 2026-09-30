@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Move and rotate mirrors, splitters, blockers, and receivers to reshape every downstream beam in Ernest Turner's interactive optical tabletop.">
+  <title>Mirror Mischief — Interactive Optics Experiment by Ernest Turner | Trikzik Labs</title>
+  <link rel="canonical" href="https://trikzik.com/games/mirror-mischief/">
+  <link rel="icon" type="image/png" sizes="48x48" href="../../assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../../assets/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Trikzik Labs">
+  <meta property="og:title" content="Mirror Mischief — Interactive Optics Experiment by Ernest Turner">
+  <meta property="og:description" content="Move one optical piece and watch every downstream beam change.">
+  <meta property="og:url" content="https://trikzik.com/games/mirror-mischief/">
+  <meta property="og:image" content="https://trikzik.com/assets/trikzik-labs-social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mirror Mischief — Interactive Optics Experiment by Ernest Turner">
+  <meta name="twitter:description" content="Move one optical piece and watch every downstream beam change.">
+  <meta name="twitter:image" content="https://trikzik.com/assets/trikzik-labs-social.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #eafcff;
+      --muted: #8aa8b6;
+      --panel: rgba(8, 24, 39, .92);
+      --line: rgba(131, 207, 224, .18);
+      --cyan: #54f4ef;
+      --cyan-soft: #9ffdfa;
+      --danger: #ff7890;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #030b16; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 8%, rgba(13, 82, 105, .22), transparent 30rem),
+        linear-gradient(145deg, #061423, #020812 74%);
+    }
+    .lab-link {
+      display: inline-block; margin-bottom: 8px; color: var(--cyan);
+      font: 700 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .11em; text-decoration: none;
+    }
+    .lab-link:hover, .lab-link:focus-visible { text-decoration: underline; }
+    .shell { width: min(1500px, 100%); margin: 0 auto; padding: clamp(14px, 2vw, 28px); }
+    header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 14px; }
+    h1 { margin: 0; font-size: clamp(1.45rem, 3vw, 2.35rem); letter-spacing: -.04em; }
+    h1 span {
+      display: inline-block; color: #b9ff5c; font-family: Georgia, serif; font-style: italic;
+      font-weight: 600; letter-spacing: -.08em; transform: rotate(-3deg) translateY(-1px);
+      text-shadow: 2px 2px 0 rgba(44, 91, 44, .45);
+    }
+    .tagline { margin: 5px 0 0; color: #a8c5d0; font-size: .96rem; }
+    .status-pill {
+      min-height: 27px; padding: 5px 10px; border: 1px solid rgba(255, 120, 144, .35);
+      border-radius: 999px; color: #ffc0cb; background: rgba(84, 8, 27, .32); font-size: .76rem;
+      opacity: 0; transition: opacity .16s;
+    }
+    .status-pill.visible { opacity: 1; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 16px; align-items: start; }
+    .stage-card, .panel {
+      border: 1px solid rgba(117, 198, 218, .18); border-radius: 18px;
+      background: rgba(6, 18, 31, .72); box-shadow: 0 22px 70px rgba(0,0,0,.32);
+    }
+    .stage-card { padding: 10px; overflow: hidden; }
+    .canvas-wrap {
+      position: relative; width: 100%; aspect-ratio: 3 / 2; min-height: 300px;
+      border-radius: 12px; overflow: hidden; background: #061522;
+    }
+    .bench-stamp, .bench-whisper {
+      position: absolute; z-index: 2; pointer-events: none; text-transform: uppercase;
+      letter-spacing: .12em; font-weight: 750;
+    }
+    .bench-stamp {
+      top: 13px; left: 15px; color: rgba(177, 255, 88, .48); font-size: clamp(.48rem, .8vw, .62rem);
+      transform: rotate(-1.5deg); border-bottom: 1px solid rgba(177, 255, 88, .2); padding-bottom: 3px;
+    }
+    .bench-whisper {
+      top: 14px; right: 15px; max-width: 230px; padding: 6px 9px;
+      color: rgba(215, 255, 169, .8); background: rgba(11, 29, 26, .67);
+      border: 1px solid rgba(177, 255, 88, .19); border-radius: 2px 9px 3px 8px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: clamp(.48rem, .8vw, .64rem);
+      text-align: right; transform: rotate(.8deg); transition: color .15s, border-color .15s;
+    }
+    canvas { display: block; width: 100%; height: 100%; cursor: default; user-select: none; }
+    .invitation {
+      position: absolute; left: 16px; bottom: 14px; margin: 0; pointer-events: none;
+      color: rgba(218, 251, 255, .78); font-family: Georgia, serif; font-style: italic;
+      font-size: clamp(.72rem, 1.3vw, .9rem);
+      text-shadow: 0 1px 8px #00131d;
+    }
+    .panel { padding: 16px; }
+    .panel section + section { margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
+    h2 { margin: 0 0 10px; color: #9bb7c2; font-size: .72rem; letter-spacing: .13em; text-transform: uppercase; }
+    .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      appearance: none; border: 1px solid rgba(119, 212, 228, .27); border-radius: 9px;
+      background: linear-gradient(#102b3b, #0a202f); color: #defaff; padding: 9px 10px;
+      font: inherit; font-size: .8rem; font-weight: 650; cursor: pointer;
+      box-shadow: inset 0 1px rgba(255,255,255,.04); transition: border-color .15s, transform .15s, background .15s;
+    }
+    button:hover:not(:disabled) { border-color: rgba(104, 244, 239, .62); background: linear-gradient(#15384a, #0b2737); }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    button:disabled { opacity: .38; cursor: not-allowed; }
+    .selected-name { font-size: 1.03rem; font-weight: 750; color: #d9ffff; margin-bottom: 12px; }
+    .rotation-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); }
+    output { min-width: 48px; text-align: right; color: var(--cyan-soft); font-variant-numeric: tabular-nums; font-size: .84rem; }
+    .rotate-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .delete { width: 100%; margin-top: 10px; border-color: rgba(255,120,144,.28); color: #ffc6d0; }
+    .reset { width: 100%; }
+    .microcopy { color: var(--muted); font-size: .72rem; line-height: 1.45; margin: 8px 1px 0; }
+    .piece-count { display: flex; justify-content: space-between; gap: 12px; color: #aac4ce; font-size: .74rem; margin-top: 9px; }
+    .facts { margin: 14px 3px 2px; color: #7797a4; font-size: .68rem; line-height: 1.5; }
+    @media (max-width: 850px) {
+      header { align-items: start; flex-direction: column; gap: 8px; }
+      .layout { grid-template-columns: 1fr; }
+      .panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .panel section + section { margin: 0; padding: 0 0 0 14px; border-top: 0; border-left: 1px solid var(--line); }
+    }
+    @media (max-width: 590px) {
+      .shell { padding: 10px; }
+      .canvas-wrap { min-height: 260px; }
+      .panel { grid-template-columns: 1fr; }
+      .panel section + section { margin-top: 14px; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <a class="lab-link" href="../../#arcade">← TRIKZIK'S LAB</a>
+        <h1>Mirror <span>Mischief</span></h1>
+        <p class="tagline">A small tabletop for large optical consequences and minor disobedience.</p>
+      </div>
+      <div id="traceLimit" class="status-pill" role="status">Trace limit reached</div>
+    </header>
+
+    <div class="layout">
+      <section class="stage-card" aria-label="Optical tabletop">
+        <div class="canvas-wrap">
+          <canvas id="table" width="900" height="600" aria-label="Interactive optical tabletop. Click or tap pieces to select and drag them."></canvas>
+          <div class="bench-stamp">Trikzik Labs · Optics Dept. (unsupervised)</div>
+          <div id="benchWhisper" class="bench-whisper" aria-live="polite">The light is behaving. Suspicious.</div>
+          <p class="invitation">Move one mirror a little. Watch everything downstream change.</p>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Tabletop controls">
+        <section>
+          <h2>Add Piece</h2>
+          <div class="add-grid">
+            <button data-add="mirror">Mirror</button>
+            <button data-add="splitter">Beam Splitter</button>
+            <button data-add="blocker">Blocker</button>
+            <button data-add="receiver">Receiver</button>
+          </div>
+          <div class="piece-count"><span id="pieceCount">5 of 16 pieces</span><span id="limitNote"></span></div>
+        </section>
+
+        <section>
+          <h2>Selected Piece</h2>
+          <div id="selectedName" class="selected-name">Light Source</div>
+          <div id="rotationControls">
+            <div class="rotation-row">
+              <input id="rotation" type="range" min="-180" max="180" step="1" value="0" aria-label="Rotation in degrees">
+              <output id="rotationValue" for="rotation">0°</output>
+            </div>
+            <div class="rotate-buttons">
+              <button id="rotateMinus">Rotate −5°</button>
+              <button id="rotatePlus">Rotate +5°</button>
+            </div>
+          </div>
+          <button id="deletePiece" class="delete" disabled>Delete Selected</button>
+        </section>
+
+        <section>
+          <h2>Shared</h2>
+          <button id="reset" class="reset">Reset Table</button>
+          <p class="microcopy">Branches below 0.5% power are not traced.</p>
+          <p class="facts">Idealized ray optics. No interference or diffraction.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // ----- State ------------------------------------------------------------
+    const W = 900, H = 600;
+    const MAX_PIECES = 16, MAX_INTERACTIONS = 32, MAX_SEGMENTS = 512;
+    const POWER_CUTOFF = 0.005, EPS = 1e-6, NUDGE = 0.08;
+    const canvas = document.querySelector('#table');
+    const ctx = canvas.getContext('2d');
+    const ui = {
+      name: document.querySelector('#selectedName'), rotationWrap: document.querySelector('#rotationControls'),
+      rotation: document.querySelector('#rotation'), rotationValue: document.querySelector('#rotationValue'),
+      minus: document.querySelector('#rotateMinus'), plus: document.querySelector('#rotatePlus'),
+      del: document.querySelector('#deletePiece'), reset: document.querySelector('#reset'),
+      count: document.querySelector('#pieceCount'), limitNote: document.querySelector('#limitNote'),
+      traceLimit: document.querySelector('#traceLimit'), whisper: document.querySelector('#benchWhisper'),
+      add: [...document.querySelectorAll('[data-add]')]
+    };
+    let nextId = 7;
+    let pieces = [];
+    let selectedId = 1;
+    let trace = { segments: [], powers: new Map(), limited: false };
+    let drag = null;
+
+    const initialPieces = () => [
+      { id: 1, type: 'source',   x: 120, y: 330, angle: 0 },
+      { id: 2, type: 'splitter', x: 400, y: 330, angle: -45 },
+      { id: 3, type: 'mirror',   x: 400, y: 130, angle: -45 },
+      { id: 4, type: 'mirror',   x: 680, y: 330, angle: 45 },
+      { id: 5, type: 'blocker',  x: 245, y: 505, angle: 10 },
+      { id: 6, type: 'receiver', x: 720, y: 130, angle: 0 },
+      { id: 7, type: 'receiver', x: 680, y: 520, angle: 0 }
+    ];
+    const labels = { source: 'Light Source', mirror: 'Mirror', splitter: 'Beam Splitter', blocker: 'Blocker', receiver: 'Receiver' };
+    const rotatable = p => p && p.type !== 'receiver';
+    const selected = () => pieces.find(p => p.id === selectedId) || null;
+    const rad = deg => deg * Math.PI / 180;
+    const normAngle = deg => ((deg + 180) % 360 + 360) % 360 - 180;
+    const unit = a => ({ x: Math.cos(rad(a)), y: Math.sin(rad(a)) });
+    const dot = (a, b) => a.x * b.x + a.y * b.y;
+
+    // ----- Geometry and intersections --------------------------------------
+    function cross(a, b) { return a.x * b.y - a.y * b.x; }
+    function lineEndpoints(p) {
+      const u = unit(p.angle), half = 52;
+      return [{ x: p.x - u.x * half, y: p.y - u.y * half }, { x: p.x + u.x * half, y: p.y + u.y * half }];
+    }
+    function raySegment(origin, dir, a, b) {
+      const v = { x: b.x - a.x, y: b.y - a.y };
+      const den = cross(dir, v);
+      if (Math.abs(den) < 1e-9) return null;
+      const ao = { x: a.x - origin.x, y: a.y - origin.y };
+      const t = cross(ao, v) / den;
+      const u = cross(ao, dir) / den;
+      return t > EPS && u >= -EPS && u <= 1 + EPS ? { t, point: { x: origin.x + dir.x * t, y: origin.y + dir.y * t } } : null;
+    }
+    function rayCircle(origin, dir, c, radius) {
+      const oc = { x: origin.x - c.x, y: origin.y - c.y };
+      const b = dot(oc, dir), q = dot(oc, oc) - radius * radius;
+      const disc = b * b - q;
+      if (disc < 0) return null;
+      const s = Math.sqrt(Math.max(0, disc));
+      const t1 = -b - s, t2 = -b + s;
+      const t = t1 > EPS ? t1 : (t2 > EPS ? t2 : Infinity);
+      return Number.isFinite(t) ? { t, point: { x: origin.x + dir.x * t, y: origin.y + dir.y * t } } : null;
+    }
+    function rayBox(origin, dir, p) {
+      const a = rad(-p.angle), ca = Math.cos(a), sa = Math.sin(a);
+      const ox = origin.x - p.x, oy = origin.y - p.y;
+      const o = { x: ox * ca - oy * sa, y: ox * sa + oy * ca };
+      const d = { x: dir.x * ca - dir.y * sa, y: dir.x * sa + dir.y * ca };
+      let near = -Infinity, far = Infinity;
+      for (const axis of ['x', 'y']) {
+        const half = axis === 'x' ? 39 : 15;
+        if (Math.abs(d[axis]) < 1e-10) { if (Math.abs(o[axis]) > half) return null; }
+        else {
+          let t1 = (-half - o[axis]) / d[axis], t2 = (half - o[axis]) / d[axis];
+          if (t1 > t2) [t1, t2] = [t2, t1];
+          near = Math.max(near, t1); far = Math.min(far, t2);
+          if (near > far) return null;
+        }
+      }
+      const t = near > EPS ? near : (far > EPS ? far : Infinity);
+      return Number.isFinite(t) ? { t, point: { x: origin.x + dir.x * t, y: origin.y + dir.y * t } } : null;
+    }
+    function boundaryHit(origin, dir) {
+      const ts = [];
+      if (dir.x > EPS) ts.push((W - origin.x) / dir.x);
+      if (dir.x < -EPS) ts.push((0 - origin.x) / dir.x);
+      if (dir.y > EPS) ts.push((H - origin.y) / dir.y);
+      if (dir.y < -EPS) ts.push((0 - origin.y) / dir.y);
+      const t = Math.min(...ts.filter(n => n > EPS));
+      return { t, point: { x: origin.x + dir.x * t, y: origin.y + dir.y * t } };
+    }
+    function nearestHit(origin, dir) {
+      let best = null;
+      for (const p of pieces) {
+        if (p.type === 'source') continue;
+        let hit = null;
+        if (p.type === 'mirror' || p.type === 'splitter') {
+          const [a, b] = lineEndpoints(p); hit = raySegment(origin, dir, a, b);
+        } else if (p.type === 'receiver') hit = rayCircle(origin, dir, p, 28);
+        else if (p.type === 'blocker') hit = rayBox(origin, dir, p);
+        if (hit && (!best || hit.t < best.t)) best = { ...hit, piece: p };
+      }
+      return best;
+    }
+    function reflectedDirection(d, angle) {
+      const surface = unit(angle);
+      const n = { x: -surface.y, y: surface.x };
+      const k = 2 * dot(d, n);
+      const r = { x: d.x - k * n.x, y: d.y - k * n.y };
+      const length = Math.hypot(r.x, r.y);
+      return { x: r.x / length, y: r.y / length };
+    }
+
+    // ----- Deterministic bounded tracing -----------------------------------
+    function calculateTrace() {
+      const source = pieces.find(p => p.type === 'source');
+      const powers = new Map(pieces.filter(p => p.type === 'receiver').map(p => [p.id, 0]));
+      const segments = [], stack = [{ origin: { x: source.x, y: source.y }, dir: unit(source.angle), power: 1, depth: 0 }];
+      let limited = false;
+      while (stack.length) {
+        const ray = stack.pop();
+        if (ray.power < POWER_CUTOFF) continue;
+        if (ray.depth >= MAX_INTERACTIONS) { limited = true; continue; }
+        if (segments.length >= MAX_SEGMENTS) { limited = true; break; }
+        const hit = nearestHit(ray.origin, ray.dir);
+        const end = hit ? hit.point : boundaryHit(ray.origin, ray.dir).point;
+        segments.push({ a: ray.origin, b: end, power: ray.power });
+        if (!hit) continue;
+        const p = hit.piece;
+        if (p.type === 'receiver') { powers.set(p.id, (powers.get(p.id) || 0) + ray.power); continue; }
+        if (p.type === 'blocker') continue;
+        const spawn = (dir, power) => stack.push({
+          origin: { x: hit.point.x + dir.x * NUDGE, y: hit.point.y + dir.y * NUDGE },
+          dir, power, depth: ray.depth + 1
+        });
+        if (p.type === 'mirror') spawn(reflectedDirection(ray.dir, p.angle), ray.power);
+        if (p.type === 'splitter') {
+          spawn(ray.dir, ray.power * .5);
+          spawn(reflectedDirection(ray.dir, p.angle), ray.power * .5);
+        }
+      }
+      return { segments, powers, limited };
+    }
+
+    // ----- Rendering --------------------------------------------------------
+    function resizeCanvas() {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const width = Math.max(1, Math.round(r.width * dpr)), height = Math.max(1, Math.round(r.height * dpr));
+      if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
+      draw();
+    }
+    function prepare() {
+      ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#061522'; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(94, 184, 207, .075)'; ctx.lineWidth = 1;
+      for (let x = 20; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 20; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(112, 211, 225, .13)';
+      for (let x = 20; x < W; x += 150) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 20; y < H; y += 150) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+      // Decorative bench scars: visibly part of the table, never optical geometry.
+      ctx.save();
+      ctx.strokeStyle = 'rgba(179, 255, 91, .075)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(26, 104); ctx.bezierCurveTo(82, 62, 118, 143, 171, 91); ctx.bezierCurveTo(203, 59, 230, 71, 245, 90); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(821, 513, 47, 21, -.25, 0, Math.PI * 1.78); ctx.stroke();
+      ctx.beginPath(); ctx.arc(829, 515, 7, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = 'rgba(179, 255, 91, .18)'; ctx.font = '600 8px ui-monospace, monospace';
+      ctx.fillText('DO NOT CALIBRATE AFTER MIDNIGHT', 653, 573);
+      ctx.fillText('0?', 248, 92);
+      ctx.restore();
+    }
+    function drawBeam(s) {
+      const alpha = Math.max(.12, Math.min(1, s.power));
+      ctx.save(); ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y);
+      ctx.strokeStyle = `rgba(47, 236, 231, ${.12 * alpha})`; ctx.lineWidth = 13 * Math.sqrt(alpha); ctx.stroke();
+      ctx.strokeStyle = `rgba(75, 247, 241, ${.42 * alpha})`; ctx.lineWidth = 4.2 * Math.sqrt(alpha); ctx.stroke();
+      ctx.strokeStyle = `rgba(216, 255, 254, ${.78 * alpha})`; ctx.lineWidth = Math.max(.7, 1.25 * Math.sqrt(alpha)); ctx.stroke();
+      ctx.restore();
+    }
+    function withPieceTransform(p, fn) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(rad(p.angle)); fn(); ctx.restore(); }
+    function drawPiece(p) {
+      if (p.type === 'mirror') withPieceTransform(p, () => {
+        const g = ctx.createLinearGradient(0, -7, 0, 7); g.addColorStop(0, '#efffff'); g.addColorStop(.35, '#8ec4d2'); g.addColorStop(1, '#274a5b');
+        ctx.strokeStyle = '#102d3e'; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(-52,0); ctx.lineTo(52,0); ctx.stroke();
+        ctx.strokeStyle = g; ctx.lineWidth = 5; ctx.stroke();
+        ctx.strokeStyle = '#dfffff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-48,-2); ctx.lineTo(48,-2); ctx.stroke();
+        ctx.fillStyle = '#b9d95b';
+        for (const x of [-48, 45]) { ctx.beginPath(); ctx.roundRect(x-4,-9,8,18,2); ctx.fill(); }
+        ctx.fillStyle = '#17242b'; ctx.beginPath(); ctx.arc(13,3,2.3,0,Math.PI*2); ctx.fill();
+      });
+      if (p.type === 'splitter') withPieceTransform(p, () => {
+        ctx.strokeStyle = 'rgba(16, 61, 78, .9)'; ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(-52,0); ctx.lineTo(52,0); ctx.stroke();
+        ctx.strokeStyle = 'rgba(78, 231, 244, .48)'; ctx.lineWidth = 8; ctx.stroke();
+        ctx.setLineDash([8,5]); ctx.strokeStyle = '#b7fbff'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#c8ff79'; ctx.font = '700 10px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillText('½', 0, -10);
+        ctx.rotate(Math.PI/4); ctx.fillStyle='rgba(186,255,238,.75)'; ctx.fillRect(45,-4,8,8);
+      });
+      if (p.type === 'blocker') withPieceTransform(p, () => {
+        const g = ctx.createLinearGradient(0,-15,0,15); g.addColorStop(0,'#263541'); g.addColorStop(1,'#0b1017');
+        ctx.fillStyle = g; ctx.strokeStyle = '#50616d'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(-39,-15,78,30,5); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(171,195,204,.15)'; for (let x=-28;x<30;x+=14){ctx.beginPath();ctx.moveTo(x,-9);ctx.lineTo(x+8,9);ctx.stroke();}
+        ctx.fillStyle='rgba(204, 223, 218, .5)'; ctx.font='700 7px ui-monospace, monospace'; ctx.textAlign='center'; ctx.fillText('ABSOLUTELY NOT',0,3);
+      });
+      if (p.type === 'receiver') {
+        const power = Math.max(0, trace.powers.get(p.id) || 0), glow = Math.min(1, power);
+        ctx.save(); ctx.translate(p.x,p.y);
+        ctx.shadowColor = '#42f4ee'; ctx.shadowBlur = 8 + 25 * glow;
+        ctx.fillStyle = `rgba(31, ${80 + 130*glow}, ${91 + 125*glow}, ${.35 + .5*glow})`;
+        ctx.strokeStyle = glow ? '#96fffb' : '#52747f'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(0,0,28,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.strokeStyle=`rgba(185, 255, 92, ${.25 + .45*glow})`; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.arc(0,0,34,-2.8,-.35); ctx.stroke();
+        for(const a of [-2.65,-2.3,-1.95,-1.6,-1.25,-.9,-.55]){
+          ctx.beginPath();ctx.moveTo(Math.cos(a)*33,Math.sin(a)*33);ctx.lineTo(Math.cos(a)*38,Math.sin(a)*38);ctx.stroke();
+        }
+        ctx.fillStyle = '#efffff'; ctx.font = '700 13px system-ui, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        const percent = Math.abs(power*100 - Math.round(power*100)) < .05 ? Math.round(power*100).toString() : (power*100).toFixed(1);
+        ctx.fillText(percent + '%',0,1); ctx.restore();
+      }
+      if (p.type === 'source') withPieceTransform(p, () => {
+        ctx.shadowColor='#42f4ee'; ctx.shadowBlur=18; ctx.fillStyle='#164e5b'; ctx.strokeStyle='#9efffb'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(0,0,22,0,Math.PI*2); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
+        ctx.fillStyle='#d9ffff'; ctx.beginPath(); ctx.moveTo(7,-8); ctx.lineTo(29,0); ctx.lineTo(7,8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle='#05141e'; ctx.beginPath(); ctx.arc(-4,0,7,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle='#b9ff5c';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-12,-18);ctx.quadraticCurveTo(-18,-29,-11,-34);ctx.stroke();
+        ctx.fillStyle='#b9ff5c';ctx.beginPath();ctx.arc(-11,-35,2.5,0,Math.PI*2);ctx.fill();
+      });
+      if (p.id === selectedId) drawSelection(p);
+    }
+    function drawSelection(p) {
+      ctx.save(); ctx.translate(p.x,p.y); ctx.strokeStyle='rgba(117, 249, 244, .88)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+      const radius = p.type === 'receiver' ? 38 : (p.type === 'source' ? 34 : 65);
+      ctx.beginPath(); ctx.arc(0,0,radius,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle='#8cfff9'; for (const a of [0,Math.PI/2,Math.PI,Math.PI*1.5]) { ctx.beginPath(); ctx.arc(Math.cos(a)*radius,Math.sin(a)*radius,3,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle='#c8ff79';ctx.font='italic 11px Georgia, serif';ctx.fillText('?',radius-2,-radius+5);
+      ctx.restore();
+    }
+    function draw() { prepare(); trace.segments.forEach(drawBeam); pieces.forEach(drawPiece); }
+    function benchMood() {
+      if (trace.limited) return 'The light has found a loophole.';
+      const values = [...trace.powers.values()], total = values.reduce((a,b)=>a+b,0);
+      if (total < EPS) return 'The dark has filed a claim.';
+      if (values.some(v=>v>.75)) return 'One cup is getting greedy.';
+      if (values.length===2 && values.every(v=>Math.abs(v-.5)<EPS)) return 'The light is behaving. Suspicious.';
+      if (values.some(v=>v>0) && values.some(v=>v<EPS)) return 'One receiver is pretending not to care.';
+      return 'Halves have developed opinions.';
+    }
+    function update() {
+      trace = calculateTrace(); ui.traceLimit.classList.toggle('visible', trace.limited);
+      ui.whisper.textContent = benchMood(); updateControls(); draw();
+    }
+
+    // ----- Pointer interaction ---------------------------------------------
+    function canvasPoint(e) {
+      const r = canvas.getBoundingClientRect();
+      return { x: (e.clientX-r.left)*W/r.width, y: (e.clientY-r.top)*H/r.height };
+    }
+    function distanceToSegment(q,a,b) {
+      const vx=b.x-a.x, vy=b.y-a.y, len=vx*vx+vy*vy;
+      const t=Math.max(0,Math.min(1,((q.x-a.x)*vx+(q.y-a.y)*vy)/len));
+      return Math.hypot(q.x-(a.x+t*vx),q.y-(a.y+t*vy));
+    }
+    function hitTest(q) {
+      for (let i=pieces.length-1;i>=0;i--) {
+        const p=pieces[i];
+        if (p.type==='mirror'||p.type==='splitter') { const [a,b]=lineEndpoints(p); if(distanceToSegment(q,a,b)<=20)return p; }
+        else if (p.type==='receiver' && Math.hypot(q.x-p.x,q.y-p.y)<=38) return p;
+        else if (p.type==='source' && Math.hypot(q.x-p.x,q.y-p.y)<=34) return p;
+        else if (p.type==='blocker') {
+          const a=rad(-p.angle), dx=q.x-p.x, dy=q.y-p.y;
+          if(Math.abs(dx*Math.cos(a)-dy*Math.sin(a))<=48 && Math.abs(dx*Math.sin(a)+dy*Math.cos(a))<=25)return p;
+        }
+      }
+      return null;
+    }
+    canvas.addEventListener('pointerdown', e => {
+      const q=canvasPoint(e), p=hitTest(q); if(!p)return;
+      e.preventDefault(); selectedId=p.id; drag={pointerId:e.pointerId,dx:q.x-p.x,dy:q.y-p.y};
+      canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; updateControls(); draw();
+    });
+    canvas.addEventListener('pointermove', e => {
+      if(!drag) { canvas.style.cursor=hitTest(canvasPoint(e))?'grab':'default'; return; }
+      if(e.pointerId!==drag.pointerId)return; e.preventDefault();
+      const p=selected(), q=canvasPoint(e); if(!p)return;
+      p.x=Math.max(34,Math.min(W-34,q.x-drag.dx)); p.y=Math.max(34,Math.min(H-34,q.y-drag.dy)); update();
+    }, { passive:false });
+    function endDrag(e) { if(!drag||e.pointerId!==drag.pointerId)return; drag=null; canvas.style.cursor='grab'; }
+    canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
+
+    // ----- Controls ---------------------------------------------------------
+    function updateControls() {
+      const p=selected(); if(!p)return;
+      ui.name.textContent=labels[p.type]; ui.rotationWrap.hidden=!rotatable(p); ui.del.disabled=p.type==='source';
+      if(rotatable(p)){ const a=Math.round(normAngle(p.angle)); ui.rotation.value=a; ui.rotationValue.value=a+'°'; ui.rotationValue.textContent=a+'°'; }
+      const placed=pieces.filter(x=>x.type!=='source').length, atLimit=placed>=MAX_PIECES;
+      ui.count.textContent=`${placed} of ${MAX_PIECES} pieces`; ui.limitNote.textContent=atLimit?'Table full':'';
+      ui.add.forEach(b=>{b.disabled=atLimit;b.title=atLimit?'The tabletop is limited to 16 placed pieces.':'';});
+    }
+    ui.rotation.addEventListener('input',()=>{const p=selected();if(rotatable(p)){p.angle=Number(ui.rotation.value);update();}});
+    function rotateBy(amount){const p=selected();if(rotatable(p)){p.angle=normAngle(p.angle+amount);update();}}
+    ui.minus.addEventListener('click',()=>rotateBy(-5)); ui.plus.addEventListener('click',()=>rotateBy(5));
+    ui.del.addEventListener('click',()=>{const p=selected();if(!p||p.type==='source')return;pieces=pieces.filter(x=>x.id!==p.id);selectedId=pieces[0].id;update();});
+    ui.add.forEach(button=>button.addEventListener('click',()=>{
+      if(pieces.filter(p=>p.type!=='source').length>=MAX_PIECES)return;
+      const type=button.dataset.add, offset=(pieces.length*23)%150;
+      const p={id:++nextId,type,x:515+offset,y:225+(offset%90),angle:type==='splitter'?-25:0};
+      pieces.push(p);selectedId=p.id;update();
+    }));
+    function reset(){pieces=initialPieces().map(p=>({...p}));nextId=7;selectedId=1;update();}
+    ui.reset.addEventListener('click',reset);
+    new ResizeObserver(resizeCanvas).observe(canvas);
+    window.addEventListener('resize',resizeCanvas);
+
+    // Small deterministic test surface; the UI and tests call the same tracer.
+    window.__mirrorMischiefTest = Object.freeze({
+      constants: { W,H,MAX_PIECES,MAX_INTERACTIONS,MAX_SEGMENTS,POWER_CUTOFF },
+      reflect: (direction, angle) => reflectedDirection(direction, angle),
+      snapshot: () => ({ pieces: pieces.map(p=>({...p})), segments: trace.segments.map(s=>structuredClone(s)), receiverPowers: Object.fromEntries(trace.powers), limited:trace.limited }),
+      replacePieces: list => { pieces=list.map(p=>({...p})); selectedId=pieces[0]?.id ?? null; update(); return window.__mirrorMischiefTest.snapshot(); },
+      reset: () => { reset(); return window.__mirrorMischiefTest.snapshot(); },
+      traceScene: list => { const old=pieces; pieces=list.map(p=>({...p})); const result=calculateTrace(); pieces=old; return {segments:result.segments,powers:Object.fromEntries(result.powers),limited:result.limited}; }
+    });
+    reset(); resizeCanvas();
+  })();
+  </script>
+</body>
+</html>

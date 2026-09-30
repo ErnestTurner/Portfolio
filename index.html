@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=jelly-bench-1" />
+    <link rel="stylesheet" href="playground.css?v=mirror-mischief-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the lab</a>
@@ -118,7 +118,7 @@
             <p class="kicker">ACTIVE SPECIMENS</p>
             <h2>Pick a specimen. Poke at it.</h2>
           </div>
-          <p>Seven working experiments.<br />Touching them is the test procedure.</p>
+          <p>Eight working experiments.<br />Touching them is the test procedure.</p>
         </div>
         <div class="arcade-layout">
           <div class="specimen-strip" role="tablist" aria-label="Choose a specimen">
@@ -216,6 +216,20 @@
               >
                 <span class="tab-art jelly-art" aria-hidden="true">◉</span
                 ><span><strong>Jelly Bench</strong><small>Change the body. Test the gap.</small></span
+                ><span class="arrow">↗</span>
+              </a>
+              <a
+                id="mirror-tab"
+                href="games/mirror-mischief/index.html"
+                class="game-tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="game-panel"
+                tabindex="-1"
+                data-game="mirror"
+              >
+                <span class="tab-art mirror-art" aria-hidden="true">◇</span
+                ><span><strong>Mirror Mischief</strong><small>Move one thing. Rewrite the light.</small></span
                 ><span class="arrow">↗</span>
               </a>
           </div>
@@ -393,6 +407,15 @@
             </p>
             <a href="games/jelly-bench/index.html" class="text-link" data-select="jelly">Test the blob →</a>
           </article>
+          <article class="playable-project">
+            <div class="project-num">SPECIMEN 008 <span>DOWNSTREAM OPTICS TEST</span></div>
+            <h3>Mirror Mischief</h3>
+            <p>
+              An optical tabletop where mirrors, splitters, blockers, and receivers turn one small
+              adjustment into a completely different path for the light.
+            </p>
+            <a href="games/mirror-mischief/index.html" class="text-link" data-select="mirror">Redirect the light →</a>
+          </article>
         </div>
       </section>
       <section id="about" class="section about">
@@ -425,6 +448,6 @@
       <span>© 2026 Ernest Turner</span><span>Thanks for playing. Stay curious.</span
       ><a href="#top">Back to the snail ↑</a>
     </footer>
-    <script src="playground.js?v=jelly-bench-1"></script>
+    <script src="playground.js?v=mirror-mischief-1"></script>
   </body>
 </html>

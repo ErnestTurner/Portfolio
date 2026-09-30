@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
   let current = "moon";
-  const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic", "jelly"];
+  const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic", "jelly", "mirror"];
   const games = {
     moon: {
       url: "games/moon-snail/index.html",
@@ -82,6 +82,17 @@
       watch: "The same obstacle becoming passable or impossible as the body’s properties change.",
       controls:
         "<p><kbd>Drag</kbd> Pull the blob</p><p><kbd>Sliders</kbd> Change its properties</p><p><kbd>Presets</kbd> Compare behaviors</p>",
+    },
+    mirror: {
+      url: "games/mirror-mischief/index.html",
+      title: "Mirror Mischief",
+      tag: "SPECIMEN 008 · DOWNSTREAM OPTICS TEST",
+      mission: "Move one thing. Rewrite the light.",
+      question: "How much can one local optical change alter everything downstream?",
+      procedure: "Drag or rotate a piece. Add mirrors, splitters, blockers, or receivers.",
+      watch: "One adjustment redirecting, splitting, blocking, or extinguishing every later beam.",
+      controls:
+        "<p><kbd>Drag</kbd> Move a piece</p><p><kbd>Slider</kbd> Rotate selected optics</p><p><kbd>Add Piece</kbd> Extend the tabletop</p>",
     },
   };
   function choose(name) {

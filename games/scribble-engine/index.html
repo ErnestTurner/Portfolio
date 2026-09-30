@@ -22,14 +22,18 @@
   <style>
     :root {
       color-scheme: dark;
-      --bench: #061a2a;
-      --panel: #0b2538;
-      --edge: #24465b;
-      --ink: #e8e2c5;
-      --muted: #9db2bd;
-      --arm-one: #f2a65a;
-      --arm-two: #60d3c5;
-      --focus: #ffd38a;
+      --bench: #080e20;
+      --panel: #101d2b;
+      --panel-deep: #0b1525;
+      --edge: #2a3c50;
+      --ink: #eff5fa;
+      --muted: #9aacbd;
+      --mint: #b4f7a7;
+      --pink: #ffafcc;
+      --blue: #a2c8ff;
+      --arm-one: var(--pink);
+      --arm-two: var(--mint);
+      --focus: #fff2a8;
     }
 
     * { box-sizing: border-box; }
@@ -37,9 +41,9 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bench);
-      color: #eef4f2;
-      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 13% 12%, #192744 0, transparent 29rem), radial-gradient(circle at 92% 84%, #17372f 0, transparent 32rem), var(--bench);
+      color: var(--ink);
+      font: 16px/1.45 Arial, Helvetica, sans-serif;
     }
 
     main {
@@ -57,51 +61,78 @@
       min-width: 0;
       display: grid;
       place-items: center;
+      position: relative;
+      padding: clamp(7px, 1.4vw, 14px);
     }
+
+    .apparatus-label { position: absolute; top: 24px; left: 26px; z-index: 2; color: #a2c8ffb8; font: 700 9px/1 "Courier New", monospace; letter-spacing: .16em; text-transform: uppercase; pointer-events: none; }
+    .apparatus-label::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 9px var(--pink); vertical-align: 1px; }
+    .drawing-wrap::before, .drawing-wrap::after { content: ""; position: absolute; width: 42px; height: 42px; pointer-events: none; z-index: 1; }
+    .drawing-wrap::before { top: 0; left: 0; border-top: 2px solid var(--pink); border-left: 2px solid var(--pink); }
+    .drawing-wrap::after { right: 0; bottom: 0; border-right: 2px solid var(--mint); border-bottom: 2px solid var(--mint); }
 
     canvas {
       display: block;
       width: min(100%, 720px);
       height: auto;
       aspect-ratio: 1;
-      background: #082033;
-      border: 1px solid var(--edge);
-      border-radius: 18px;
-      box-shadow: 0 18px 55px #020b12aa, inset 0 0 60px #03121f88;
+      background: #0b1425;
+      border: 1px solid #354a62;
+      border-radius: 12px;
+      box-shadow: 0 24px 75px #020611aa, 0 0 0 6px #ffffff05;
       touch-action: none;
     }
 
     .controls {
-      background: color-mix(in srgb, var(--panel) 94%, black);
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #122236f5, #0b1627f5);
       border: 1px solid var(--edge);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 14px 40px #020b1266;
+      border-radius: 14px;
+      padding: 25px 22px 22px;
+      box-shadow: 0 20px 65px #02061188;
     }
+
+    .controls::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--mint) 0 36%, var(--pink) 36% 69%, var(--blue) 69%); }
+    .controls::after { content: "MEDDLING PERMITTED"; position: absolute; top: 17px; right: -35px; width: 142px; padding: 4px 0; transform: rotate(35deg); border-top: 1px solid #ffafcc66; border-bottom: 1px solid #ffafcc66; color: #ffafcc99; font: 700 8px/1 "Courier New", monospace; letter-spacing: .14em; text-align: center; pointer-events: none; }
+    .eyebrow { margin: 0 0 8px; color: var(--mint); font: 700 11px/1.2 "Courier New", monospace; letter-spacing: .18em; text-transform: uppercase; }
+    .designation { display: inline-block; margin: 0 0 17px; padding: 5px 8px; border: 1px solid #41546a; border-radius: 3px; color: #91a6b8; font: 700 9px/1 "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; transform: rotate(-1deg); }
 
     h1 {
-      margin: 0 0 4px;
-      font-size: clamp(1.75rem, 4vw, 2.3rem);
-      letter-spacing: -.035em;
+      margin: 0 0 7px;
+      font-size: clamp(2rem, 4vw, 2.65rem);
+      line-height: .95;
+      letter-spacing: -.065em;
+      text-transform: uppercase;
     }
 
+    h1 em { color: var(--mint); font-style: normal; }
+
     .invitation {
-      margin: 0 0 20px;
-      color: var(--ink);
-      font-size: .98rem;
-      font-style: italic;
+      margin: 0 0 22px;
+      max-width: 28ch;
+      color: #c4d2df;
+      font-size: .92rem;
+      line-height: 1.55;
     }
 
     fieldset {
+      position: relative;
       margin: 0 0 16px;
       padding: 15px;
       border: 1px solid var(--edge);
-      border-radius: 12px;
+      border-radius: 9px;
+      background: #ffffff03;
     }
+
+    fieldset::after { content: ""; position: absolute; right: 9px; bottom: 9px; width: 4px; height: 4px; border: 1px solid #6e8296; border-radius: 50%; box-shadow: inset 0 0 0 1px #08101e; opacity: .7; }
 
     legend {
       padding: 0 7px;
       font-weight: 750;
+      font-size: .77rem;
+      letter-spacing: .13em;
+      text-transform: uppercase;
     }
 
     .arm-one legend { color: var(--arm-one); }
@@ -115,13 +146,16 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 6px;
-      color: #d7e2e2;
+      color: #dbe5ee;
       font-size: .92rem;
     }
 
     output {
       min-width: 4.8em;
-      color: white;
+      color: var(--blue);
+      font-family: "Courier New", monospace;
+      font-size: .85rem;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
       text-align: right;
     }
@@ -130,15 +164,17 @@
       width: 100%;
       min-height: 30px;
       margin: 0;
-      accent-color: #c7d7d8;
       cursor: pointer;
     }
 
+    .arm-one input[type="range"] { accent-color: var(--pink); }
+    .arm-two input[type="range"] { accent-color: var(--mint); }
+
     button {
       min-height: 44px;
-      border: 1px solid #41647a;
-      border-radius: 9px;
-      background: #14364c;
+      border: 1px solid #40566d;
+      border-radius: 7px;
+      background: #14243a;
       color: #f5f8f7;
       padding: 9px 12px;
       font: inherit;
@@ -146,8 +182,9 @@
       cursor: pointer;
     }
 
-    button:hover { background: #1a455f; }
+    button:hover { border-color: var(--mint); background: #1a3045; }
     button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    button:active { transform: translateY(1px); }
 
     .direction {
       width: 100%;
@@ -157,7 +194,10 @@
       text-align: left;
     }
 
-    .direction span:last-child { color: #b9d2d6; font-size: .9rem; }
+    .direction span:first-child { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+    .direction span:last-child { color: var(--blue); font: 700 .79rem "Courier New", monospace; }
+    .arm-one .direction { border-left: 3px solid var(--pink); }
+    .arm-two .direction { border-left: 3px solid var(--mint); }
 
     .note {
       margin: -2px 2px 17px;
@@ -170,6 +210,8 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
+    .shared button:first-child { border-color: #6e8ca1; background: #1a3045; }
+    .shared button:last-child { color: var(--pink); }
 
     @media (max-width: 760px) {
       main {
@@ -179,6 +221,7 @@
       }
       canvas { width: min(100%, 590px); }
       .controls { width: min(100%, 590px); justify-self: center; }
+      .apparatus-label { top: 19px; left: 21px; }
     }
 
     @media (max-width: 390px) {
@@ -189,12 +232,15 @@
 <body>
   <main>
     <section class="drawing-wrap" aria-label="Scribble Engine drawing area">
+      <span class="apparatus-label" aria-hidden="true">Live consequence window</span>
       <canvas id="view" width="600" height="600"></canvas>
     </section>
 
     <section class="controls" aria-label="Scribble Engine controls">
-      <h1>Scribble Engine</h1>
+      <p class="eyebrow">Trikzik Labs · Experimental apparatus 02</p>
+      <h1>Scribble <em>Engine</em></h1>
       <p class="invitation">Can you draw a straight line using two things that only rotate?</p>
+      <p class="designation">Dual-orbit mark maker · Please interfere</p>
 
       <fieldset class="arm-one">
         <legend>Arm 1</legend>
@@ -285,7 +331,7 @@
         inkContext.beginPath();
         inkContext.moveTo(previousPen.x, previousPen.y);
         inkContext.lineTo(point.penX, point.penY);
-        inkContext.strokeStyle = '#e8e2c5';
+        inkContext.strokeStyle = '#eff5fa';
         inkContext.lineWidth = 1.15;
         inkContext.lineCap = 'round';
         inkContext.lineJoin = 'round';
@@ -295,8 +341,21 @@
     }
 
     function drawMechanism(point) {
-      viewContext.fillStyle = '#082033';
+      viewContext.fillStyle = '#0b1425';
       viewContext.fillRect(0, 0, SIZE, SIZE);
+
+      // A faint drafting grid gives the workbench texture without becoming ink.
+      viewContext.beginPath();
+      for (let line = 30; line < SIZE; line += 30) {
+        viewContext.moveTo(line, 0);
+        viewContext.lineTo(line, SIZE);
+        viewContext.moveTo(0, line);
+        viewContext.lineTo(SIZE, line);
+      }
+      viewContext.strokeStyle = '#a2c8ff0a';
+      viewContext.lineWidth = 1;
+      viewContext.stroke();
+
       viewContext.drawImage(ink, 0, 0);
 
       viewContext.lineCap = 'round';
@@ -305,20 +364,20 @@
       viewContext.beginPath();
       viewContext.moveTo(CENTER.x, CENTER.y);
       viewContext.lineTo(point.elbowX, point.elbowY);
-      viewContext.strokeStyle = '#f2a65a';
+      viewContext.strokeStyle = '#ffafcc';
       viewContext.lineWidth = 7;
       viewContext.stroke();
 
       viewContext.beginPath();
       viewContext.moveTo(point.elbowX, point.elbowY);
       viewContext.lineTo(point.penX, point.penY);
-      viewContext.strokeStyle = '#60d3c5';
+      viewContext.strokeStyle = '#b4f7a7';
       viewContext.lineWidth = 6;
       viewContext.stroke();
 
-      joint(CENTER.x, CENTER.y, 8, '#f7d6a3');
-      joint(point.elbowX, point.elbowY, 7, '#b9f0e8');
-      joint(point.penX, point.penY, 4.5, '#fff9dc');
+      joint(CENTER.x, CENTER.y, 8, '#ffd4e3');
+      cyclopsBearing(point.elbowX, point.elbowY, point.penX, point.penY);
+      penUfo(point.penX, point.penY);
     }
 
     function joint(x, y, radius, color) {
@@ -326,9 +385,66 @@
       viewContext.arc(x, y, radius, 0, Math.PI * 2);
       viewContext.fillStyle = color;
       viewContext.fill();
-      viewContext.strokeStyle = '#082033';
+      viewContext.strokeStyle = '#0b1425';
       viewContext.lineWidth = 2;
       viewContext.stroke();
+    }
+
+    // The elbow is technically a bearing. It is also keeping an eye on the pen.
+    function cyclopsBearing(x, y, targetX, targetY) {
+      const direction = Math.atan2(targetY - y, targetX - x);
+      viewContext.save();
+      viewContext.translate(x, y);
+      viewContext.beginPath();
+      viewContext.arc(0, 0, 11, 0, Math.PI * 2);
+      viewContext.fillStyle = '#ffafcc';
+      viewContext.fill();
+      viewContext.strokeStyle = '#0b1425';
+      viewContext.lineWidth = 2.5;
+      viewContext.stroke();
+      viewContext.beginPath();
+      viewContext.ellipse(0, 0, 6.2, 5, direction, 0, Math.PI * 2);
+      viewContext.fillStyle = '#eff5fa';
+      viewContext.fill();
+      viewContext.beginPath();
+      viewContext.arc(Math.cos(direction) * 2.2, Math.sin(direction) * 2.2, 2.2, 0, Math.PI * 2);
+      viewContext.fillStyle = '#101d2b';
+      viewContext.fill();
+      viewContext.restore();
+    }
+
+    // A very small UFO performs the serious business of putting ink on paper.
+    function penUfo(x, y) {
+      viewContext.save();
+      viewContext.translate(x, y);
+      viewContext.beginPath();
+      viewContext.moveTo(-8, -2);
+      viewContext.quadraticCurveTo(0, -11, 8, -2);
+      viewContext.closePath();
+      viewContext.fillStyle = '#a2c8ff';
+      viewContext.fill();
+      viewContext.strokeStyle = '#0b1425';
+      viewContext.lineWidth = 2;
+      viewContext.stroke();
+      viewContext.beginPath();
+      viewContext.ellipse(0, 0, 12, 4.8, 0, 0, Math.PI * 2);
+      viewContext.fillStyle = '#b4f7a7';
+      viewContext.fill();
+      viewContext.strokeStyle = '#0b1425';
+      viewContext.stroke();
+      viewContext.beginPath();
+      viewContext.arc(-4, 0, 1.2, 0, Math.PI * 2);
+      viewContext.arc(4, 0, 1.2, 0, Math.PI * 2);
+      viewContext.fillStyle = '#ffafcc';
+      viewContext.fill();
+      // The bright center remains exactly on the mathematical pen coordinate.
+      viewContext.beginPath();
+      viewContext.arc(0, 0, 2.4, 0, Math.PI * 2);
+      viewContext.fillStyle = '#eff5fa';
+      viewContext.shadowColor = '#eff5fa';
+      viewContext.shadowBlur = 8;
+      viewContext.fill();
+      viewContext.restore();
     }
 
     // Motion: subdivide elapsed time so fast settings still leave a smooth trail.

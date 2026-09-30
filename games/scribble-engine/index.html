@@ -95,6 +95,8 @@
 
     .controls::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--mint) 0 36%, var(--pink) 36% 69%, var(--blue) 69%); }
     .controls::after { content: "MEDDLING PERMITTED"; position: absolute; top: 17px; right: -35px; width: 142px; padding: 4px 0; transform: rotate(35deg); border-top: 1px solid #ffafcc66; border-bottom: 1px solid #ffafcc66; color: #ffafcc99; font: 700 8px/1 "Courier New", monospace; letter-spacing: .14em; text-align: center; pointer-events: none; }
+    .arcade-back { display: inline-block; margin: 0 0 18px; color: var(--mint); font: 700 10px/1 "Courier New", monospace; letter-spacing: .14em; text-decoration: none; text-transform: uppercase; }
+    .arcade-back:focus-visible { outline: 3px solid var(--focus); outline-offset: 5px; }
     .eyebrow { margin: 0 0 8px; color: var(--mint); font: 700 11px/1.2 "Courier New", monospace; letter-spacing: .18em; text-transform: uppercase; }
     .designation { display: inline-block; margin: 0 0 17px; padding: 5px 8px; border: 1px solid #41546a; border-radius: 3px; color: #91a6b8; font: 700 9px/1 "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; transform: rotate(-1deg); }
 
@@ -237,6 +239,7 @@
     </section>
 
     <section class="controls" aria-label="Scribble Engine controls">
+      <a class="arcade-back" href="../../#arcade" target="_top">← Arcade</a>
       <p class="eyebrow">Trikzik Labs · Experimental apparatus 02</p>
       <h1>Scribble <em>Engine</em></h1>
       <p class="invitation">Can you draw a straight line using two things that only rotate?</p>

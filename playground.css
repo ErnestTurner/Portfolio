@@ -327,7 +327,11 @@ h2 {
   grid-template-columns: 270px minmax(0, 1fr);
   gap: 26px;
 }
+.chooser {
+  min-width: 0;
+}
 .game-tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -339,10 +343,19 @@ h2 {
   color: var(--text);
   border-radius: 9px;
   margin-bottom: 10px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.game-tab:hover {
+  border-color: #587066;
+  transform: translateX(2px);
 }
 .game-tab.selected {
   border-color: #8db282;
   background: #1a2c27;
+  box-shadow: inset 3px 0 var(--mint), 0 0 0 1px #a3ffd31c;
 }
 .game-tab strong {
   font-size: 15px;
@@ -368,6 +381,18 @@ h2 {
 .star-art {
   background: #352834;
   color: var(--pink);
+}
+.brain-art {
+  background: #302b48;
+  color: #d8ccff;
+}
+.scribble-art {
+  background: #20384a;
+  color: var(--blue);
+}
+.traffic-art {
+  background: #42372a;
+  color: #ffd28b;
 }
 .arrow {
   margin-left: auto;
@@ -506,6 +531,20 @@ summary span {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+.projects article.playable-project {
+  box-shadow: inset 0 3px 0 #a3ffd329;
+}
+.projects article.playable-project .text-link::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 9px #a3ffd366;
+  vertical-align: 1px;
 }
 .project-num {
   font:
@@ -663,13 +702,24 @@ footer {
   }
   .chooser [role="tablist"] {
     display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     gap: 10px;
     overflow-x: auto;
     padding-bottom: 4px;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scrollbar-color: #587066 #101a26;
   }
   .game-tab {
     margin: 0;
+    flex: 0 0 min(82vw, 240px);
     min-width: 190px;
+    scroll-snap-align: start;
+  }
+  .game-tab:hover {
+    transform: none;
   }
   .mission {
     padding: 15px 2px;

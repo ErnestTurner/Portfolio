@@ -45,7 +45,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css" />
+    <link rel="stylesheet" href="playground.css?v=cohesion-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the arcade</a>
@@ -167,7 +167,7 @@
                 tabindex="-1"
                 data-game="brain"
               >
-                <span class="tab-art" aria-hidden="true">🧠</span
+                <span class="tab-art brain-art" aria-hidden="true">🧠</span
                 ><span><strong>Brain in a Jar</strong><small>Tinker with a tiny creature’s neural wiring.</small></span
                 ><span class="arrow">↗</span>
               </button>
@@ -180,7 +180,7 @@
                 tabindex="-1"
                 data-game="scribble"
               >
-                <span class="tab-art" aria-hidden="true">✎</span
+                <span class="tab-art scribble-art" aria-hidden="true">✎</span
                 ><span><strong>Scribble Engine</strong><small>Make rotation draw.</small></span
                 ><span class="arrow">↗</span>
               </button>
@@ -193,12 +193,12 @@
                 tabindex="-1"
                 data-game="traffic"
               >
-                <span class="tab-art" aria-hidden="true">↻</span
+                <span class="tab-art traffic-art" aria-hidden="true">↻</span
                 ><span><strong>Traffic With No Excuse</strong><small>Start a jam. Remove the reason.</small></span
                 ><span class="arrow">↗</span>
               </button>
             </div>
-            <div class="mission">
+            <div class="mission" aria-live="polite">
               <p class="kicker" id="game-tag">FIVE-INGREDIENT ARCADE</p>
               <h3 id="game-title">Feed the moon.</h3>
               <p id="game-description">
@@ -275,7 +275,7 @@
           <p>Things you can run, explore,<br />and judge for yourself.</p>
         </div>
         <div class="projects">
-          <article>
+          <article class="playable-project">
             <div class="project-num">01 <span>BROWSER GAME</span></div>
             <h3>Moon Snail</h3>
             <p>
@@ -305,7 +305,7 @@
               >Explore the source ↗</a
             >
           </article>
-          <article>
+          <article class="playable-project">
             <div class="project-num">03 <span>BROWSER EXPERIMENT</span></div>
             <h3>Starfall: Last Light</h3>
             <p>
@@ -314,7 +314,7 @@
             </p>
             <a href="#arcade" class="text-link" data-select="star">Take a run →</a>
           </article>
-          <article>
+          <article class="playable-project">
             <div class="project-num">04 <span>COMPLETE GAME</span></div>
             <h3>Dungeon Reset</h3>
             <p>
@@ -323,7 +323,7 @@
             </p>
             <a href="#arcade" class="text-link" data-select="dungeon">Clock in →</a>
           </article>
-          <article>
+          <article class="playable-project">
             <div class="project-num">05 <span>BROWSER EXPERIMENT</span></div>
             <h3>Scribble Engine</h3>
             <p>
@@ -332,7 +332,7 @@
             </p>
             <a href="#arcade" class="text-link" data-select="scribble">Start drawing →</a>
           </article>
-          <article>
+          <article class="playable-project">
             <div class="project-num">06 <span>EMERGENT SIMULATION</span></div>
             <h3>Traffic With No Excuse</h3>
             <p>

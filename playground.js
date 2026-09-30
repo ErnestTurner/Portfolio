@@ -8,7 +8,7 @@
     moon: {
       url: "games/moon-snail/",
       title: "Moon Snail",
-      tag: "FIVE-INGREDIENT ARCADE",
+      tag: "SPECIMEN 001 · INGREDIENT COLLISION TEST",
       mission: "Feed the moon.",
       description:
         "You're a snail with an umbrella. Trap hostile marshmallows in soap bubbles and let gravity carry them home. Deliver 30 through three phases.",
@@ -18,7 +18,7 @@
     star: {
       url: "games/starfall/",
       title: "Starfall",
-      tag: "SURVIVAL EXPERIMENT",
+      tag: "SPECIMEN 002 · SURVIVAL PRESSURE TEST",
       mission: "Outlast the swarm.",
       description:
         "Move your ship, aim with your mouse, and click to fire. Clear pursuing drones to build your score. Best played with a keyboard and mouse.",
@@ -28,7 +28,7 @@
     dungeon: {
       url: "games/dungeon-reset/",
       title: "Dungeon Reset",
-      tag: "DUNGEON MAINTENANCE",
+      tag: "SPECIMEN 003 · MAINTENANCE LOOP TEST",
       mission: "Clean up after the heroes.",
       description:
         "Return the monsters, reset the traps, repair the room, and watch five increasingly capable parties discover exactly what you left unfinished.",
@@ -38,7 +38,7 @@
     brain: {
       url: "games/brain-in-a-jar/",
       title: "Brain in a Jar",
-      tag: "NEURAL TINKERING TOY",
+      tag: "SPECIMEN 004 · NEURAL CONTROL TEST",
       mission: "Change a wire. Change a mind.",
       description: "Tinker with a tiny creature’s neural wiring.",
       controls:
@@ -47,7 +47,7 @@
     scribble: {
       url: "games/scribble-engine/",
       title: "Scribble Engine",
-      tag: "KINETIC DRAWING EXPERIMENT",
+      tag: "SPECIMEN 005 · KINETIC DRAWING TEST",
       mission: "Make rotation draw.",
       description:
         "Adjust the lengths, speeds, and directions of two independently rotating arms, then watch their pen trace the result.",
@@ -57,7 +57,7 @@
     traffic: {
       url: "games/traffic-with-no-excuse/",
       title: "Traffic With No Excuse",
-      tag: "EMERGENT TRAFFIC TOY",
+      tag: "SPECIMEN 006 · EMERGENT TRAFFIC TEST",
       mission: "Start a jam. Remove the reason.",
       description:
         "Brake one of 24 identical drivers, then change their shared settings to discover when the disturbance fades—and when it becomes a traveling traffic jam.",
@@ -81,14 +81,14 @@
     const panel = $("game-panel");
     panel.setAttribute("aria-labelledby", name + "-tab");
     panel.classList.toggle("dungeon-active", name === "dungeon");
-    frame.title = g.title + " playable arcade game";
+    frame.title = g.title + " interactive specimen";
     $("game-title").textContent = g.mission;
     $("game-tag").textContent = g.tag;
     $("game-description").textContent = g.description;
     $("control-notes").innerHTML = g.controls;
     $("full-game").href = g.url;
     $("screen-name").textContent =
-      g.title.toUpperCase() + " / " + String(order.indexOf(name) + 1).padStart(2, "0");
+      "SPECIMEN " + String(order.indexOf(name) + 1).padStart(3, "0") + " / " + g.title.toUpperCase();
     $("inspector-guide").hidden = name !== "moon";
   }
   document.querySelectorAll("[data-game]").forEach((b) => {

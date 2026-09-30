@@ -5,24 +5,25 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta
       name="description"
-      content="Ernest Turner's playable portfolio. Explore browser games, inspect their mechanics, and meet a curious little snail."
+      content="Ernest Turner is a software developer and game maker building playable browser games, autonomous simulations, and interactive experiments."
     />
-    <title>Ernest Turner — Games & Experiments | Ernest's Playground</title>
+    <title>Ernest Turner | Software Developer, Games &amp; Experiments</title>
     <link rel="canonical" href="https://ernest-turner.pages.dev/" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Ernest's Playground" />
-    <meta property="og:title" content="Ernest Turner — Games &amp; Experiments" />
-    <meta property="og:description" content="Ernest Turner's playable portfolio of browser games, curious systems, and interactive experiments." />
+    <meta property="og:title" content="Ernest Turner | Software Developer, Games &amp; Experiments" />
+    <meta property="og:description" content="Ernest Turner is a software developer and game maker building playable browser games, autonomous simulations, and interactive experiments." />
     <meta property="og:url" content="https://ernest-turner.pages.dev/" />
     <meta property="og:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ernest Turner — Games &amp; Experiments" />
-    <meta name="twitter:description" content="Ernest Turner's playable portfolio of browser games, curious systems, and interactive experiments." />
+    <meta name="twitter:title" content="Ernest Turner | Software Developer, Games &amp; Experiments" />
+    <meta name="twitter:description" content="Ernest Turner is a software developer and game maker building playable browser games, autonomous simulations, and interactive experiments." />
     <meta name="twitter:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png" />
     <script type="application/ld+json">
       {
@@ -39,6 +40,7 @@
             "@type": "WebSite",
             "@id": "https://ernest-turner.pages.dev/#website",
             "name": "Ernest's Playground",
+            "alternateName": "Ernest Turner",
             "url": "https://ernest-turner.pages.dev/",
             "creator": { "@id": "https://ernest-turner.pages.dev/#ernest-turner" }
           }
@@ -121,8 +123,9 @@
         <div class="arcade-layout">
           <aside class="chooser">
             <div role="tablist" aria-label="Choose a game">
-              <button
+              <a
                 id="moon-tab"
+                href="games/moon-snail/"
                 class="game-tab selected"
                 role="tab"
                 aria-selected="true"
@@ -131,9 +134,10 @@
               >
                 <span class="tab-art moon-art">☾</span
                 ><span><strong>Moon Snail</strong><small>Catch. Bubble. Repeat.</small></span
-                ><span class="arrow">↗</span></button
-              ><button
+                ><span class="arrow">↗</span></a
+              ><a
                 id="star-tab"
+                href="games/starfall/"
                 class="game-tab"
                 role="tab"
                 aria-selected="false"
@@ -144,9 +148,10 @@
                 <span class="tab-art star-art">✧</span
                 ><span><strong>Starfall</strong><small>One ship. A whole swarm.</small></span
                 ><span class="arrow">↗</span>
-              </button>
-              <button
+              </a>
+              <a
                 id="dungeon-tab"
+                href="games/dungeon-reset/"
                 class="game-tab"
                 role="tab"
                 aria-selected="false"
@@ -157,9 +162,10 @@
                 <span class="tab-art dungeon-art">DR</span
                 ><span><strong>Dungeon Reset</strong><small>Repair. Reset. Regret.</small></span
                 ><span class="arrow">↗</span>
-              </button>
-              <button
+              </a>
+              <a
                 id="brain-tab"
+                href="games/brain-in-a-jar/"
                 class="game-tab"
                 role="tab"
                 aria-selected="false"
@@ -170,9 +176,10 @@
                 <span class="tab-art brain-art" aria-hidden="true">🧠</span
                 ><span><strong>Brain in a Jar</strong><small>Tinker with a tiny creature’s neural wiring.</small></span
                 ><span class="arrow">↗</span>
-              </button>
-              <button
+              </a>
+              <a
                 id="scribble-tab"
+                href="games/scribble-engine/"
                 class="game-tab"
                 role="tab"
                 aria-selected="false"
@@ -183,9 +190,10 @@
                 <span class="tab-art scribble-art" aria-hidden="true">✎</span
                 ><span><strong>Scribble Engine</strong><small>Make rotation draw.</small></span
                 ><span class="arrow">↗</span>
-              </button>
-              <button
+              </a>
+              <a
                 id="traffic-tab"
+                href="games/traffic-with-no-excuse/"
                 class="game-tab"
                 role="tab"
                 aria-selected="false"
@@ -196,7 +204,7 @@
                 <span class="tab-art traffic-art" aria-hidden="true">↻</span
                 ><span><strong>Traffic With No Excuse</strong><small>Start a jam. Remove the reason.</small></span
                 ><span class="arrow">↗</span>
-              </button>
+              </a>
             </div>
             <div class="mission" aria-live="polite">
               <p class="kicker" id="game-tag">FIVE-INGREDIENT ARCADE</p>
@@ -282,7 +290,7 @@
               Five random ingredients became one connected system: pursuit, slime, bubbles, gravity,
               and an umbrella that needs a refill.
             </p>
-            <a href="#arcade" class="text-link" data-select="moon">Play & inspect →</a>
+            <a href="games/moon-snail/" class="text-link" data-select="moon">Play & inspect →</a>
           </article>
           <article>
             <div class="project-num">02 <span>LEGACY / C#</span></div>
@@ -312,7 +320,7 @@
               A compact survival experiment. Move, aim, and fire as pursuing drones slowly turn the
               arena into a very small place.
             </p>
-            <a href="#arcade" class="text-link" data-select="star">Take a run →</a>
+            <a href="games/starfall/" class="text-link" data-select="star">Take a run →</a>
           </article>
           <article class="playable-project">
             <div class="project-num">04 <span>COMPLETE GAME</span></div>
@@ -321,7 +329,7 @@
               A finished five-raid caretaker game about restoring the dungeon after the heroes
               leave—and watching the next party test every shortcut.
             </p>
-            <a href="#arcade" class="text-link" data-select="dungeon">Clock in →</a>
+            <a href="games/dungeon-reset/" class="text-link" data-select="dungeon">Clock in →</a>
           </article>
           <article class="playable-project">
             <div class="project-num">05 <span>BROWSER EXPERIMENT</span></div>
@@ -330,7 +338,7 @@
               Two independently rotating arms share one pen. Change their lengths, speeds, and
               directions to turn simple motion into geometric drawings.
             </p>
-            <a href="#arcade" class="text-link" data-select="scribble">Start drawing →</a>
+            <a href="games/scribble-engine/" class="text-link" data-select="scribble">Start drawing →</a>
           </article>
           <article class="playable-project">
             <div class="project-num">06 <span>EMERGENT SIMULATION</span></div>
@@ -339,7 +347,7 @@
               Twenty-four identical drivers circle one obstacle-free road. Brake one car, remove the
               cause, and watch whether the disturbance disappears or learns to travel.
             </p>
-            <a href="#arcade" class="text-link" data-select="traffic">Start an incident →</a>
+            <a href="games/traffic-with-no-excuse/" class="text-link" data-select="traffic">Start an incident →</a>
           </article>
         </div>
       </section>

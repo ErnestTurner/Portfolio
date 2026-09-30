@@ -92,7 +92,10 @@
     $("inspector-guide").hidden = name !== "moon";
   }
   document.querySelectorAll("[data-game]").forEach((b) => {
-    b.onclick = () => choose(b.dataset.game);
+    b.onclick = (e) => {
+      e.preventDefault();
+      choose(b.dataset.game);
+    };
     b.onkeydown = (e) => {
       if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
         e.preventDefault();
@@ -112,7 +115,13 @@
   });
   document
     .querySelectorAll("[data-select]")
-    .forEach((a) => (a.onclick = () => choose(a.dataset.select)));
+    .forEach(
+      (a) =>
+        (a.onclick = (e) => {
+          e.preventDefault();
+          choose(a.dataset.select);
+        }),
+    );
   const habitat = $("habitat"),
     snail = $("snail"),
     reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=lab-console-1" />
+    <link rel="stylesheet" href="playground.css?v=jelly-bench-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the lab</a>
@@ -118,7 +118,7 @@
             <p class="kicker">ACTIVE SPECIMENS</p>
             <h2>Pick a specimen. Poke at it.</h2>
           </div>
-          <p>Six working experiments.<br />Touching them is the test procedure.</p>
+          <p>Seven working experiments.<br />Touching them is the test procedure.</p>
         </div>
         <div class="arcade-layout">
           <div class="specimen-strip" role="tablist" aria-label="Choose a specimen">
@@ -202,6 +202,20 @@
               >
                 <span class="tab-art traffic-art" aria-hidden="true">↻</span
                 ><span><strong>Traffic With No Excuse</strong><small>Start a jam. Remove the reason.</small></span
+                ><span class="arrow">↗</span>
+              </a>
+              <a
+                id="jelly-tab"
+                href="games/jelly-bench/index.html"
+                class="game-tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="game-panel"
+                tabindex="-1"
+                data-game="jelly"
+              >
+                <span class="tab-art jelly-art" aria-hidden="true">◉</span
+                ><span><strong>Jelly Bench</strong><small>Change the body. Test the gap.</small></span
                 ><span class="arrow">↗</span>
               </a>
           </div>
@@ -370,6 +384,15 @@
             </p>
             <a href="games/traffic-with-no-excuse/index.html" class="text-link" data-select="traffic">Start an incident →</a>
           </article>
+          <article class="playable-project">
+            <div class="project-num">SPECIMEN 007 <span>SOFT-BODY PROPERTY TEST</span></div>
+            <h3>Jelly Bench</h3>
+            <p>
+              A soft-body workbench where stiffness, damping, pressure, and rest length change what
+              one blob can squeeze through—and whether it can get back.
+            </p>
+            <a href="games/jelly-bench/index.html" class="text-link" data-select="jelly">Test the blob →</a>
+          </article>
         </div>
       </section>
       <section id="about" class="section about">
@@ -402,6 +425,6 @@
       <span>© 2026 Ernest Turner</span><span>Thanks for playing. Stay curious.</span
       ><a href="#top">Back to the snail ↑</a>
     </footer>
-    <script src="playground.js?v=lab-copy-1"></script>
+    <script src="playground.js?v=jelly-bench-1"></script>
   </body>
 </html>

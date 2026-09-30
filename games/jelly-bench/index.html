@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Change a soft body's stiffness, damping, pressure, and rest length to test what it can squeeze through in Ernest Turner's interactive Jelly Bench.">
+  <title>Jelly Bench — Soft-Body Experiment by Ernest Turner | Trikzik Labs</title>
+  <link rel="canonical" href="https://trikzik.com/games/jelly-bench/">
+  <link rel="icon" type="image/png" sizes="48x48" href="../../assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../../assets/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Trikzik Labs">
+  <meta property="og:title" content="Jelly Bench — Soft-Body Experiment by Ernest Turner">
+  <meta property="og:description" content="Change a soft body's properties and test what the same blob can squeeze through.">
+  <meta property="og:url" content="https://trikzik.com/games/jelly-bench/">
+  <meta property="og:image" content="https://trikzik.com/assets/trikzik-labs-social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Jelly Bench — Soft-Body Experiment by Ernest Turner">
+  <meta name="twitter:description" content="Change a soft body's properties and test what the same blob can squeeze through.">
+  <meta name="twitter:image" content="https://trikzik.com/assets/trikzik-labs-social.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #050b18;
+      --panel: rgba(11, 23, 42, .88);
+      --line: rgba(137, 224, 255, .18);
+      --cyan: #64f4ff;
+      --purple: #a982ff;
+      --muted: #91a6bc;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      color: #eafaff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(33, 93, 137, .18), transparent 34rem),
+        radial-gradient(circle at 83% 88%, rgba(99, 55, 156, .15), transparent 38rem),
+        var(--ink);
+    }
+
+    .lab-link {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--cyan);
+      font: 700 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .11em;
+      text-decoration: none;
+    }
+
+    .lab-link:hover, .lab-link:focus-visible { text-decoration: underline; }
+
+    .app {
+      width: min(1500px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(14px, 2.3vw, 34px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      gap: clamp(14px, 2vw, 28px);
+      align-items: start;
+    }
+
+    .stage-column { min-width: 0; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin: 2px 2px 14px;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--cyan);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .19em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4.4rem);
+      line-height: .9;
+      letter-spacing: -.055em;
+      font-weight: 820;
+    }
+
+    .tagline {
+      max-width: 25ch;
+      margin: 0 0 3px;
+      color: var(--muted);
+      text-align: right;
+      font-size: .86rem;
+      letter-spacing: .025em;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 10 / 7;
+      min-height: 390px;
+      max-height: calc(100vh - 150px);
+      overflow: hidden;
+      border: 1px solid rgba(141, 224, 255, .2);
+      border-radius: 24px;
+      background: #071121;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, .38), inset 0 1px rgba(255, 255, 255, .045);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    canvas.grabbing { cursor: grabbing; }
+
+    .invitation {
+      position: absolute;
+      left: 50%;
+      top: 18px;
+      width: min(88%, 560px);
+      transform: translateX(-50%);
+      margin: 0;
+      color: rgba(218, 245, 255, .74);
+      font-size: clamp(.78rem, 1.6vw, 1rem);
+      line-height: 1.45;
+      letter-spacing: .012em;
+      text-align: center;
+      pointer-events: none;
+      text-shadow: 0 2px 18px #020712;
+    }
+
+    .panel {
+      position: sticky;
+      top: 18px;
+      padding: 22px;
+      border: 1px solid rgba(139, 220, 255, .17);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(17, 34, 57, .94), rgba(7, 16, 31, .94));
+      box-shadow: 0 22px 60px rgba(0, 0, 0, .32), inset 0 1px rgba(255, 255, 255, .045);
+      backdrop-filter: blur(18px);
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .live {
+      color: #76ffc9;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .live::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+      vertical-align: 1px;
+    }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    fieldset + fieldset {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(142, 220, 255, .11);
+    }
+
+    legend {
+      width: 100%;
+      margin-bottom: 13px;
+      color: #a9bfd2;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .slider-row { margin-bottom: 14px; }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: .8rem;
+    }
+
+    output {
+      color: var(--cyan);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 20px;
+      margin: 0;
+      accent-color: #6ceefa;
+      cursor: ew-resize;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #c5d7e4;
+      font-size: .76rem;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      accent-color: #7aeef8;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid rgba(134, 222, 255, .18);
+      border-radius: 10px;
+      color: #dff8ff;
+      font: inherit;
+      font-size: .75rem;
+      font-weight: 720;
+      background: rgba(31, 67, 93, .34);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+
+    button:hover, button:focus-visible {
+      border-color: rgba(113, 239, 255, .55);
+      background: rgba(40, 91, 117, .55);
+      outline: none;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    button.active {
+      color: #07111b;
+      border-color: #7ef4ff;
+      background: linear-gradient(135deg, #77f3ff, #9cd8ff);
+      box-shadow: 0 0 18px rgba(92, 226, 255, .22);
+    }
+
+    .reset-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(142, 220, 255, .11);
+    }
+
+    .reset-row button:last-child {
+      border-color: rgba(178, 143, 255, .27);
+      background: rgba(104, 66, 157, .24);
+    }
+
+    @media (max-width: 850px) {
+      .app { grid-template-columns: 1fr; }
+      .stage { min-height: 330px; max-height: none; }
+      .panel { position: static; }
+      .checks { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .app { padding: 10px; }
+      header { align-items: start; }
+      .tagline { max-width: 15ch; font-size: .72rem; }
+      .stage { min-height: 310px; border-radius: 17px; }
+      .panel { padding: 18px; border-radius: 17px; }
+      .checks { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="stage-column" aria-labelledby="title">
+      <header>
+        <div>
+          <a class="lab-link" href="../../#arcade">← TRIKZIK'S LAB</a>
+          <p class="eyebrow">Soft-body experiment 01</p>
+          <h1 id="title">Jelly Bench</h1>
+        </div>
+        <p class="tagline">Simple rules.<br>Surprising behavior.</p>
+      </header>
+      <div class="stage" id="stage">
+        <canvas id="canvas" aria-label="Interactive soft jelly blob between two platforms"></canvas>
+        <p class="invitation">Can you make it squeeze through the gap, then change its properties so it can’t get back?</p>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Jelly controls">
+      <div class="panel-head">
+        <h2>Bench Controls</h2>
+        <span class="live">Live</span>
+      </div>
+
+      <fieldset>
+        <legend>Blob Properties</legend>
+        <div class="slider-row">
+          <label class="slider-label" for="stiffness"><span>Stiffness</span><output id="stiffnessOut">46</output></label>
+          <input id="stiffness" type="range" min="8" max="92" step="1" value="46">
+        </div>
+        <div class="slider-row">
+          <label class="slider-label" for="damping"><span>Damping</span><output id="dampingOut">34</output></label>
+          <input id="damping" type="range" min="4" max="82" step="1" value="34">
+        </div>
+        <div class="slider-row">
+          <label class="slider-label" for="pressure"><span>Pressure</span><output id="pressureOut">58</output></label>
+          <input id="pressure" type="range" min="0" max="100" step="1" value="58">
+        </div>
+        <div class="slider-row">
+          <label class="slider-label" for="restLength"><span>Rest Length</span><output id="restLengthOut">100%</output></label>
+          <input id="restLength" type="range" min="72" max="128" step="1" value="100">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>View Options</legend>
+        <div class="checks">
+          <label class="check"><input id="showNodes" type="checkbox">Show Nodes</label>
+          <label class="check"><input id="showSprings" type="checkbox">Show Springs</label>
+          <label class="check"><input id="showCollisions" type="checkbox">Collision Shapes</label>
+          <label class="check"><input id="showOutline" type="checkbox" checked>Blob Outline</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Quick Presets</legend>
+        <div class="button-grid" id="presets">
+          <button type="button" data-preset="default" class="active">Default</button>
+          <button type="button" data-preset="soft">Soft &amp; Squishy</button>
+          <button type="button" data-preset="firm">Firm &amp; Bouncy</button>
+          <button type="button" data-preset="goofy">Goofy</button>
+        </div>
+      </fieldset>
+
+      <div class="reset-row">
+        <button id="resetBlob" type="button">Reset Blob</button>
+        <button id="resetAll" type="button">Reset All</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    "use strict";
+
+    // ---- Simulation state -------------------------------------------------
+    const canvas = document.querySelector("#canvas");
+    const stage = document.querySelector("#stage");
+    const ctx = canvas.getContext("2d");
+    const WORLD = { width: 1000, height: 700 };
+    const FIXED_DT = 1 / 120;
+    const MAX_FRAME = 1 / 15;
+    const NODE_COUNT = 24;
+    const BASE_RADIUS = 88;
+    const START = { x: 500, y: 202 };
+    const GRAVITY = 940;
+    const NODE_RADIUS = 5.5;
+    const MAX_SPEED = 1650;
+    const SOLVER_ITERATIONS = 7;
+    const DEFAULTS = { stiffness: 46, damping: 34, pressure: 58, restLength: 100 };
+    const DEFAULT_VIEW = { showNodes: false, showSprings: false, showCollisions: false, showOutline: true };
+    const PRESETS = {
+      default: { ...DEFAULTS },
+      soft: { stiffness: 16, damping: 48, pressure: 29, restLength: 96 },
+      firm: { stiffness: 82, damping: 15, pressure: 86, restLength: 103 },
+      goofy: { stiffness: 29, damping: 8, pressure: 70, restLength: 118 }
+    };
+    const settings = { ...DEFAULTS };
+    const view = { ...DEFAULT_VIEW };
+    const nodes = [];
+    const springs = [];
+    const platforms = [
+      { x: -30, y: 292, w: 460, h: 118 },
+      { x: 570, y: 292, w: 460, h: 118 }
+    ];
+    const floor = { x: -30, y: 644, w: 1060, h: 90 };
+    const walls = [
+      { x: -35, y: 0, w: 35, h: 700 },
+      { x: 1000, y: 0, w: 35, h: 700 }
+    ];
+    const colliders = [...platforms, floor, ...walls];
+    let targetArea = Math.PI * BASE_RADIUS * BASE_RADIUS;
+    let activePreset = "default";
+    let accumulator = 0;
+    let lastTime = performance.now();
+    let paused = false;
+    let diagnosticSteps = 0;
+    const pointer = { active: false, id: null, x: 0, y: 0, targets: [] };
+
+    // ---- Soft-body construction ------------------------------------------
+    function addSpring(a, b, kind, stiffnessScale = 1) {
+      const angularSpan = Math.min(Math.abs(a - b), NODE_COUNT - Math.abs(a - b));
+      const chord = 2 * BASE_RADIUS * Math.sin((Math.PI * angularSpan) / NODE_COUNT);
+      springs.push({ a, b, baseRest: chord, rest: chord, kind, stiffnessScale });
+    }
+
+    function buildBlob() {
+      nodes.length = 0;
+      springs.length = 0;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const angle = -Math.PI / 2 + (i / NODE_COUNT) * Math.PI * 2;
+        const x = START.x + Math.cos(angle) * BASE_RADIUS;
+        const y = START.y + Math.sin(angle) * BASE_RADIUS;
+        nodes.push({ x, y, px: x, py: y, ax: 0, ay: 0, contact: false });
+      }
+      for (let i = 0; i < NODE_COUNT; i++) {
+        addSpring(i, (i + 1) % NODE_COUNT, "edge", 1);
+        addSpring(i, (i + 2) % NODE_COUNT, "brace", .62);
+        addSpring(i, (i + 6) % NODE_COUNT, "support", .23);
+      }
+      for (let i = 0; i < NODE_COUNT / 2; i++) addSpring(i, i + NODE_COUNT / 2, "cross", .16);
+      updateRestShape();
+    }
+
+    function updateRestShape() {
+      const scale = settings.restLength / 100;
+      for (const spring of springs) spring.rest = spring.baseRest * scale;
+      targetArea = Math.PI * Math.pow(BASE_RADIUS * scale, 2);
+    }
+
+    function resetBlob() {
+      const radius = BASE_RADIUS * (settings.restLength / 100);
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const angle = -Math.PI / 2 + (i / NODE_COUNT) * Math.PI * 2;
+        const x = START.x + Math.cos(angle) * radius;
+        const y = START.y + Math.sin(angle) * radius;
+        Object.assign(nodes[i], { x, y, px: x, py: y, ax: 0, ay: 0, contact: false });
+      }
+      releasePointer();
+    }
+
+    // ---- Force calculation and constraint solving ------------------------
+    function signedArea() {
+      let sum = 0;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const a = nodes[i];
+        const b = nodes[(i + 1) % NODE_COUNT];
+        sum += a.x * b.y - b.x * a.y;
+      }
+      return sum * .5;
+    }
+
+    function finiteBlob() {
+      return nodes.every(n => Number.isFinite(n.x) && Number.isFinite(n.y) && Number.isFinite(n.px) && Number.isFinite(n.py));
+    }
+
+    function recoverIfInvalid() {
+      const area = signedArea();
+      if (!finiteBlob() || area <= targetArea * .04 || area > WORLD.width * WORLD.height * 2) resetBlob();
+    }
+
+    function applyForces(dt) {
+      const velocityKeep = Math.pow(.999 - settings.damping * .000085, dt * 120);
+      for (const n of nodes) {
+        n.contact = false;
+        let vx = (n.x - n.px) * velocityKeep;
+        let vy = (n.y - n.py) * velocityKeep;
+        const speed = Math.hypot(vx, vy);
+        if (speed > MAX_SPEED * dt) {
+          const scale = (MAX_SPEED * dt) / speed;
+          vx *= scale;
+          vy *= scale;
+        }
+        n.px = n.x;
+        n.py = n.y;
+        n.x += vx + n.ax * dt * dt;
+        n.y += vy + (n.ay + GRAVITY) * dt * dt;
+        n.ax = 0;
+        n.ay = 0;
+      }
+
+      if (pointer.active) {
+        for (const target of pointer.targets) {
+          const n = nodes[target.index];
+          const desiredX = pointer.x + target.offsetX;
+          const desiredY = pointer.y + target.offsetY;
+          const pull = .32 * target.weight;
+          n.x += (desiredX - n.x) * pull;
+          n.y += (desiredY - n.y) * pull;
+        }
+      }
+    }
+
+    function solveSprings(dt) {
+      const base = .055 + Math.pow(settings.stiffness / 100, 1.35) * .36;
+      for (const s of springs) {
+        const a = nodes[s.a];
+        const b = nodes[s.b];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const length = Math.hypot(dx, dy) || .0001;
+        const error = (length - s.rest) / length;
+        const correction = error * base * s.stiffnessScale;
+        const cx = dx * correction * .5;
+        const cy = dy * correction * .5;
+        a.x += cx; a.y += cy;
+        b.x -= cx; b.y -= cy;
+      }
+    }
+
+    function solveArea(dt) {
+      if (settings.pressure <= 0) return;
+      const area = signedArea();
+      const error = targetArea - area;
+      let denominator = 0;
+      const gradients = new Array(NODE_COUNT);
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const prev = nodes[(i - 1 + NODE_COUNT) % NODE_COUNT];
+        const next = nodes[(i + 1) % NODE_COUNT];
+        const gx = (next.y - prev.y) * .5;
+        const gy = (prev.x - next.x) * .5;
+        gradients[i] = { x: gx, y: gy };
+        denominator += gx * gx + gy * gy;
+      }
+      if (denominator < .0001) return;
+      const strength = .025 + Math.pow(settings.pressure / 100, 1.25) * .28;
+      const lambda = (error / denominator) * strength;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        nodes[i].x += gradients[i].x * lambda;
+        nodes[i].y += gradients[i].y * lambda;
+      }
+    }
+
+    function stabilizeShape() {
+      // A mild anti-fold correction keeps polygon order intact under extreme drags.
+      const areaSign = Math.sign(signedArea()) || 1;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const a = nodes[(i - 1 + NODE_COUNT) % NODE_COUNT];
+        const b = nodes[i];
+        const c = nodes[(i + 1) % NODE_COUNT];
+        const cross = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+        if (Math.sign(cross) !== areaSign && Math.abs(cross) > 10) {
+          b.x += ((a.x + c.x) * .5 - b.x) * .035;
+          b.y += ((a.y + c.y) * .5 - b.y) * .035;
+        }
+      }
+    }
+
+    // ---- Collision handling ---------------------------------------------
+    function collideNodeWithRect(n, rect) {
+      const left = rect.x - NODE_RADIUS;
+      const right = rect.x + rect.w + NODE_RADIUS;
+      const top = rect.y - NODE_RADIUS;
+      const bottom = rect.y + rect.h + NODE_RADIUS;
+      if (n.x <= left || n.x >= right || n.y <= top || n.y >= bottom) return;
+
+      const distances = [n.x - left, right - n.x, n.y - top, bottom - n.y];
+      let side = 0;
+      for (let i = 1; i < 4; i++) if (distances[i] < distances[side]) side = i;
+      if (side === 0) n.x = left;
+      else if (side === 1) n.x = right;
+      else if (side === 2) n.y = top;
+      else n.y = bottom;
+
+      const vx = n.x - n.px;
+      const vy = n.y - n.py;
+      const bounce = .08 + (1 - settings.damping / 100) * .13;
+      const friction = .82;
+      if (side < 2) {
+        n.px = n.x + vx * bounce;
+        n.py = n.y - vy * friction;
+      } else {
+        n.px = n.x - vx * friction;
+        n.py = n.y + vy * bounce;
+      }
+      n.contact = true;
+    }
+
+    function solveCollisions() {
+      for (const n of nodes) for (const rect of colliders) collideNodeWithRect(n, rect);
+      // Final world guards catch impossible one-frame teleports and deep floor grabs.
+      for (const n of nodes) {
+        if (n.x < NODE_RADIUS) { n.x = NODE_RADIUS; n.px = Math.min(n.px, n.x); n.contact = true; }
+        if (n.x > WORLD.width - NODE_RADIUS) { n.x = WORLD.width - NODE_RADIUS; n.px = Math.max(n.px, n.x); n.contact = true; }
+        if (n.y < NODE_RADIUS) { n.y = NODE_RADIUS; n.py = Math.min(n.py, n.y); n.contact = true; }
+        if (n.y > floor.y - NODE_RADIUS) { n.y = floor.y - NODE_RADIUS; n.py = Math.max(n.py, n.y); n.contact = true; }
+      }
+    }
+
+    function simulate(dt = FIXED_DT) {
+      applyForces(dt);
+      for (let i = 0; i < SOLVER_ITERATIONS; i++) {
+        solveSprings(dt);
+        solveArea(dt);
+        stabilizeShape();
+        solveCollisions();
+      }
+      recoverIfInvalid();
+      diagnosticSteps++;
+    }
+
+    // ---- Dragging interaction -------------------------------------------
+    function eventToWorld(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * WORLD.width / rect.width,
+        y: (event.clientY - rect.top) * WORLD.height / rect.height
+      };
+    }
+
+    function beginPointer(event) {
+      if (pointer.active) return;
+      const p = eventToWorld(event);
+      let nearest = 0;
+      let nearestDistance = Infinity;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const d = Math.hypot(nodes[i].x - p.x, nodes[i].y - p.y);
+        if (d < nearestDistance) { nearestDistance = d; nearest = i; }
+      }
+      if (nearestDistance > 125) return;
+      pointer.active = true;
+      pointer.id = event.pointerId;
+      pointer.x = p.x;
+      pointer.y = p.y;
+      pointer.targets = [
+        { index: nearest, weight: 1, offsetX: nodes[nearest].x - p.x, offsetY: nodes[nearest].y - p.y },
+        { index: (nearest - 1 + NODE_COUNT) % NODE_COUNT, weight: .46, offsetX: nodes[(nearest - 1 + NODE_COUNT) % NODE_COUNT].x - p.x, offsetY: nodes[(nearest - 1 + NODE_COUNT) % NODE_COUNT].y - p.y },
+        { index: (nearest + 1) % NODE_COUNT, weight: .46, offsetX: nodes[(nearest + 1) % NODE_COUNT].x - p.x, offsetY: nodes[(nearest + 1) % NODE_COUNT].y - p.y }
+      ];
+      canvas.setPointerCapture(event.pointerId);
+      canvas.classList.add("grabbing");
+      event.preventDefault();
+    }
+
+    function movePointer(event) {
+      if (!pointer.active || event.pointerId !== pointer.id) return;
+      const p = eventToWorld(event);
+      pointer.x = Math.max(0, Math.min(WORLD.width, p.x));
+      pointer.y = Math.max(0, Math.min(WORLD.height, p.y));
+      event.preventDefault();
+    }
+
+    function releasePointer(event) {
+      if (event && pointer.active && event.pointerId !== pointer.id) return;
+      pointer.active = false;
+      pointer.id = null;
+      pointer.targets = [];
+      canvas.classList.remove("grabbing");
+    }
+
+    canvas.addEventListener("pointerdown", beginPointer);
+    canvas.addEventListener("pointermove", movePointer);
+    canvas.addEventListener("pointerup", releasePointer);
+    canvas.addEventListener("pointercancel", releasePointer);
+    canvas.addEventListener("lostpointercapture", releasePointer);
+
+    // ---- Rendering -------------------------------------------------------
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width * dpr));
+      const height = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    }
+
+    function roundedRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+    }
+
+    function drawBackground() {
+      const bg = ctx.createRadialGradient(500, 270, 30, 500, 310, 620);
+      bg.addColorStop(0, "#102846");
+      bg.addColorStop(.46, "#09182c");
+      bg.addColorStop(1, "#040b17");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+      ctx.strokeStyle = "rgba(112, 194, 226, .055)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= WORLD.width; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD.height); ctx.stroke();
+      }
+      for (let y = 0; y <= WORLD.height; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD.width, y); ctx.stroke();
+      }
+
+      const halo = ctx.createRadialGradient(500, 225, 10, 500, 225, 220);
+      halo.addColorStop(0, "rgba(92, 238, 255, .12)");
+      halo.addColorStop(1, "rgba(92, 238, 255, 0)");
+      ctx.fillStyle = halo;
+      ctx.fillRect(250, 0, 500, 490);
+    }
+
+    function drawPlatform(rect, mirrored = false) {
+      ctx.save();
+      roundedRect(rect.x, rect.y, rect.w, rect.h, 8);
+      const metal = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.h);
+      metal.addColorStop(0, "#6d8294");
+      metal.addColorStop(.06, "#b4c5cd");
+      metal.addColorStop(.13, "#52697a");
+      metal.addColorStop(.5, "#293d50");
+      metal.addColorStop(1, "#132536");
+      ctx.fillStyle = metal;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(205, 238, 247, .34)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(3, 10, 19, .38)";
+      for (let x = rect.x + 35; x < rect.x + rect.w - 10; x += 78) {
+        ctx.beginPath(); ctx.arc(x, rect.y + 31, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "rgba(204, 229, 236, .28)"; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(115, 228, 248, .35)";
+      ctx.fillRect(rect.x + (mirrored ? 18 : rect.w - 23), rect.y + 14, 5, rect.h - 28);
+      ctx.restore();
+    }
+
+    function drawBench() {
+      drawPlatform(platforms[0], false);
+      drawPlatform(platforms[1], true);
+
+      const floorGrad = ctx.createLinearGradient(0, floor.y, 0, WORLD.height);
+      floorGrad.addColorStop(0, "#263a4d");
+      floorGrad.addColorStop(.08, "#101f30");
+      floorGrad.addColorStop(1, "#081322");
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(floor.x, floor.y, floor.w, floor.h);
+      ctx.fillStyle = "rgba(137, 221, 241, .22)";
+      ctx.fillRect(0, floor.y, WORLD.width, 2);
+
+      ctx.fillStyle = "rgba(157, 207, 222, .3)";
+      ctx.font = "700 12px ui-monospace, monospace";
+      ctx.letterSpacing = "2px";
+      ctx.fillText("CLEARANCE 140", 445, 430);
+      ctx.fillStyle = "rgba(117, 167, 186, .18)";
+      ctx.fillRect(499, 444, 2, 176);
+      for (let y = 458; y < 620; y += 24) ctx.fillRect(490, y, 21, 1);
+    }
+
+    function traceBlob() {
+      const first = nodes[0];
+      const last = nodes[NODE_COUNT - 1];
+      ctx.beginPath();
+      ctx.moveTo((last.x + first.x) * .5, (last.y + first.y) * .5);
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const current = nodes[i];
+        const next = nodes[(i + 1) % NODE_COUNT];
+        ctx.quadraticCurveTo(current.x, current.y, (current.x + next.x) * .5, (current.y + next.y) * .5);
+      }
+      ctx.closePath();
+    }
+
+    function blobCenter() {
+      let x = 0, y = 0;
+      for (const n of nodes) { x += n.x; y += n.y; }
+      return { x: x / NODE_COUNT, y: y / NODE_COUNT };
+    }
+
+    function drawBlob() {
+      const center = blobCenter();
+      ctx.save();
+      ctx.shadowColor = "rgba(78, 236, 255, .68)";
+      ctx.shadowBlur = 28;
+      traceBlob();
+      const fill = ctx.createRadialGradient(center.x - 30, center.y - 40, 8, center.x, center.y, 145);
+      fill.addColorStop(0, "rgba(213, 255, 255, .92)");
+      fill.addColorStop(.22, "rgba(80, 245, 255, .76)");
+      fill.addColorStop(.62, "rgba(72, 171, 223, .66)");
+      fill.addColorStop(1, "rgba(137, 77, 219, .72)");
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.globalCompositeOperation = "screen";
+      traceBlob();
+      const sheen = ctx.createLinearGradient(center.x - 100, center.y - 110, center.x + 95, center.y + 110);
+      sheen.addColorStop(0, "rgba(255,255,255,.45)");
+      sheen.addColorStop(.26, "rgba(255,255,255,.05)");
+      sheen.addColorStop(.63, "rgba(90,255,244,.09)");
+      sheen.addColorStop(1, "rgba(183,107,255,.22)");
+      ctx.fillStyle = sheen;
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+
+      if (view.showOutline) {
+        traceBlob();
+        ctx.strokeStyle = "rgba(183, 252, 255, .86)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        traceBlob();
+        ctx.strokeStyle = "rgba(164, 117, 255, .42)";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+      }
+
+      ctx.save();
+      traceBlob();
+      ctx.clip();
+      ctx.globalAlpha = .2;
+      ctx.strokeStyle = "#c5fbff";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < NODE_COUNT; i += 3) {
+        const a = nodes[i], b = nodes[(i + 6) % NODE_COUNT];
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      ctx.restore();
+
+      if (view.showSprings) {
+        ctx.lineWidth = 1.25;
+        for (const s of springs) {
+          const a = nodes[s.a], b = nodes[s.b];
+          ctx.strokeStyle = s.kind === "edge" ? "rgba(230,255,255,.72)" : "rgba(201,145,255,.3)";
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+
+      if (view.showNodes) {
+        for (const n of nodes) {
+          ctx.beginPath(); ctx.arc(n.x, n.y, n.contact ? 6.4 : 5, 0, Math.PI * 2);
+          ctx.fillStyle = n.contact ? "#ffdc7c" : "#d9ffff";
+          ctx.fill();
+          ctx.strokeStyle = "#155f7d"; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawCollisionShapes() {
+      if (!view.showCollisions) return;
+      ctx.save();
+      ctx.setLineDash([10, 8]);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255, 210, 102, .82)";
+      ctx.fillStyle = "rgba(255, 210, 102, .045)";
+      for (const rect of colliders) {
+        ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+        ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+      }
+      ctx.restore();
+    }
+
+    function render() {
+      resizeCanvas();
+      const sx = canvas.width / WORLD.width;
+      const sy = canvas.height / WORLD.height;
+      ctx.setTransform(sx, 0, 0, sy, 0, 0);
+      drawBackground();
+      drawBench();
+      drawBlob();
+      drawCollisionShapes();
+      if (pointer.active) {
+        ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 13, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(220,255,255,.78)"; ctx.lineWidth = 2; ctx.stroke();
+      }
+    }
+
+    function frame(now) {
+      const elapsed = Math.min(MAX_FRAME, Math.max(0, (now - lastTime) / 1000));
+      lastTime = now;
+      if (!paused) {
+        accumulator += elapsed;
+        let safety = 0;
+        while (accumulator >= FIXED_DT && safety++ < 10) {
+          simulate(FIXED_DT);
+          accumulator -= FIXED_DT;
+        }
+      }
+      render();
+      requestAnimationFrame(frame);
+    }
+
+    // ---- UI controls -----------------------------------------------------
+    const sliderIds = ["stiffness", "damping", "pressure", "restLength"];
+
+    function syncUI() {
+      for (const key of sliderIds) {
+        const input = document.querySelector(`#${key}`);
+        input.value = settings[key];
+        document.querySelector(`#${key}Out`).value = key === "restLength" ? `${settings[key]}%` : settings[key];
+      }
+      for (const key of Object.keys(DEFAULT_VIEW)) document.querySelector(`#${key}`).checked = view[key];
+      document.querySelectorAll("[data-preset]").forEach(button => button.classList.toggle("active", button.dataset.preset === activePreset));
+    }
+
+    function setProperty(key, value) {
+      if (!sliderIds.includes(key)) return;
+      const input = document.querySelector(`#${key}`);
+      settings[key] = Math.max(Number(input.min), Math.min(Number(input.max), Number(value)));
+      if (key === "restLength") updateRestShape();
+      activePreset = null;
+      syncUI();
+    }
+
+    for (const key of sliderIds) {
+      document.querySelector(`#${key}`).addEventListener("input", event => setProperty(key, event.target.value));
+    }
+
+    for (const key of Object.keys(DEFAULT_VIEW)) {
+      document.querySelector(`#${key}`).addEventListener("change", event => { view[key] = event.target.checked; });
+    }
+
+    function applyPreset(name) {
+      if (!PRESETS[name]) return;
+      Object.assign(settings, PRESETS[name]);
+      activePreset = name;
+      updateRestShape();
+      syncUI();
+    }
+
+    document.querySelector("#presets").addEventListener("click", event => {
+      const button = event.target.closest("[data-preset]");
+      if (button) applyPreset(button.dataset.preset);
+    });
+    document.querySelector("#resetBlob").addEventListener("click", resetBlob);
+    document.querySelector("#resetAll").addEventListener("click", () => {
+      Object.assign(settings, DEFAULTS);
+      Object.assign(view, DEFAULT_VIEW);
+      activePreset = "default";
+      updateRestShape();
+      resetBlob();
+      syncUI();
+    });
+
+    // Focused, read-only-friendly diagnostics for offline verification.
+    window.__jellyBenchTest = {
+      pause(value = true) { paused = Boolean(value); lastTime = performance.now(); return paused; },
+      step(count = 1) { for (let i = 0; i < Math.max(0, Math.min(50000, count)); i++) simulate(FIXED_DT); render(); return this.getState(); },
+      setProperty,
+      applyPreset,
+      resetBlob,
+      resetAll() { document.querySelector("#resetAll").click(); },
+      setPointer(x, y, index = 0) {
+        pointer.active = true;
+        pointer.x = Math.max(0, Math.min(WORLD.width, x));
+        pointer.y = Math.max(0, Math.min(WORLD.height, y));
+        pointer.id = -1;
+        pointer.targets = [{ index, weight: 1, offsetX: 0, offsetY: 0 }];
+      },
+      releasePointer,
+      getState() {
+        const center = blobCenter();
+        const ys = nodes.map(n => n.y), xs = nodes.map(n => n.x);
+        return {
+          settings: { ...settings }, view: { ...view }, activePreset,
+          finite: finiteBlob(), area: signedArea(), targetArea, center,
+          bounds: { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) },
+          contacts: nodes.filter(n => n.contact).length, steps: diagnosticSteps
+        };
+      }
+    };
+
+    buildBlob();
+    syncUI();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

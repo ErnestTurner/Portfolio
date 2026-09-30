@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
   let current = "moon";
-  const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic"];
+  const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic", "jelly"];
   const games = {
     moon: {
       url: "games/moon-snail/index.html",
@@ -71,6 +71,17 @@
       watch: "The slowdown traveling backward while every car continues moving forward.",
       controls:
         "<p><kbd>Tap a car</kbd> Brake for two seconds</p><p><kbd>Sliders</kbd> Change every driver</p><p><kbd>Pause</kbd> <kbd>Restart Flow</kbd> <kbd>Reset</kbd></p>",
+    },
+    jelly: {
+      url: "games/jelly-bench/index.html",
+      title: "Jelly Bench",
+      tag: "SPECIMEN 007 · SOFT-BODY PROPERTY TEST",
+      mission: "Change the body. Test the gap.",
+      question: "Can the same soft body squeeze through a gap, then become unable to get back?",
+      procedure: "Drag the blob through the gap. Change stiffness, damping, pressure, or rest length.",
+      watch: "The same obstacle becoming passable or impossible as the body’s properties change.",
+      controls:
+        "<p><kbd>Drag</kbd> Pull the blob</p><p><kbd>Sliders</kbd> Change its properties</p><p><kbd>Presets</kbd> Compare behaviors</p>",
     },
   };
   function choose(name) {

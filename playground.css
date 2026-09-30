@@ -328,7 +328,7 @@ h2 {
 }
 .specimen-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 .lab-console {
@@ -403,6 +403,10 @@ h2 {
 .traffic-art {
   background: #42372a;
   color: #ffd28b;
+}
+.jelly-art {
+  background: #2d2948;
+  color: #bca4ff;
 }
 .arrow {
   margin-left: auto;
@@ -655,6 +659,9 @@ footer {
   }
   .arcade-layout {
     gap: 16px;
+  }
+  .specimen-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .lab-console {
     grid-template-columns: 220px minmax(0, 1fr);

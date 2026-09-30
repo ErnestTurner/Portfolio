@@ -324,7 +324,17 @@ h2 {
 }
 .arcade-layout {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 18px;
+}
+.specimen-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.lab-console {
+  display: grid;
+  grid-template-columns: minmax(250px, 290px) minmax(0, 1fr);
+  align-items: start;
   gap: 26px;
 }
 .chooser {
@@ -342,7 +352,7 @@ h2 {
   background: #101a26;
   color: var(--text);
   border-radius: 9px;
-  margin-bottom: 10px;
+  margin: 0;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
@@ -644,7 +654,11 @@ footer {
     gap: 16px;
   }
   .arcade-layout {
+    gap: 16px;
+  }
+  .lab-console {
     grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
   }
   .section {
     padding: 50px 28px;
@@ -720,9 +734,9 @@ footer {
     margin-top: 14px;
   }
   .arcade-layout {
-    grid-template-columns: 1fr;
+    gap: 14px;
   }
-  .chooser [role="tablist"] {
+  .specimen-strip {
     display: flex;
     width: 100%;
     max-width: 100%;
@@ -733,6 +747,10 @@ footer {
     overscroll-behavior-inline: contain;
     scroll-snap-type: inline mandatory;
     scrollbar-color: #587066 #101a26;
+  }
+  .lab-console {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
   .game-tab {
     margin: 0;

@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=records-1" />
+    <link rel="stylesheet" href="playground.css?v=lab-console-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the lab</a>
@@ -121,8 +121,7 @@
           <p>Six working experiments.<br />Touching them is the test procedure.</p>
         </div>
         <div class="arcade-layout">
-          <aside class="chooser">
-            <div role="tablist" aria-label="Choose a specimen">
+          <div class="specimen-strip" role="tablist" aria-label="Choose a specimen">
               <a
                 id="moon-tab"
                 href="games/moon-snail/index.html"
@@ -205,7 +204,9 @@
                 ><span><strong>Traffic With No Excuse</strong><small>Start a jam. Remove the reason.</small></span
                 ><span class="arrow">↗</span>
               </a>
-            </div>
+          </div>
+          <div class="lab-console">
+            <aside class="chooser">
             <div class="mission" aria-live="polite">
               <p class="kicker" id="game-tag">SPECIMEN 001 · INGREDIENT COLLISION TEST</p>
               <h3 id="game-title">Feed the moon.</h3>
@@ -240,8 +241,8 @@
             <p class="small">
               Switching specimens starts a fresh run. Best scores stay on this device.
             </p>
-          </aside>
-          <div class="game-column">
+            </aside>
+            <div class="game-column">
             <div id="game-panel" role="tabpanel" aria-labelledby="moon-tab" class="screen">
               <div class="screen-bar">
                 <span><i></i> SPECIMEN READY</span><span id="screen-name">SPECIMEN 001 / MOON SNAIL</span>
@@ -281,6 +282,7 @@
                 </div>
               </div>
             </details>
+            </div>
           </div>
         </div>
       </section>

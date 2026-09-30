@@ -10,7 +10,7 @@
       title: "Moon Snail",
       tag: "SPECIMEN 001 · INGREDIENT COLLISION TEST",
       mission: "Feed the moon.",
-      question: "Can five unrelated ingredients become one playable system?",
+      question: "Can an umbrella, snail, moon, soap bubble, and marshmallow become one playable system?",
       procedure: "Catch attackers in soap bubbles. Feed 30 to the moon.",
       watch: "Pursuit, slime, soap, bubbles, and lunar gravity pushing on the same loop.",
       controls:

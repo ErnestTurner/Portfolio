@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=cohesion-1" />
+    <link rel="stylesheet" href="playground.css?v=records-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the lab</a>
@@ -209,10 +209,20 @@
             <div class="mission" aria-live="polite">
               <p class="kicker" id="game-tag">SPECIMEN 001 · INGREDIENT COLLISION TEST</p>
               <h3 id="game-title">Feed the moon.</h3>
-              <p id="game-description">
-                You're a snail with an umbrella. Trap hostile marshmallows in soap bubbles and let
-                gravity carry them home. Deliver 30 through three phases.
-              </p>
+              <div class="specimen-record" id="specimen-record">
+                <div>
+                  <span>QUESTION</span>
+                  <p id="specimen-question">Can five unrelated ingredients become one playable system?</p>
+                </div>
+                <div>
+                  <span>PROCEDURE</span>
+                  <p id="specimen-procedure">Catch attackers in soap bubbles. Feed 30 to the moon.</p>
+                </div>
+                <div>
+                  <span>WATCH FOR</span>
+                  <p id="specimen-watch">Pursuit, slime, soap, bubbles, and lunar gravity pushing on the same loop.</p>
+                </div>
+              </div>
               <div class="control-notes" id="control-notes">
                 <p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Slide</p>
                 <p><kbd>Space</kbd> Catch · release to refill</p>
@@ -396,6 +406,6 @@
       <span>© 2026 Ernest Turner</span><span>Thanks for playing. Stay curious.</span
       ><a href="#top">Back to the snail ↑</a>
     </footer>
-    <script src="playground.js?v=lab-1"></script>
+    <script src="playground.js?v=records-1"></script>
   </body>
 </html>

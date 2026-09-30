@@ -10,8 +10,9 @@
       title: "Moon Snail",
       tag: "SPECIMEN 001 · INGREDIENT COLLISION TEST",
       mission: "Feed the moon.",
-      description:
-        "You're a snail with an umbrella. Trap hostile marshmallows in soap bubbles and let gravity carry them home. Deliver 30 through three phases.",
+      question: "Can five unrelated ingredients become one playable system?",
+      procedure: "Catch attackers in soap bubbles. Feed 30 to the moon.",
+      watch: "Pursuit, slime, soap, bubbles, and lunar gravity pushing on the same loop.",
       controls:
         "<p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Slide</p><p><kbd>Space</kbd> Catch · release to refill</p><p><kbd>P</kbd> Pause <kbd>I</kbd> Inspect</p>",
     },
@@ -20,8 +21,9 @@
       title: "Starfall",
       tag: "SPECIMEN 002 · SURVIVAL PRESSURE TEST",
       mission: "Outlast the swarm.",
-      description:
-        "Move your ship, aim with your mouse, and click to fire. Clear pursuing drones to build your score. Best played with a keyboard and mouse.",
+      question: "How long can one movement-and-aim loop stay tense?",
+      procedure: "Move, aim, and fire. Keep clearing drones as the swarm accelerates.",
+      watch: "Open space disappearing as pursuers accumulate around one ship.",
       controls:
         "<p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Move</p><p><kbd>Mouse</kbd> Aim <kbd>Click</kbd> Fire</p>",
     },
@@ -30,8 +32,9 @@
       title: "Dungeon Reset",
       tag: "SPECIMEN 003 · MAINTENANCE LOOP TEST",
       mission: "Clean up after the heroes.",
-      description:
-        "Return the monsters, reset the traps, repair the room, and watch five increasingly capable parties discover exactly what you left unfinished.",
+      question: "Can maintenance become the adventure instead of the aftermath?",
+      procedure: "Return monsters, reset traps, repair the room, then release the next party.",
+      watch: "Every unfinished task becoming an advantage for the heroes who follow.",
       controls:
         "<p><kbd>Drag</kbd> Return monsters</p><p><kbd>Hold</kbd> Repair and refill</p><p><kbd>Esc</kbd> Pause <kbd>M</kbd> Sound</p>",
     },
@@ -40,7 +43,9 @@
       title: "Brain in a Jar",
       tag: "SPECIMEN 004 · NEURAL CONTROL TEST",
       mission: "Change a wire. Change a mind.",
-      description: "Tinker with a tiny creature’s neural wiring.",
+      question: "How much behavior can emerge from a 4→4→2 neural network?",
+      procedure: "Move the light. Select one connection. Change its weight.",
+      watch: "A small wiring change producing a different decision in the same creature.",
       controls:
         "<p><kbd>Click / drag</kbd> Move light</p><p><kbd>Slider</kbd> Change selected wire</p><p><kbd>Pause</kbd> then <kbd>Step</kbd> Inspect a tick</p>",
     },
@@ -49,8 +54,9 @@
       title: "Scribble Engine",
       tag: "SPECIMEN 005 · KINETIC DRAWING TEST",
       mission: "Make rotation draw.",
-      description:
-        "Adjust the lengths, speeds, and directions of two independently rotating arms, then watch their pen trace the result.",
+      question: "What drawings emerge when two rotations share one pen?",
+      procedure: "Change each arm’s length, speed, and direction. Let the pen run.",
+      watch: "Simple ratios closing into forms while mismatched motion keeps drifting.",
       controls:
         "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Direction</kbd> Reverse either arm</p><p><kbd>Pause</kbd> <kbd>Clear</kbd> <kbd>Reset</kbd></p>",
     },
@@ -59,8 +65,9 @@
       title: "Traffic With No Excuse",
       tag: "SPECIMEN 006 · EMERGENT TRAFFIC TEST",
       mission: "Start a jam. Remove the reason.",
-      description:
-        "Brake one of 24 identical drivers, then change their shared settings to discover when the disturbance fades—and when it becomes a traveling traffic jam.",
+      question: "Can a traffic jam survive after its cause disappears?",
+      procedure: "Brake one car for two seconds. Then leave every driver alone.",
+      watch: "The slowdown traveling backward while every car continues moving forward.",
       controls:
         "<p><kbd>Tap a car</kbd> Brake for two seconds</p><p><kbd>Sliders</kbd> Change every driver</p><p><kbd>Pause</kbd> <kbd>Restart Flow</kbd> <kbd>Reset</kbd></p>",
     },
@@ -84,7 +91,9 @@
     frame.title = g.title + " interactive specimen";
     $("game-title").textContent = g.mission;
     $("game-tag").textContent = g.tag;
-    $("game-description").textContent = g.description;
+    $("specimen-question").textContent = g.question;
+    $("specimen-procedure").textContent = g.procedure;
+    $("specimen-watch").textContent = g.watch;
     $("control-notes").innerHTML = g.controls;
     $("full-game").href = g.url;
     $("screen-name").textContent =

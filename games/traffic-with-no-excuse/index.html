@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Brake one car and watch a traffic jam emerge from identical local driving rules in Ernest Turner's interactive browser simulation.">
+  <title>Traffic With No Excuse — Emergent Traffic Toy by Ernest Turner | Ernest's Playground</title>
+  <link rel="canonical" href="https://ernest-turner.pages.dev/games/traffic-with-no-excuse/">
+  <link rel="icon" type="image/png" sizes="48x48" href="../../assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../../assets/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ernest's Playground">
+  <meta property="og:title" content="Traffic With No Excuse — Emergent Traffic Toy by Ernest Turner">
+  <meta property="og:description" content="Brake one car and watch a traffic jam emerge from identical local driving rules.">
+  <meta property="og:url" content="https://ernest-turner.pages.dev/games/traffic-with-no-excuse/">
+  <meta property="og:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Traffic With No Excuse — Emergent Traffic Toy by Ernest Turner">
+  <meta name="twitter:description" content="Brake one car and watch a traffic jam emerge from identical local driving rules.">
+  <meta name="twitter:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #071826;
+      --panel: #0c2233;
+      --line: #496476;
+      --text: #eef7f7;
+      --muted: #9fb6c1;
+      --accent: #ffd166;
+      --focus: #83e8ff;
+      --paper: #d9d3c2;
+      --warning: #b94b42;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px),
+        radial-gradient(circle at 35% 25%, rgba(35, 86, 111, .24), transparent 38rem),
+        var(--ink);
+      background-size: 7px 7px, 9px 9px, auto, auto;
+      color: var(--text);
+      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1180px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(18px, 3vw, 42px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+      gap: clamp(22px, 4vw, 54px);
+      align-items: center;
+    }
+
+    .stage { min-width: 0; }
+
+    .arcade-back {
+      display: inline-block;
+      margin-bottom: 15px;
+      color: var(--focus);
+      font: 650 .72rem/1.2 ui-monospace, "Cascadia Mono", monospace;
+      letter-spacing: .1em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .arcade-back:hover { color: var(--accent); }
+
+    h1 {
+      margin: 0 0 6px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.65rem, 4vw, 3.05rem);
+      line-height: 1;
+      letter-spacing: .035em;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-shadow: 0 1px 0 #000;
+    }
+
+    .kicker {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: .86rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .road-wrap {
+      position: relative;
+      width: min(100%, 72vh);
+      aspect-ratio: 1;
+      margin-inline: auto;
+      touch-action: manipulation;
+      isolation: isolate;
+    }
+
+    .road-wrap::before {
+      content: "Municipal Flow Laboratory · Observation Dish 24-C";
+      position: absolute;
+      inset: 3.5% auto auto 50%;
+      z-index: 2;
+      transform: translateX(-50%);
+      color: rgba(216, 228, 228, .58);
+      font: 600 clamp(.48rem, 1.15vw, .66rem)/1.2 ui-monospace, "Cascadia Mono", monospace;
+      letter-spacing: .11em;
+      text-align: center;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .case-card {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 42%;
+      padding: clamp(10px, 2.6vw, 20px);
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(18, 28, 31, .38);
+      border-radius: 4px;
+      background:
+        linear-gradient(96deg, transparent 47%, rgba(20,20,20,.035) 49%, transparent 52%),
+        var(--paper);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .32), inset 0 0 20px rgba(44, 36, 21, .08);
+      color: #17252a;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .case-id {
+      display: block;
+      padding-bottom: .38em;
+      border-bottom: 1px solid rgba(23, 37, 42, .35);
+      font: 600 clamp(.48rem, 1.25vw, .68rem)/1.2 ui-monospace, "Cascadia Mono", monospace;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .case-card strong {
+      display: block;
+      margin: .65em 0 .42em;
+      color: #273a3f;
+      font: 800 clamp(.64rem, 1.8vw, 1.04rem)/1.05 Georgia, "Times New Roman", serif;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+
+    .case-card[data-state="active"] strong,
+    .case-card[data-state="lingering"] strong { color: #923b35; }
+
+    .case-card small {
+      display: block;
+      font: 500 clamp(.48rem, 1.25vw, .72rem)/1.35 ui-monospace, "Cascadia Mono", monospace;
+    }
+
+    .readouts {
+      display: flex;
+      justify-content: center;
+      gap: clamp(24px, 8vw, 76px);
+      margin-top: 8px;
+    }
+
+    .readout {
+      min-width: 9rem;
+      padding: 8px 14px;
+      border-top: 1px solid rgba(159, 182, 193, .28);
+      border-bottom: 1px solid rgba(159, 182, 193, .12);
+      text-align: center;
+    }
+    .readout strong { display: block; font-size: clamp(1.25rem, 3vw, 1.8rem); font-variant-numeric: tabular-nums; }
+    .readout span { color: var(--muted); font-size: .78rem; }
+
+    aside {
+      position: relative;
+      padding: 24px;
+      padding-top: 58px;
+      border: 1px solid rgba(135, 177, 194, .28);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(18, 48, 67, .88), rgba(7, 25, 38, .94));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .26), inset 0 0 35px rgba(0, 0, 0, .16);
+    }
+
+    aside::before {
+      content: "Driver Parameters · All Vehicles";
+      position: absolute;
+      inset: 0 0 auto;
+      padding: 13px 18px;
+      border-bottom: 1px solid rgba(159, 182, 193, .22);
+      color: #b9cad0;
+      font: 600 .68rem/1.3 ui-monospace, "Cascadia Mono", monospace;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    aside::after {
+      content: "";
+      position: absolute;
+      inset: 8px 9px auto auto;
+      width: 6px;
+      height: 6px;
+      border: 1px solid #6c8793;
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px #071826, -300px 0 0 -1px #6c8793;
+    }
+
+    .control + .control { margin-top: 22px; }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+      font: .86rem/1.3 ui-monospace, "Cascadia Mono", monospace;
+    }
+
+    output { color: var(--focus); font-variant-numeric: tabular-nums; }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 0;
+      accent-color: var(--focus);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    button {
+      min-height: 44px;
+      border: 1px solid rgba(131, 232, 255, .34);
+      border-radius: 4px;
+      background: linear-gradient(#173a52, #102b40);
+      color: var(--text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:hover { background: #173e59; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    #restart {
+      grid-column: 1 / -1;
+      border-color: rgba(255, 209, 102, .48);
+      background: linear-gradient(#9d7134, #755124);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 26px;
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    .legend-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #e15a48, #f2c14e, #54d6c5);
+    }
+
+    .disclaimer { margin: 20px 0 0; color: #809ba8; font-size: .72rem; }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; align-items: start; }
+      .road-wrap { width: 100%; }
+      aside { padding: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      canvas { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" aria-labelledby="title">
+      <a class="arcade-back" href="../../#arcade" target="_top">← Arcade</a>
+      <h1 id="title">Traffic With No Excuse</h1>
+      <p class="kicker">One road. One rule. No obvious cause.</p>
+      <div class="road-wrap">
+        <canvas id="road" aria-label="Circular road with 24 moving cars. Tap a car to brake it for two simulation seconds."></canvas>
+        <div class="case-card" id="caseCard" data-state="idle" aria-live="polite">
+          <span class="case-id">Specimen 24-C · Cause status</span>
+          <strong id="caseHeadline">No incident currently inventing itself</strong>
+          <small id="caseDetail">Tap one car. Can the jam outlive the reason it started?</small>
+        </div>
+      </div>
+      <div class="readouts" aria-live="polite">
+        <div class="readout"><strong id="averageSpeed">0.0 m/s</strong><span>Average speed</span></div>
+        <div class="readout"><strong id="slowCars">0</strong><span>Cars below 3 m/s</span></div>
+      </div>
+    </section>
+
+    <aside aria-label="Driver settings">
+      <div class="control">
+        <label for="timeGap"><span>Following gap T</span><output id="timeGapValue">1.1 s</output></label>
+        <input id="timeGap" type="range" min="0.6" max="2.5" step="0.1" value="1.1">
+      </div>
+      <div class="control">
+        <label for="acceleration"><span>Acceleration a</span><output id="accelerationValue">0.5 m/s²</output></label>
+        <input id="acceleration" type="range" min="0.3" max="2.5" step="0.1" value="0.5">
+      </div>
+      <div class="control">
+        <label for="braking"><span>Braking firmness b</span><output id="brakingValue">3.0 m/s²</output></label>
+        <input id="braking" type="range" min="1" max="4" step="0.1" value="3">
+      </div>
+
+      <div class="buttons">
+        <button id="pause" type="button">Pause</button>
+        <button id="reset" type="button">Reset</button>
+        <button id="restart" type="button">Restart Flow</button>
+      </div>
+
+      <div class="legend" aria-label="Car color: slow to fast">
+        <span>Slow</span><span class="legend-bar"></span><span>Fast</span>
+      </div>
+      <p class="disclaimer">Illustrative car-following model—not a real-road prediction.</p>
+    </aside>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // Model constants and shared driver settings.
+    const CIRCUMFERENCE = 400;
+    const CAR_LENGTH = 4.5;
+    const CAR_COUNT = 24;
+    const DESIRED_SPEED = 15;
+    const MINIMUM_GAP = 2;
+    const DT = 0.02;
+    const DEFAULTS = Object.freeze({ T: 1.1, a: 0.5, b: 3 });
+    const params = { ...DEFAULTS };
+
+    const mod = (n, m) => ((n % m) + m) % m;
+
+    function idmAcceleration(ownSpeed, leaderSpeed, actualGap, p = params) {
+      const gap = Math.max(actualGap, 0.001);
+      const closingSpeed = ownSpeed - leaderSpeed;
+      const desiredGap = MINIMUM_GAP + Math.max(0,
+        ownSpeed * p.T + ownSpeed * closingSpeed / (2 * Math.sqrt(p.a * p.b))
+      );
+      return p.a * (1 - Math.pow(ownSpeed / DESIRED_SPEED, 4) - Math.pow(desiredGap / gap, 2));
+    }
+
+    function equilibriumSpeed(p = params) {
+      const gap = CIRCUMFERENCE / CAR_COUNT - CAR_LENGTH;
+      let low = 0;
+      let high = DESIRED_SPEED;
+      for (let i = 0; i < 80; i++) {
+        const mid = (low + high) / 2;
+        if (idmAcceleration(mid, mid, gap, p) > 0) low = mid;
+        else high = mid;
+      }
+      return (low + high) / 2;
+    }
+
+    // Simulation state: position is always distance around the loop in meters.
+    let cars = [];
+    let running = true;
+    let simTime = 0;
+    let intervention = null;
+    let trackedCarId = null;
+
+    function makeUniformCars(p = params) {
+      const speed = equilibriumSpeed(p);
+      return Array.from({ length: CAR_COUNT }, (_, id) => ({
+        id,
+        position: id * CIRCUMFERENCE / CAR_COUNT,
+        speed,
+        acceleration: 0
+      }));
+    }
+
+    function restartFlow() {
+      cars = makeUniformCars();
+      simTime = 0;
+      intervention = null;
+      trackedCarId = null;
+    }
+
+    function beginIntervention(carId) {
+      intervention = { carId, remaining: 2 };
+      trackedCarId = carId;
+    }
+
+    function simulationStep(state = cars, p = params, active = intervention) {
+      const count = state.length;
+      const accelerations = new Array(count);
+      const gaps = new Array(count);
+
+      // Every acceleration is calculated from one common state snapshot.
+      for (let i = 0; i < count; i++) {
+        const leader = state[(i + 1) % count];
+        const car = state[i];
+        gaps[i] = mod(leader.position - car.position, CIRCUMFERENCE) - CAR_LENGTH;
+        let accel = idmAcceleration(car.speed, leader.speed, gaps[i], p);
+        if (active && active.carId === car.id && active.remaining > 0) {
+          // The intervention requests -3 m/s²; stronger IDM braking wins.
+          accel = Math.min(accel, -3);
+        }
+        accelerations[i] = Number.isFinite(accel) ? accel : -3;
+      }
+
+      const nextSpeeds = state.map((car, i) => Math.max(0, car.speed + accelerations[i] * DT));
+      const travel = state.map((car, i) => Math.max(0, (car.speed + nextSpeeds[i]) * 0.5 * DT));
+
+      // Numerical safety only: relax proposed travel distances so no car can
+      // cross its leader within a step. Normal runs stay far from this guard.
+      const clearance = 1e-7;
+      for (let pass = 0; pass < count; pass++) {
+        let changed = false;
+        for (let i = 0; i < count; i++) {
+          const maxTravel = Math.max(0, gaps[i] + travel[(i + 1) % count] - clearance);
+          if (travel[i] > maxTravel) {
+            travel[i] = maxTravel;
+            changed = true;
+          }
+        }
+        if (!changed) break;
+      }
+
+      const next = state.map((car, i) => {
+        const safeSpeed = Math.max(0, Math.min(nextSpeeds[i], 2 * travel[i] / DT));
+        return {
+          id: car.id,
+          position: mod(car.position + travel[i], CIRCUMFERENCE),
+          speed: Number.isFinite(safeSpeed) ? safeSpeed : 0,
+          acceleration: (safeSpeed - car.speed) / DT
+        };
+      });
+      return next;
+    }
+
+    function step() {
+      cars = simulationStep();
+      simTime += DT;
+      if (intervention) {
+        intervention.remaining = Math.max(0, intervention.remaining - DT);
+        if (intervention.remaining <= 1e-9) intervention = null;
+      }
+    }
+
+    restartFlow();
+
+    // Interaction wiring.
+    const canvas = document.getElementById('road');
+    const ctx = canvas.getContext('2d');
+    const averageSpeedEl = document.getElementById('averageSpeed');
+    const slowCarsEl = document.getElementById('slowCars');
+    const caseCardEl = document.getElementById('caseCard');
+    const caseHeadlineEl = document.getElementById('caseHeadline');
+    const caseDetailEl = document.getElementById('caseDetail');
+    const pauseButton = document.getElementById('pause');
+    const sliderConfig = [
+      ['timeGap', 'timeGapValue', 'T', value => `${value.toFixed(1)} s`],
+      ['acceleration', 'accelerationValue', 'a', value => `${value.toFixed(1)} m/s²`],
+      ['braking', 'brakingValue', 'b', value => `${value.toFixed(1)} m/s²`]
+    ];
+
+    for (const [inputId, outputId, key, format] of sliderConfig) {
+      const input = document.getElementById(inputId);
+      const output = document.getElementById(outputId);
+      input.addEventListener('input', () => {
+        params[key] = Number(input.value);
+        output.value = format(params[key]);
+      });
+    }
+
+    pauseButton.addEventListener('click', () => {
+      running = !running;
+      pauseButton.textContent = running ? 'Pause' : 'Resume';
+      lastFrame = performance.now();
+      accumulator = 0;
+    });
+
+    document.getElementById('restart').addEventListener('click', restartFlow);
+    document.getElementById('reset').addEventListener('click', () => {
+      Object.assign(params, DEFAULTS);
+      for (const [inputId, outputId, key, format] of sliderConfig) {
+        document.getElementById(inputId).value = params[key];
+        document.getElementById(outputId).value = format(params[key]);
+      }
+      running = true;
+      pauseButton.textContent = 'Pause';
+      accumulator = 0;
+      restartFlow();
+    });
+
+    function carScreenPosition(car, size) {
+      const center = size / 2;
+      const radius = size * 0.365;
+      const angle = car.position / CIRCUMFERENCE * Math.PI * 2 - Math.PI / 2;
+      return { x: center + Math.cos(angle) * radius, y: center + Math.sin(angle) * radius, angle };
+    }
+
+    function chooseCar(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * canvas.width / rect.width;
+      const y = (event.clientY - rect.top) * canvas.height / rect.height;
+      const size = Math.min(canvas.width, canvas.height);
+      let best = null;
+      let bestDistance = size * 0.055; // generous touch target around each car
+      for (const car of cars) {
+        const point = carScreenPosition(car, size);
+        const distance = Math.hypot(x - point.x, y - point.y);
+        if (distance < bestDistance) { best = car; bestDistance = distance; }
+      }
+      if (best) beginIntervention(best.id);
+    }
+
+    canvas.addEventListener('pointerdown', chooseCar);
+
+    // Rendering reads only current simulation state; resize never touches it.
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width * dpr));
+      const height = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    }
+
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+    function speedColor(speed) {
+      const t = clamp(speed / DESIRED_SPEED, 0, 1);
+      const stops = [[225, 90, 72], [242, 193, 78], [84, 214, 197]];
+      const scaled = t * 2;
+      const index = Math.min(1, Math.floor(scaled));
+      const f = scaled - index;
+      const a = stops[index];
+      const b = stops[index + 1];
+      return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * f)).join(',')})`;
+    }
+
+    // Presentation-only: overlapping arcs make the slowdown read as a single
+    // emergent specimen. Their size and opacity come directly from car speed.
+    function drawJamBody(size, center, radius) {
+      const referenceSpeed = Math.max(1, equilibriumSpeed());
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      for (const car of cars) {
+        const severity = clamp((referenceSpeed * 0.94 - car.speed) / (referenceSpeed * 0.72), 0, 1);
+        if (severity <= 0.015) continue;
+        const angle = car.position / CIRCUMFERENCE * Math.PI * 2 - Math.PI / 2;
+        const span = 0.055 + severity * 0.085;
+        for (let layer = 0; layer < 3; layer++) {
+          ctx.beginPath();
+          ctx.arc(center, center, radius, angle - span * (1.45 - layer * .18), angle + span * (1.45 - layer * .18));
+          ctx.lineWidth = size * (.104 + layer * .018);
+          ctx.strokeStyle = layer === 0
+            ? `rgba(116, 35, 43, ${severity * .12})`
+            : layer === 1
+              ? `rgba(204, 68, 49, ${severity * .12})`
+              : `rgba(238, 145, 55, ${severity * .075})`;
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    function updateCaseCard(speedDeviation) {
+      if (intervention) {
+        caseCardEl.dataset.state = 'active';
+        caseHeadlineEl.textContent = 'Reason present';
+        caseDetailEl.textContent = 'One driver is currently supplying an explanation.';
+      } else if (trackedCarId !== null && speedDeviation > 0.35) {
+        caseCardEl.dataset.state = 'lingering';
+        caseHeadlineEl.textContent = 'Cause removed · Effect remains';
+        caseDetailEl.textContent = 'The reason has stopped. The stopping has not.';
+      } else if (trackedCarId !== null) {
+        caseCardEl.dataset.state = 'resolved';
+        caseHeadlineEl.textContent = 'Incident failed to become permanent';
+        caseDetailEl.textContent = 'Flow has misplaced the disturbance.';
+      } else {
+        caseCardEl.dataset.state = 'idle';
+        caseHeadlineEl.textContent = 'No incident currently inventing itself';
+        caseDetailEl.textContent = 'Tap one car. Can the jam outlive the reason it started?';
+      }
+    }
+
+    function draw() {
+      resizeCanvas();
+      const width = canvas.width;
+      const height = canvas.height;
+      const size = Math.min(width, height);
+      const center = size / 2;
+      const radius = size * 0.365;
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.translate((width - size) / 2, (height - size) / 2);
+
+      // Glass observation-dish rims; purely visual and independent of state.
+      for (const [ringRadius, lineWidth, color] of [
+        [radius + size * .082, size * .008, 'rgba(176, 213, 222, .32)'],
+        [radius + size * .068, size * .002, 'rgba(238, 250, 251, .48)'],
+        [radius - size * .069, size * .002, 'rgba(120, 161, 175, .32)']
+      ]) {
+        ctx.beginPath();
+        ctx.arc(center, center, ringRadius, 0, Math.PI * 2);
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(center, center, radius, 0, Math.PI * 2);
+      ctx.lineWidth = size * 0.115;
+      ctx.strokeStyle = '#273d48';
+      ctx.stroke();
+      drawJamBody(size, center, radius);
+      ctx.beginPath();
+      ctx.arc(center, center, radius, 0, Math.PI * 2);
+      ctx.setLineDash([size * .012, size * .018]);
+      ctx.lineWidth = Math.max(1, size * .0025);
+      ctx.strokeStyle = 'rgba(194, 219, 224, .34)';
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const carLength = size * .038;
+      const carWidth = size * .021;
+      for (const car of cars) {
+        const point = carScreenPosition(car, size);
+        const active = intervention && intervention.carId === car.id;
+        ctx.save();
+        ctx.translate(point.x, point.y);
+        ctx.rotate(point.angle + Math.PI / 2);
+
+        if (active || trackedCarId === car.id) {
+          ctx.strokeStyle = active ? '#ffffff' : 'rgba(255,255,255,.58)';
+          ctx.lineWidth = active ? size * .005 : size * .0025;
+          ctx.strokeRect(-carLength * .68, -carWidth * .82, carLength * 1.36, carWidth * 1.64);
+        }
+
+        ctx.fillStyle = speedColor(car.speed);
+        ctx.beginPath();
+        ctx.roundRect(-carLength / 2, -carWidth / 2, carLength, carWidth, carWidth * .24);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(7, 24, 38, .7)';
+        ctx.fillRect(carLength * .02, -carWidth * .38, carLength * .2, carWidth * .76);
+
+        if (car.acceleration < -0.1) {
+          ctx.fillStyle = '#ff342f';
+          const lamp = Math.max(1.5, size * .0025);
+          ctx.beginPath();
+          ctx.arc(-carLength * .45, -carWidth * .28, lamp, 0, Math.PI * 2);
+          ctx.arc(-carLength * .45, carWidth * .28, lamp, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // The outlined source remains ordinary; only the evidence tag distinguishes it.
+      if (trackedCarId !== null && !intervention) {
+        const tracked = cars.find(car => car.id === trackedCarId);
+        if (tracked) {
+          const point = carScreenPosition(tracked, size);
+          const inwardRadius = radius * .76;
+          const labelX = center + Math.cos(point.angle) * inwardRadius;
+          const labelY = center + Math.sin(point.angle) * inwardRadius;
+          const labelWidth = size * .135;
+          const labelHeight = size * .026;
+          ctx.beginPath();
+          ctx.moveTo(point.x, point.y);
+          ctx.lineTo(labelX, labelY);
+          ctx.lineWidth = Math.max(1, size * .0015);
+          ctx.strokeStyle = 'rgba(220, 228, 218, .68)';
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(216, 211, 194, .92)';
+          ctx.beginPath();
+          ctx.roundRect(labelX - labelWidth / 2, labelY - labelHeight / 2, labelWidth, labelHeight, size * .003);
+          ctx.fill();
+          ctx.fillStyle = '#223238';
+          ctx.font = `600 ${Math.max(7, size * .011)}px ui-monospace, monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('FORMER CAUSE', labelX, labelY);
+        }
+      }
+      ctx.restore();
+
+      const average = cars.reduce((sum, car) => sum + car.speed, 0) / cars.length;
+      const speedDeviation = Math.sqrt(cars.reduce((sum, car) => sum + Math.pow(car.speed - average, 2), 0) / cars.length);
+      averageSpeedEl.textContent = `${average.toFixed(1)} m/s`;
+      slowCarsEl.textContent = String(cars.filter(car => car.speed < 3).length);
+      updateCaseCard(speedDeviation);
+    }
+
+    let lastFrame = performance.now();
+    let accumulator = 0;
+    function frame(now) {
+      const elapsed = Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+      if (running) {
+        accumulator += elapsed;
+        while (accumulator >= DT) {
+          step();
+          accumulator -= DT;
+        }
+      }
+      draw();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    // Read-only/debug test surface; no test controls are exposed in the UI.
+    window.__trafficWithNoExcuseTest = Object.freeze({
+      constants: Object.freeze({ CIRCUMFERENCE, CAR_LENGTH, CAR_COUNT, DESIRED_SPEED, MINIMUM_GAP, DT }),
+      equilibriumSpeed,
+      idmAcceleration,
+      makeUniformCars,
+      simulationStep,
+      getState: () => ({
+        cars: cars.map(car => ({ ...car })), params: { ...params }, running, simTime,
+        intervention: intervention ? { ...intervention } : null, trackedCarId
+      }),
+      setParams: values => Object.assign(params, values),
+      restartFlow,
+      beginIntervention,
+      advance: seconds => {
+        const steps = Math.max(0, Math.round(seconds / DT));
+        for (let i = 0; i < steps; i++) step();
+        return cars.map(car => ({ ...car }));
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

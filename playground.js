@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
   let current = "moon";
-  const order = ["moon", "star", "dungeon", "brain", "scribble"];
+  const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic"];
   const games = {
     moon: {
       url: "games/moon-snail/",
@@ -53,6 +53,16 @@
         "Adjust the lengths, speeds, and directions of two independently rotating arms, then watch their pen trace the result.",
       controls:
         "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Direction</kbd> Reverse either arm</p><p><kbd>Pause</kbd> <kbd>Clear</kbd> <kbd>Reset</kbd></p>",
+    },
+    traffic: {
+      url: "games/traffic-with-no-excuse/",
+      title: "Traffic With No Excuse",
+      tag: "EMERGENT TRAFFIC TOY",
+      mission: "Start a jam. Remove the reason.",
+      description:
+        "Brake one of 24 identical drivers, then change their shared settings to discover when the disturbance fades—and when it becomes a traveling traffic jam.",
+      controls:
+        "<p><kbd>Tap a car</kbd> Brake for two seconds</p><p><kbd>Sliders</kbd> Change every driver</p><p><kbd>Pause</kbd> <kbd>Restart Flow</kbd> <kbd>Reset</kbd></p>",
     },
   };
   function choose(name) {

@@ -29,6 +29,7 @@
     },
     dungeon: {
       url: "games/dungeon-reset/index.html",
+      fileUrl: "https://trikzik.com/games/dungeon-reset/",
       title: "Dungeon Reset",
       tag: "SPECIMEN 003 · MAINTENANCE LOOP TEST",
       mission: "Clean up after the heroes.",
@@ -74,11 +75,12 @@
   };
   function choose(name) {
     if (!games[name]) return;
+    const g = games[name],
+      url = location.protocol === "file:" && g.fileUrl ? g.fileUrl : g.url;
     if (current !== name) {
-      frame.src = games[name].url;
+      frame.src = url;
       current = name;
     }
-    const g = games[name];
     document.querySelectorAll("[data-game]").forEach((b) => {
       const active = b.dataset.game === name;
       b.classList.toggle("selected", active);
@@ -95,7 +97,7 @@
     $("specimen-procedure").textContent = g.procedure;
     $("specimen-watch").textContent = g.watch;
     $("control-notes").innerHTML = g.controls;
-    $("full-game").href = g.url;
+    $("full-game").href = url;
     $("screen-name").textContent =
       "SPECIMEN " + String(order.indexOf(name) + 1).padStart(3, "0") + " / " + g.title.toUpperCase();
     $("inspector-guide").hidden = name !== "moon";

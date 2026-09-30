@@ -6,7 +6,7 @@
   const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic"];
   const games = {
     moon: {
-      url: "games/moon-snail/",
+      url: "games/moon-snail/index.html",
       title: "Moon Snail",
       tag: "SPECIMEN 001 · INGREDIENT COLLISION TEST",
       mission: "Feed the moon.",
@@ -17,7 +17,7 @@
         "<p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Slide</p><p><kbd>Space</kbd> Catch · release to refill</p><p><kbd>P</kbd> Pause <kbd>I</kbd> Inspect</p>",
     },
     star: {
-      url: "games/starfall/",
+      url: "games/starfall/index.html",
       title: "Starfall",
       tag: "SPECIMEN 002 · SURVIVAL PRESSURE TEST",
       mission: "Outlast the swarm.",
@@ -28,7 +28,7 @@
         "<p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Move</p><p><kbd>Mouse</kbd> Aim <kbd>Click</kbd> Fire</p>",
     },
     dungeon: {
-      url: "games/dungeon-reset/",
+      url: "games/dungeon-reset/index.html",
       title: "Dungeon Reset",
       tag: "SPECIMEN 003 · MAINTENANCE LOOP TEST",
       mission: "Clean up after the heroes.",
@@ -39,7 +39,7 @@
         "<p><kbd>Drag</kbd> Return monsters</p><p><kbd>Hold</kbd> Repair and refill</p><p><kbd>Esc</kbd> Pause <kbd>M</kbd> Sound</p>",
     },
     brain: {
-      url: "games/brain-in-a-jar/",
+      url: "games/brain-in-a-jar/index.html",
       title: "Brain in a Jar",
       tag: "SPECIMEN 004 · NEURAL CONTROL TEST",
       mission: "Change a wire. Change a mind.",
@@ -50,7 +50,7 @@
         "<p><kbd>Click / drag</kbd> Move light</p><p><kbd>Slider</kbd> Change selected wire</p><p><kbd>Pause</kbd> then <kbd>Step</kbd> Inspect a tick</p>",
     },
     scribble: {
-      url: "games/scribble-engine/",
+      url: "games/scribble-engine/index.html",
       title: "Scribble Engine",
       tag: "SPECIMEN 005 · KINETIC DRAWING TEST",
       mission: "Make rotation draw.",
@@ -61,7 +61,7 @@
         "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Direction</kbd> Reverse either arm</p><p><kbd>Pause</kbd> <kbd>Clear</kbd> <kbd>Reset</kbd></p>",
     },
     traffic: {
-      url: "games/traffic-with-no-excuse/",
+      url: "games/traffic-with-no-excuse/index.html",
       title: "Traffic With No Excuse",
       tag: "SPECIMEN 006 · EMERGENT TRAFFIC TEST",
       mission: "Start a jam. Remove the reason.",

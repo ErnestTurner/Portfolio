@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
   let current = "moon";
-  const order = ["moon", "star", "dungeon", "brain"];
+  const order = ["moon", "star", "dungeon", "brain", "scribble"];
   const games = {
     moon: {
       url: "games/moon-snail/",
@@ -43,6 +43,16 @@
       description: "Tinker with a tiny creature’s neural wiring.",
       controls:
         "<p><kbd>Click / drag</kbd> Move light</p><p><kbd>Slider</kbd> Change selected wire</p><p><kbd>Pause</kbd> then <kbd>Step</kbd> Inspect a tick</p>",
+    },
+    scribble: {
+      url: "games/scribble-engine/",
+      title: "Scribble Engine",
+      tag: "KINETIC DRAWING EXPERIMENT",
+      mission: "Make rotation draw.",
+      description:
+        "Adjust the lengths, speeds, and directions of two independently rotating arms, then watch their pen trace the result.",
+      controls:
+        "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Direction</kbd> Reverse either arm</p><p><kbd>Pause</kbd> <kbd>Clear</kbd> <kbd>Reset</kbd></p>",
     },
   };
   function choose(name) {

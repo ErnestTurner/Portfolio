@@ -664,9 +664,12 @@ footer {
   .chooser [role="tablist"] {
     display: flex;
     gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
   }
   .game-tab {
     margin: 0;
+    min-width: 190px;
   }
   .mission {
     padding: 15px 2px;

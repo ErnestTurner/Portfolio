@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Experiment with Scribble Engine, Ernest Turner's kinetic drawing toy where two independently rotating arms trace changing geometric patterns.">
+  <title>Scribble Engine — Interactive Drawing Experiment by Ernest Turner | Ernest's Playground</title>
+  <link rel="canonical" href="https://ernest-turner.pages.dev/games/scribble-engine/">
+  <link rel="icon" type="image/png" sizes="48x48" href="../../assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../../assets/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ernest's Playground">
+  <meta property="og:title" content="Scribble Engine — Interactive Drawing Experiment by Ernest Turner">
+  <meta property="og:description" content="Adjust two independently rotating arms and watch them trace changing geometric patterns in Ernest Turner's browser experiment.">
+  <meta property="og:url" content="https://ernest-turner.pages.dev/games/scribble-engine/">
+  <meta property="og:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Scribble Engine — Interactive Drawing Experiment by Ernest Turner">
+  <meta name="twitter:description" content="Adjust two independently rotating arms and watch them trace changing geometric patterns in Ernest Turner's browser experiment.">
+  <meta name="twitter:image" content="https://ernest-turner.pages.dev/assets/ernest-playground-social.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bench: #061a2a;
+      --panel: #0b2538;
+      --edge: #24465b;
+      --ink: #e8e2c5;
+      --muted: #9db2bd;
+      --arm-one: #f2a65a;
+      --arm-two: #60d3c5;
+      --focus: #ffd38a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bench);
+      color: #eef4f2;
+      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1180px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(14px, 2.5vw, 30px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      gap: clamp(18px, 3vw, 34px);
+      align-items: center;
+    }
+
+    .drawing-wrap {
+      min-width: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    canvas {
+      display: block;
+      width: min(100%, 720px);
+      height: auto;
+      aspect-ratio: 1;
+      background: #082033;
+      border: 1px solid var(--edge);
+      border-radius: 18px;
+      box-shadow: 0 18px 55px #020b12aa, inset 0 0 60px #03121f88;
+      touch-action: none;
+    }
+
+    .controls {
+      background: color-mix(in srgb, var(--panel) 94%, black);
+      border: 1px solid var(--edge);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 14px 40px #020b1266;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: clamp(1.75rem, 4vw, 2.3rem);
+      letter-spacing: -.035em;
+    }
+
+    .invitation {
+      margin: 0 0 20px;
+      color: var(--ink);
+      font-size: .98rem;
+      font-style: italic;
+    }
+
+    fieldset {
+      margin: 0 0 16px;
+      padding: 15px;
+      border: 1px solid var(--edge);
+      border-radius: 12px;
+    }
+
+    legend {
+      padding: 0 7px;
+      font-weight: 750;
+    }
+
+    .arm-one legend { color: var(--arm-one); }
+    .arm-two legend { color: var(--arm-two); }
+
+    .control-row { margin-bottom: 14px; }
+    .control-row:last-child { margin-bottom: 0; }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      color: #d7e2e2;
+      font-size: .92rem;
+    }
+
+    output {
+      min-width: 4.8em;
+      color: white;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      min-height: 30px;
+      margin: 0;
+      accent-color: #c7d7d8;
+      cursor: pointer;
+    }
+
+    button {
+      min-height: 44px;
+      border: 1px solid #41647a;
+      border-radius: 9px;
+      background: #14364c;
+      color: #f5f8f7;
+      padding: 9px 12px;
+      font: inherit;
+      font-weight: 680;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1a455f; }
+    button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+    .direction {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+
+    .direction span:last-child { color: #b9d2d6; font-size: .9rem; }
+
+    .note {
+      margin: -2px 2px 17px;
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .shared {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+      canvas { width: min(100%, 590px); }
+      .controls { width: min(100%, 590px); justify-self: center; }
+    }
+
+    @media (max-width: 390px) {
+      .shared { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="drawing-wrap" aria-label="Scribble Engine drawing area">
+      <canvas id="view" width="600" height="600"></canvas>
+    </section>
+
+    <section class="controls" aria-label="Scribble Engine controls">
+      <h1>Scribble Engine</h1>
+      <p class="invitation">Can you draw a straight line using two things that only rotate?</p>
+
+      <fieldset class="arm-one">
+        <legend>Arm 1</legend>
+        <div class="control-row">
+          <label for="length1">Length <output id="length1Value" for="length1">100 units</output></label>
+          <input id="length1" type="range" min="20" max="140" step="1" value="100">
+        </div>
+        <div class="control-row">
+          <label for="speed1">Speed <output id="speed1Value" for="speed1">30°/s</output></label>
+          <input id="speed1" type="range" min="0" max="360" step="1" value="30">
+        </div>
+        <button class="direction" id="direction1" type="button" aria-pressed="false">
+          <span>Rotation direction</span><span>Clockwise ↻</span>
+        </button>
+      </fieldset>
+
+      <fieldset class="arm-two">
+        <legend>Arm 2</legend>
+        <div class="control-row">
+          <label for="length2">Length <output id="length2Value" for="length2">70 units</output></label>
+          <input id="length2" type="range" min="20" max="140" step="1" value="70">
+        </div>
+        <div class="control-row">
+          <label for="speed2">Speed <output id="speed2Value" for="speed2">90°/s</output></label>
+          <input id="speed2" type="range" min="0" max="360" step="1" value="90">
+        </div>
+        <button class="direction" id="direction2" type="button" aria-pressed="true">
+          <span>Rotation direction</span><span>Counterclockwise ↺</span>
+        </button>
+      </fieldset>
+
+      <p class="note">Both arm angles are measured from the page, independently—not from each other.</p>
+
+      <div class="shared">
+        <button id="pause" type="button">Pause</button>
+        <button id="clear" type="button">Clear Paper</button>
+        <button id="reset" type="button">Reset</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    'use strict';
+
+    // State: logical units live in a fixed 600 × 600 drawing space.
+    const SIZE = 600;
+    const CENTER = { x: SIZE / 2, y: SIZE / 2 };
+    const DEFAULTS = Object.freeze({
+      length1: 100, length2: 70,
+      speed1: 30, speed2: 90,
+      direction1: 1, direction2: -1,
+      angle1: 0, angle2: 0
+    });
+    const state = { ...DEFAULTS, running: true };
+
+    const view = document.querySelector('#view');
+    const viewContext = view.getContext('2d', { alpha: false });
+    const ink = document.createElement('canvas');
+    ink.width = ink.height = SIZE;
+    const inkContext = ink.getContext('2d');
+    let previousPen = null;
+    let previousTime = performance.now();
+
+    // Kinematics: both angles are absolute page angles, exactly as shown here.
+    function positions(source = state) {
+      const elbowX = CENTER.x + source.length1 * Math.cos(source.angle1);
+      const elbowY = CENTER.y + source.length1 * Math.sin(source.angle1);
+      return {
+        elbowX,
+        elbowY,
+        penX: elbowX + source.length2 * Math.cos(source.angle2),
+        penY: elbowY + source.length2 * Math.sin(source.angle2)
+      };
+    }
+
+    function breakStroke() {
+      previousPen = null;
+    }
+
+    function clearInk() {
+      inkContext.clearRect(0, 0, SIZE, SIZE);
+      breakStroke();
+    }
+
+    // Drawing: ink accumulates in one bounded canvas; machinery is redrawn separately.
+    function addInk(point) {
+      if (previousPen) {
+        inkContext.beginPath();
+        inkContext.moveTo(previousPen.x, previousPen.y);
+        inkContext.lineTo(point.penX, point.penY);
+        inkContext.strokeStyle = '#e8e2c5';
+        inkContext.lineWidth = 1.15;
+        inkContext.lineCap = 'round';
+        inkContext.lineJoin = 'round';
+        inkContext.stroke();
+      }
+      previousPen = { x: point.penX, y: point.penY };
+    }
+
+    function drawMechanism(point) {
+      viewContext.fillStyle = '#082033';
+      viewContext.fillRect(0, 0, SIZE, SIZE);
+      viewContext.drawImage(ink, 0, 0);
+
+      viewContext.lineCap = 'round';
+      viewContext.lineJoin = 'round';
+
+      viewContext.beginPath();
+      viewContext.moveTo(CENTER.x, CENTER.y);
+      viewContext.lineTo(point.elbowX, point.elbowY);
+      viewContext.strokeStyle = '#f2a65a';
+      viewContext.lineWidth = 7;
+      viewContext.stroke();
+
+      viewContext.beginPath();
+      viewContext.moveTo(point.elbowX, point.elbowY);
+      viewContext.lineTo(point.penX, point.penY);
+      viewContext.strokeStyle = '#60d3c5';
+      viewContext.lineWidth = 6;
+      viewContext.stroke();
+
+      joint(CENTER.x, CENTER.y, 8, '#f7d6a3');
+      joint(point.elbowX, point.elbowY, 7, '#b9f0e8');
+      joint(point.penX, point.penY, 4.5, '#fff9dc');
+    }
+
+    function joint(x, y, radius, color) {
+      viewContext.beginPath();
+      viewContext.arc(x, y, radius, 0, Math.PI * 2);
+      viewContext.fillStyle = color;
+      viewContext.fill();
+      viewContext.strokeStyle = '#082033';
+      viewContext.lineWidth = 2;
+      viewContext.stroke();
+    }
+
+    // Motion: subdivide elapsed time so fast settings still leave a smooth trail.
+    function advance(elapsedSeconds) {
+      const radians1 = state.direction1 * state.speed1 * Math.PI / 180;
+      const radians2 = state.direction2 * state.speed2 * Math.PI / 180;
+      const fastest = Math.max(Math.abs(radians1), Math.abs(radians2));
+      const sampleDuration = fastest > 0 ? Math.min(1 / 120, (Math.PI / 180) / fastest) : 1 / 120;
+      const steps = Math.max(1, Math.ceil(elapsedSeconds / sampleDuration));
+      const step = elapsedSeconds / steps;
+
+      for (let index = 0; index < steps; index += 1) {
+        state.angle1 = (state.angle1 + radians1 * step) % (Math.PI * 2);
+        state.angle2 = (state.angle2 + radians2 * step) % (Math.PI * 2);
+        addInk(positions());
+      }
+    }
+
+    function frame(now) {
+      const elapsed = Math.min((now - previousTime) / 1000, 0.05);
+      previousTime = now;
+      if (state.running) advance(elapsed);
+      drawMechanism(positions());
+      requestAnimationFrame(frame);
+    }
+
+    // Controls: settings update immediately without changing either angle.
+    const controls = {
+      length1: document.querySelector('#length1'),
+      length2: document.querySelector('#length2'),
+      speed1: document.querySelector('#speed1'),
+      speed2: document.querySelector('#speed2'),
+      direction1: document.querySelector('#direction1'),
+      direction2: document.querySelector('#direction2'),
+      pause: document.querySelector('#pause')
+    };
+
+    function syncControls() {
+      for (const key of ['length1', 'length2', 'speed1', 'speed2']) {
+        controls[key].value = state[key];
+        const suffix = key.startsWith('length') ? ' units' : '°/s';
+        document.querySelector(`#${key}Value`).value = `${state[key]}${suffix}`;
+      }
+      for (const key of ['direction1', 'direction2']) {
+        const counterclockwise = state[key] < 0;
+        controls[key].setAttribute('aria-pressed', String(counterclockwise));
+        controls[key].lastElementChild.textContent = counterclockwise ? 'Counterclockwise ↺' : 'Clockwise ↻';
+      }
+      controls.pause.textContent = state.running ? 'Pause' : 'Resume';
+    }
+
+    for (const key of ['length1', 'length2']) {
+      controls[key].addEventListener('input', event => {
+        state[key] = Number(event.target.value);
+        breakStroke();
+        syncControls();
+      });
+    }
+
+    for (const key of ['speed1', 'speed2']) {
+      controls[key].addEventListener('input', event => {
+        state[key] = Number(event.target.value);
+        syncControls();
+      });
+    }
+
+    for (const key of ['direction1', 'direction2']) {
+      controls[key].addEventListener('click', () => {
+        state[key] *= -1;
+        syncControls();
+      });
+    }
+
+    controls.pause.addEventListener('click', () => {
+      state.running = !state.running;
+      breakStroke();
+      previousTime = performance.now();
+      syncControls();
+    });
+
+    document.querySelector('#clear').addEventListener('click', clearInk);
+
+    document.querySelector('#reset').addEventListener('click', () => {
+      Object.assign(state, DEFAULTS, { running: true });
+      clearInk();
+      previousTime = performance.now();
+      syncControls();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      previousTime = performance.now();
+      breakStroke();
+    });
+
+    syncControls();
+    drawMechanism(positions());
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

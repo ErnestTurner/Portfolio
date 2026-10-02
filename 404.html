@@ -5,33 +5,277 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#0a101a" />
-    <title>Page Not Found | Trikzik Labs</title>
+    <title>Specimen Not Found | Trikzik Labs</title>
     <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
     <style>
-      :root { color-scheme: dark; --bg: #0a101a; --panel: #111b2a; --line: #2a3b52; --text: #f4f7fb; --muted: #9aacbf; --mint: #a3ffd3; --lavender: #bcadff; }
+      :root {
+        color-scheme: dark;
+        --bg: #0a101a;
+        --panel-dark: #080f18;
+        --line: #2a3d4b;
+        --text: #eff5fa;
+        --muted: #9aacbd;
+        --mint: #b4f7a7;
+        --pink: #ffafcc;
+      }
+
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 28px; background: radial-gradient(circle at 80% 10%, #1a2340 0, var(--bg) 36rem); color: var(--text); font-family: Arial, Helvetica, sans-serif; }
-      main { width: min(720px, 100%); padding: clamp(32px, 7vw, 72px); border: 1px solid var(--line); border-radius: 24px; background: #111b2add; box-shadow: 0 24px 80px #0008; }
-      .kicker { color: var(--mint); font: 700 12px/1.4 "Courier New", monospace; letter-spacing: 3px; }
-      h1 { margin: 18px 0; font-size: clamp(48px, 10vw, 92px); line-height: .95; letter-spacing: -4px; }
-      h1 em { color: var(--lavender); font-family: Georgia, serif; font-weight: 400; }
-      p { max-width: 520px; color: var(--muted); font-size: 18px; line-height: 1.65; }
-      nav { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-      a { border: 1px solid var(--line); border-radius: 10px; padding: 13px 18px; color: var(--text); font-weight: 700; text-decoration: none; }
-      a:first-child { border-color: var(--mint); background: var(--mint); color: #09263a; }
-      a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 78% 10%, #1a2940 0, transparent 34rem),
+          var(--bg);
+        color: var(--text);
+        font: 16px/1.6 Arial, Helvetica, sans-serif;
+      }
+
+      .skip {
+        position: absolute;
+        left: 12px;
+        top: -80px;
+        z-index: 10;
+        padding: 10px 13px;
+        background: var(--mint);
+        color: #14251a;
+        font-weight: 800;
+      }
+
+      .skip:focus { top: 12px; }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 25px 42px;
+        border-bottom: 1px solid var(--line);
+        font: 700 12px/1.4 "Courier New", monospace;
+        letter-spacing: 1.4px;
+      }
+
+      header span:first-child { color: var(--mint); }
+      header span:last-child { color: var(--muted); }
+
+      main {
+        width: min(1120px, calc(100% - 40px));
+        margin: clamp(32px, 7vh, 78px) auto;
+      }
+
+      .kicker {
+        margin: 0 0 13px;
+        color: var(--mint);
+        font: 700 12px/1.5 "Courier New", monospace;
+        letter-spacing: 1.8px;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin: 0 0 24px;
+        font-size: clamp(49px, 8vw, 94px);
+        line-height: .94;
+        letter-spacing: clamp(-4px, -.045em, -2px);
+      }
+
+      h1 em {
+        color: var(--mint);
+        font-style: normal;
+      }
+
+      .lead {
+        max-width: 650px;
+        margin: 0 0 34px;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .containment {
+        position: relative;
+        min-height: 315px;
+        overflow: hidden;
+        border: 1px solid #3c594e;
+        border-radius: 140px 140px 15px 15px;
+        background:
+          linear-gradient(#ffffff05 1px, transparent 1px),
+          linear-gradient(90deg, #ffffff05 1px, transparent 1px),
+          radial-gradient(ellipse at center, #1a2c31, var(--panel-dark) 68%);
+        background-size: 34px 34px, 34px 34px, auto;
+        box-shadow: inset 0 0 80px #0008;
+      }
+
+      .containment::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 0 42%, #b4f7a711 50%, transparent 58%);
+        animation: scan 5s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .chamber-top,
+      .chamber-bottom {
+        position: absolute;
+        z-index: 2;
+        left: 24px;
+        right: 24px;
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        color: #9db5ae;
+        font: 700 10px/1.4 "Courier New", monospace;
+        letter-spacing: 1.3px;
+      }
+
+      .chamber-top { top: 38px; left: 68px; right: 68px; }
+      .chamber-bottom { bottom: 18px; }
+
+      .status::before {
+        content: "";
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 8px;
+        border-radius: 50%;
+        background: var(--pink);
+        box-shadow: 0 0 12px #ffafcc88;
+        animation: blink 1.8s steps(1) infinite;
+      }
+
+      .mount {
+        position: absolute;
+        left: 50%;
+        top: 51%;
+        width: min(330px, 66vw);
+        height: 135px;
+        transform: translate(-50%, -50%);
+        border: 1px dashed #7da09073;
+        border-radius: 50%;
+      }
+
+      .mount::before,
+      .mount::after {
+        content: "";
+        position: absolute;
+        background: #7da09073;
+      }
+
+      .mount::before { left: 50%; top: -20px; bottom: -20px; width: 1px; }
+      .mount::after { top: 50%; left: -20px; right: -20px; height: 1px; }
+
+      .tag {
+        position: absolute;
+        z-index: 3;
+        left: 50%;
+        top: 50%;
+        width: min(250px, 62vw);
+        padding: 17px 20px;
+        transform: translate(-50%, -50%) rotate(-3deg);
+        border: 1px solid #6a806f;
+        background: #17231f;
+        box-shadow: 8px 10px 0 #0005;
+        text-align: center;
+        font: 700 12px/1.45 "Courier New", monospace;
+        letter-spacing: 1.4px;
+      }
+
+      .tag strong {
+        display: block;
+        color: var(--mint);
+        font-size: 21px;
+        letter-spacing: 2.5px;
+      }
+
+      .recovery {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px 22px;
+        margin-top: 28px;
+      }
+
+      a.action {
+        min-height: 48px;
+        padding: 12px 18px;
+        border: 1px solid #435362;
+        border-radius: 7px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      a.action:first-child {
+        border-color: var(--mint);
+        background: var(--mint);
+        color: #18281d;
+      }
+
+      a.action:hover { border-color: var(--mint); }
+      a:focus-visible { outline: 3px solid var(--mint); outline-offset: 5px; }
+
+      .note {
+        color: #8497a8;
+        font: 11px/1.5 "Courier New", monospace;
+        letter-spacing: .7px;
+      }
+
+      @keyframes scan {
+        0%, 100% { transform: translateY(-48%); opacity: .25; }
+        50% { transform: translateY(48%); opacity: .75; }
+      }
+
+      @keyframes blink { 50% { opacity: .35; } }
+
+      @media (max-width: 620px) {
+        header { padding: 20px; }
+        header span:last-child { display: none; }
+        main { width: min(100% - 32px, 1120px); margin-top: 34px; }
+        h1 { font-size: clamp(47px, 15vw, 67px); }
+        .lead { font-size: 16px; }
+        .containment { min-height: 290px; border-radius: 75px 75px 13px 13px; }
+        .chamber-top { left: 42px; right: 42px; justify-content: center; }
+        .chamber-top span:last-child { display: none; }
+        .chamber-bottom { flex-direction: column; gap: 4px; }
+        .recovery { align-items: stretch; }
+        .recovery .action { flex: 1 1 100%; text-align: center; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <div class="kicker">404 / LOST IN THE WORKSHOP</div>
-      <h1>That idea got out<br /><em>without a forwarding address.</em></h1>
-      <p>The page you asked for is not here. The games and experiments are still right where we left them.</p>
-      <nav aria-label="Recovery links">
-        <a href="/">Return home</a>
-        <a href="/#arcade">Enter the arcade</a>
+    <a class="skip" href="#main">Skip to error details</a>
+    <header aria-label="Trikzik Labs status">
+      <span>TRIKZIK LABS / RECORDS DEPARTMENT</span>
+      <span>CATALOG TERMINAL 04</span>
+    </header>
+
+    <main id="main">
+      <p class="kicker">404 / SPECIMEN NOT IN CATALOG</p>
+      <h1>Nothing is assigned to <em>this containment unit.</em></h1>
+      <p class="lead">Either the specimen escaped, or the address was entered wrong. Both explanations are being documented.</p>
+
+      <section class="containment" aria-label="Empty specimen containment unit">
+        <div class="chamber-top">
+          <span class="status">SEARCH COMPLETE</span>
+          <span>RECOVERY SCAN / NEGATIVE</span>
+        </div>
+        <div class="mount" aria-hidden="true"></div>
+        <div class="tag">CATALOG STATUS<strong>UNASSIGNED</strong>DO NOT FEED</div>
+        <div class="chamber-bottom">
+          <span>0 SPECIMENS RECOVERED</span>
+          <span>CONTAINMENT INTEGRITY: TECHNICALLY FINE</span>
+        </div>
+      </section>
+
+      <nav class="recovery" aria-label="Recovery links">
+        <a class="action" href="/">Return to the lab</a>
+        <a class="action" href="/#arcade">Open specimen catalog</a>
+        <span class="note">INCIDENT LEFT OPEN PENDING EXISTENCE.</span>
       </nav>
     </main>
   </body>

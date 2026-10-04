@@ -464,6 +464,9 @@ h2 {
 .control-notes p {
   margin: 9px 0;
 }
+.touch-only {
+  display: none;
+}
 kbd {
   border: 1px solid #3b4f5e;
   border-radius: 4px;
@@ -784,6 +787,12 @@ footer {
     flex-wrap: wrap;
     margin: 14px 0;
     padding: 0;
+  }
+  .desktop-only {
+    display: none;
+  }
+  .touch-only {
+    display: block;
   }
   .chooser > .small {
     margin: 0;

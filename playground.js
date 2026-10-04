@@ -20,12 +20,12 @@
       url: "games/starfall/index.html",
       title: "Starfall",
       tag: "SPECIMEN 002 · SURVIVAL PRESSURE TEST",
-      mission: "Outlast the swarm.",
-      question: "How long can one movement-and-aim loop stay tense?",
-      procedure: "Move, aim, and fire. Keep clearing drones as the swarm accelerates.",
-      watch: "Open space disappearing as pursuers accumulate around one ship.",
+      mission: "Spend the last light carefully.",
+      question: "Can one reserve power survival, weapons, and panic at the same time?",
+      procedure: "Fire and flare with the same light keeping you alive. Break drones, recover fragments, survive the eclipse.",
+      watch: "Low light raising the score multiplier while the ship slows and the dark gets ideas.",
       controls:
-        "<p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Move</p><p><kbd>Mouse</kbd> Aim <kbd>Click</kbd> Fire</p>",
+        "<p class=\"desktop-only\"><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> Move</p><p class=\"desktop-only\"><kbd>Mouse</kbd> Aim and fire · <kbd>Space</kbd> Flare</p><p class=\"touch-only\">Drag the left side to move</p><p class=\"touch-only\">Hold the right side to aim and fire · tap <kbd>Flare</kbd></p>",
     },
     dungeon: {
       url: "games/dungeon-reset/index.html",
@@ -56,10 +56,10 @@
       tag: "SPECIMEN 005 · KINETIC DRAWING TEST",
       mission: "Make rotation draw.",
       question: "What drawings emerge when two rotations share one pen?",
-      procedure: "Change each arm’s length, speed, and direction. Let the pen run.",
-      watch: "Simple ratios closing into forms while mismatched motion keeps drifting.",
+      procedure: "Change the arms, preview the clean result, then export it. Clear is recoverable if regret arrives quickly.",
+      watch: "Simple ratios closing into forms while the preview keeps the apparatus out of the artwork.",
       controls:
-        "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Direction</kbd> Reverse either arm</p><p><kbd>Pause</kbd> <kbd>Clear</kbd> <kbd>Reset</kbd></p>",
+        "<p><kbd>Sliders</kbd> Change arm length and speed</p><p><kbd>Preview</kbd> Export PNG or SVG</p><p><kbd>Clear</kbd> then <kbd>Restore Clear</kbd> if necessary</p>",
     },
     traffic: {
       url: "games/traffic-with-no-excuse/index.html",

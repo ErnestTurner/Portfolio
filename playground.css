@@ -1,13 +1,26 @@
 :root {
   color-scheme: dark;
-  --bg: #0a101a;
-  --surface: #101d2b;
-  --line: #263647;
-  --text: #eff5fa;
-  --muted: #9aacbd;
-  --mint: #b4f7a7;
+  --lab-black: #081018;
+  --lab-panel: #0c1924;
+  --lab-panel-raised: #14212e;
+  --lab-line: #37505c;
+  --lab-outline: #dfe8e1;
+  --lab-white: #eff5fa;
+  --lab-muted: #9fb3c1;
+  --earth-blue: #2b74d8;
+  --earth-blue-deep: #1f61bd;
+  --earth-blue-soft: #a2c8ff;
+  --earth-green: #38cd75;
+  --earth-green-edge: #58e08a;
+  --earth-green-soft: #a8ef9d;
+  --bg: var(--lab-black);
+  --surface: var(--lab-panel);
+  --line: var(--lab-line);
+  --text: var(--lab-white);
+  --muted: var(--lab-muted);
+  --mint: var(--earth-green-soft);
   --pink: #ffafcc;
-  --blue: #a2c8ff;
+  --blue: var(--earth-blue-soft);
 }
 * {
   box-sizing: border-box;
@@ -145,7 +158,7 @@ h1 em {
   align-items: center;
   min-height: 48px;
   padding: 12px 18px;
-  border: 1px solid #435362;
+  border: 1px solid var(--lab-line);
   border-radius: 7px;
   font-size: 14px;
   font-weight: bold;
@@ -175,7 +188,7 @@ h1 em {
 }
 .small {
   font-size: 12px;
-  color: #8da0b1;
+  color: var(--lab-muted);
   line-height: 1.6;
 }
 .workbench-hero {
@@ -193,12 +206,12 @@ h1 em {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(420px, auto) auto auto;
   padding: 22px 22px 0;
-  border: 1px solid #41605a;
+  border: 1px solid var(--lab-line);
   border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 43% 37%, #163448 0, #0d1a26 31%, transparent 52%),
-    linear-gradient(145deg, #081018, #0d1720 65%, #071016);
+    radial-gradient(circle at 43% 37%, #163448 0, var(--lab-panel) 31%, transparent 52%),
+    linear-gradient(145deg, var(--lab-black), #0d1720 65%, #071016);
   box-shadow: inset 0 0 50px #0006;
 }
 .workbench::after {
@@ -206,9 +219,9 @@ h1 em {
   position: absolute;
   inset: auto 0 0;
   height: 9px;
-  background: #1a2b32;
-  border-top: 2px solid #d9e1d6;
-  box-shadow: 0 -7px 0 #071016, 0 -9px 0 #46605a;
+  background: var(--lab-panel-raised);
+  border-top: 2px solid var(--lab-outline);
+  box-shadow: 0 -7px 0 var(--lab-black), 0 -9px 0 var(--lab-line);
 }
 .workbench-tools {
   grid-column: 1 / -1;
@@ -228,8 +241,8 @@ h1 em {
 }
 .workbench-tools > p {
   margin: 0;
-  color: #e7eee9;
-  border-bottom: 1px solid #e7eee9;
+  color: var(--lab-outline);
+  border-bottom: 1px solid var(--lab-outline);
   padding: 0 18px 7px;
 }
 .ufo-button {
@@ -243,10 +256,10 @@ h1 em {
 }
 .ufo-button > span:last-child {
   padding: 8px 10px;
-  border: 1px solid #a7b8c4;
+  border: 1px solid var(--lab-line);
   border-radius: 6px;
-  background: #f0f3ec;
-  color: #16212b;
+  background: var(--lab-white);
+  color: var(--lab-black);
   box-shadow: 3px 3px 0 #a2c8ff2b;
 }
 .ufo-button:hover .ufo,
@@ -259,9 +272,9 @@ h1 em {
   place-items: center;
   width: 70px;
   height: 30px;
-  border: 2px solid #eff5fa;
+  border: 2px solid var(--lab-white);
   border-radius: 50%;
-  background: #397ce4;
+  background: var(--earth-blue);
   transition: transform 0.2s ease;
 }
 .ufo::before {
@@ -270,10 +283,10 @@ h1 em {
   width: 34px;
   height: 24px;
   bottom: 15px;
-  border: 2px solid #eff5fa;
+  border: 2px solid var(--lab-white);
   border-bottom: 0;
   border-radius: 35px 35px 0 0;
-  background: #142630;
+  background: var(--lab-panel-raised);
 }
 .ufo::after {
   content: "";
@@ -282,15 +295,109 @@ h1 em {
   right: 8px;
   bottom: -9px;
   height: 8px;
-  border-left: 2px solid #eff5fa;
-  border-right: 2px solid #eff5fa;
+  border-left: 2px solid var(--lab-white);
+  border-right: 2px solid var(--lab-white);
 }
-.ufo i {
+.alien-pilot {
   position: relative;
   z-index: 1;
-  bottom: 15px;
-  color: var(--mint);
-  font: bold 13px "Courier New", monospace;
+  bottom: 17px;
+  display: block;
+  width: 24px;
+  height: 23px;
+  transform-origin: 50% 100%;
+}
+.alien-antenna {
+  position: absolute;
+  left: 11px;
+  top: -4px;
+  width: 2px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--earth-green-edge);
+  transform: rotate(-8deg);
+}
+.alien-antenna::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--earth-green-soft);
+  box-shadow: 0 0 5px #a8ef9d88;
+}
+.alien-head {
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  width: 19px;
+  height: 15px;
+  border: 1px solid var(--lab-black);
+  border-radius: 55% 55% 48% 48%;
+  background: var(--earth-green);
+  box-shadow: inset 0 -3px 0 #1ca85a;
+}
+.alien-head i {
+  position: absolute;
+  top: 4px;
+  width: 4px;
+  height: 5px;
+  border-radius: 55% 45% 55% 45%;
+  background: var(--lab-black);
+  transform: rotate(12deg);
+}
+.alien-head i::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  width: 1px;
+  height: 1px;
+  border-radius: 50%;
+  background: var(--lab-white);
+}
+.alien-head i:first-child { left: 4px; }
+.alien-head i:nth-child(2) { right: 4px; transform: rotate(-12deg); }
+.alien-head b {
+  position: absolute;
+  left: 7px;
+  bottom: 2px;
+  width: 5px;
+  height: 2px;
+  border-bottom: 1px solid var(--lab-black);
+  border-radius: 50%;
+}
+.alien-arm {
+  position: absolute;
+  z-index: -1;
+  bottom: 1px;
+  width: 8px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--earth-green-edge);
+  transition: transform 0.2s ease;
+}
+.alien-arm::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  width: 4px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--earth-green-soft);
+}
+.alien-arm-left { left: 0; transform: rotate(18deg); }
+.alien-arm-left::after { left: -1px; }
+.alien-arm-right { right: 0; transform: rotate(-18deg); }
+.alien-arm-right::after { right: -1px; }
+.ufo-button:hover .alien-arm-right,
+.ufo-button:focus-visible .alien-arm-right {
+  transform: translateY(-4px) rotate(-42deg);
+}
+.ufo-button.launched .alien-pilot {
+  animation: alien-brace 0.55s ease;
 }
 .ufo-button.launched .ufo {
   animation: ufo-hop 0.55s ease;
@@ -323,17 +430,17 @@ h1 em {
   overflow: visible;
 }
 .stand-lines {
-  color: #e5ebe6;
+  color: var(--lab-outline);
   stroke-width: 3;
 }
 .ocean {
-  fill: #236fdd;
-  stroke: #eff5fa;
+  fill: var(--earth-blue);
+  stroke: var(--lab-white);
   stroke-width: 4;
 }
 .continent {
-  fill: #38cd75;
-  stroke: #44d982;
+  fill: var(--earth-green);
+  stroke: var(--earth-green-edge);
   stroke-width: 5;
   stroke-linejoin: round;
 }
@@ -351,7 +458,7 @@ h1 em {
   z-index: 5;
   width: 40px;
   height: 40px;
-  border: 1px solid #dfe8e1;
+  border: 1px solid var(--lab-outline);
   border-radius: 50%;
   color: var(--text);
   background: #0b1620d9;
@@ -368,9 +475,9 @@ h1 em {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 3px solid #eff5fa;
+  border: 3px solid var(--lab-white);
   border-radius: 50%;
-  background: #152536;
+  background: var(--lab-panel-raised);
   color: var(--text);
   box-shadow: 0 0 0 2px #081018;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
@@ -383,10 +490,12 @@ h1 em {
 .globe-marker:focus-visible,
 .globe-marker[aria-pressed="true"] {
   transform: scale(1.18);
-  background: var(--blue);
+  background: var(--earth-blue);
+  color: var(--lab-white);
 }
 .globe-marker[aria-pressed="true"] {
-  color: #102034;
+  color: var(--lab-black);
+  background: var(--earth-green);
   box-shadow: 0 0 0 3px var(--mint), 0 0 24px #b4f7a755;
 }
 .marker-moon { left: 3%; top: 45%; }
@@ -528,7 +637,7 @@ h1 em {
 .station-open {
   width: 100%;
   border-color: #397ce4;
-  background: #236fdd;
+  background: var(--earth-blue-deep);
   color: #fff;
 }
 .station-open:hover {
@@ -539,9 +648,9 @@ h1 em {
   align-self: center;
   min-width: 0;
   padding: 14px;
-  border: 1px solid #dfe8e1;
+  border: 1px solid var(--lab-outline);
   border-radius: 12px;
-  background: #08121be8;
+  background: #081018e8;
   box-shadow: 4px 4px 0 #0d2530;
 }
 .preview-head {
@@ -561,7 +670,7 @@ h1 em {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid #536875;
+  border: 1px solid var(--lab-line);
   border-radius: 50%;
   background: transparent;
   color: var(--text);
@@ -591,12 +700,12 @@ h1 em {
 }
 .preview-window {
   overflow: hidden;
-  border: 1px solid #3f5663;
+  border: 1px solid var(--lab-line);
   border-radius: 8px;
   background:
     linear-gradient(#ffffff08 1px, transparent 1px),
     linear-gradient(90deg, #ffffff08 1px, transparent 1px),
-    #091722;
+    var(--lab-panel);
   background-size: 18px 18px;
 }
 .preview-art {
@@ -621,8 +730,8 @@ h1 em {
 .preview-label {
   display: block;
   padding: 7px 9px;
-  border-top: 1px solid #3f5663;
-  color: #91a7b5;
+  border-top: 1px solid var(--lab-line);
+  color: var(--lab-muted);
   font: 700 8px/1.4 "Courier New", monospace;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -630,13 +739,13 @@ h1 em {
 .preview-open {
   width: 100%;
   margin-top: 10px;
-  border-color: #397ce4;
-  background: #236fdd;
+  border-color: var(--earth-blue);
+  background: var(--earth-blue-deep);
   color: #fff;
 }
 .preview-open:hover {
   border-color: var(--mint);
-  background: #2d7bea;
+  background: var(--earth-blue);
 }
 .preview-paused .preview-art *,
 .preview-art * {
@@ -734,12 +843,13 @@ h1 em {
 @keyframes mirror-tilt { to { transform: rotate(24deg); } }
 @keyframes beam-choice { to { opacity: 0.16; } }
 @keyframes receiver-glow { to { filter: drop-shadow(0 0 8px #b4f7a7); } }
+@keyframes alien-brace { 45% { transform: translateY(2px) rotate(-8deg); } }
 .experiment-clipboard {
   display: block;
   margin: 6px 12px 22px;
-  border: 1px solid #dfe8e1;
+  border: 1px solid var(--lab-outline);
   border-radius: 10px;
-  background: #0a151dcc;
+  background: #0c1924dd;
 }
 .experiment-clipboard h2 {
   display: flex;
@@ -747,7 +857,7 @@ h1 em {
   gap: 8px;
   margin: 0;
   padding: 13px 16px;
-  color: #e7eee9;
+  color: var(--lab-outline);
   font: 700 11px/1.4 "Courier New", monospace;
   letter-spacing: 1.4px;
 }
@@ -763,10 +873,10 @@ h1 em {
   gap: 9px;
   min-height: 44px;
   padding: 8px 10px;
-  border: 1px solid #8798a3;
+  border: 1px solid var(--lab-line);
   border-radius: 6px;
   color: var(--text);
-  background: #0c1821;
+  background: var(--lab-panel);
   text-align: left;
   font-size: 11px;
 }
@@ -785,7 +895,7 @@ h1 em {
   display: flex;
   justify-content: space-between;
   padding: 2px 12px 24px;
-  color: #8ca0ad;
+  color: var(--lab-muted);
   font-size: 9px;
 }
 @keyframes signal-pop {
@@ -1081,7 +1191,7 @@ summary span {
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: linear-gradient(130deg, #14212e, #0d1723);
+  background: linear-gradient(130deg, var(--lab-panel-raised), var(--lab-panel));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1171,7 +1281,7 @@ footer {
   justify-content: center;
   min-height: 44px;
   padding: 9px 14px;
-  border: 1px solid #435362;
+  border: 1px solid var(--lab-line);
   border-radius: 7px;
   color: var(--text);
   font-size: 13px;
@@ -1296,8 +1406,9 @@ footer {
     height: 20px;
     bottom: 12px;
   }
-  .ufo i {
-    bottom: 12px;
+  .alien-pilot {
+    bottom: 14px;
+    transform: scale(0.88);
   }
   .globe-zone {
     grid-column: 1;

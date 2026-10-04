@@ -453,6 +453,186 @@ h1 em {
   transform-origin: 220px 245px;
   transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+.cradle-arm {
+  stroke-width: 5;
+}
+.cradle-pad {
+  fill: var(--lab-panel-raised);
+  stroke: var(--lab-white);
+  stroke-width: 4;
+}
+.planet-probe-frame,
+.planet-probe-moving {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.globe-zone[data-experiment="jelly"] :is(.planet-probe-frame, .planet-probe-moving) {
+  opacity: 1;
+}
+.planet-probe-frame {
+  fill: var(--lab-panel-raised);
+  stroke: var(--lab-outline);
+  stroke-width: 4;
+}
+.probe-bolt {
+  fill: var(--earth-blue);
+  stroke-width: 2;
+}
+.planet-probe-moving {
+  transform-origin: 405px 245px;
+}
+.probe-arm {
+  fill: none;
+  stroke: var(--lab-outline);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.probe-pad {
+  fill: var(--lab-white);
+  stroke: var(--lab-black);
+  stroke-width: 2;
+}
+.planet-treatment {
+  pointer-events: none;
+}
+.planet-treatment :is(path, circle, rect, ellipse, line, polyline) {
+  vector-effect: non-scaling-stroke;
+}
+.planet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: -16px auto 6px;
+}
+.planet-poke {
+  min-width: 184px;
+  border-color: var(--earth-blue);
+  background: var(--earth-blue-deep);
+  color: var(--lab-white);
+}
+.planet-poke:hover:not(:disabled),
+.planet-poke:focus-visible:not(:disabled) {
+  border-color: var(--earth-green-soft);
+  background: var(--earth-blue);
+}
+.planet-poke:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.planet-status {
+  min-width: 82px;
+  color: var(--lab-muted);
+  font: 700 9px/1.35 "Courier New", monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.planet-teaser-label {
+  margin: 0 auto 8px;
+  color: var(--lab-muted);
+  font: 700 8px/1.4 "Courier New", monospace;
+  letter-spacing: 0.5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+.treatment-label {
+  fill: var(--lab-white);
+  font: 700 9px "Courier New", monospace;
+  letter-spacing: 0.8px;
+}
+.treatment-moon .mini-moon { fill: #d8ccff; stroke: var(--lab-white); stroke-width: 2; }
+.treatment-moon .mini-snail { fill: #bca7fb; stroke: var(--lab-white); stroke-width: 2; }
+.treatment-moon .mini-trail { fill: none; stroke: var(--earth-green-soft); stroke-width: 4; stroke-linecap: round; }
+.treatment-moon .mini-umbrella { fill: var(--earth-blue); stroke: var(--lab-white); stroke-width: 2; transform-origin: 328px 300px; }
+.treatment-moon .mini-marshmallow { fill: #fff1e6; stroke: #ffafcc; stroke-width: 2; }
+.treatment-moon .mini-bubble { fill: #a2c8ff33; stroke: var(--earth-blue-soft); stroke-width: 2; opacity: 0; }
+.treatment-star .eclipse-veil { fill: #05080de6; clip-path: url(#planet-clip); }
+.treatment-star .mini-ship { fill: var(--lab-white); stroke: var(--earth-blue-soft); stroke-width: 2; transform-origin: 220px 245px; }
+.treatment-star .flare-ring { fill: none; stroke: #ffe599; stroke-width: 5; opacity: 0; transform-origin: 342px 187px; }
+.treatment-star .light-fragment { fill: #ffe599; stroke: #fff6bf; stroke-width: 1; opacity: 0; }
+.treatment-dungeon .mess-mark { fill: #2b2428; stroke: #ffafcc; stroke-width: 3; }
+.treatment-dungeon .reset-mark { fill: none; stroke: #ffe599; stroke-width: 4; stroke-linecap: round; opacity: 0; }
+.treatment-dungeon .mini-caretaker { fill: none; stroke: var(--lab-white); stroke-width: 3; stroke-linecap: round; }
+.treatment-dungeon .mini-party { fill: none; stroke: #ffafcc; stroke-width: 3; }
+.treatment-brain .stimulus { fill: #ffe599; stroke: #fff6bf; stroke-width: 2; }
+.treatment-brain .sensor-rays { fill: none; stroke: #ffe59999; stroke-width: 2; stroke-dasharray: 5 5; }
+.treatment-brain .network-lines { fill: none; stroke: var(--earth-blue-soft); stroke-width: 2; }
+.treatment-brain .network-nodes { fill: var(--lab-panel); stroke: var(--earth-green-soft); stroke-width: 2; }
+.treatment-brain .network-pulse { fill: #ffafcc; opacity: 0; }
+.treatment-scribble .drawing-arm { fill: none; stroke: var(--lab-outline); stroke-width: 5; stroke-linecap: round; }
+.treatment-scribble .arm-one { transform-origin: 68px 361px; }
+.treatment-scribble .arm-two { transform-origin: 372px 361px; }
+.treatment-scribble .arm-joint { fill: var(--earth-blue); stroke: var(--lab-white); stroke-width: 2; }
+.treatment-scribble .trace-path { fill: none; stroke: #ffafcc; stroke-width: 3; stroke-dasharray: 330; stroke-dashoffset: 330; clip-path: url(#planet-clip); }
+.treatment-traffic .traffic-ring { fill: none; stroke: #dfe8e177; stroke-width: 13; }
+.treatment-traffic .traffic-cars { fill: #ffd166; transform-origin: 220px 245px; }
+.treatment-traffic .traffic-cars rect:nth-child(6),
+.treatment-traffic .traffic-cars rect:nth-child(7),
+.treatment-traffic .traffic-cars rect:nth-child(8) { fill: #b94b42; }
+.treatment-traffic .jam-wave { fill: none; stroke: #ffafcc; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 9 8; opacity: 0; }
+.treatment-jelly .pressure-lines { fill: none; stroke: var(--earth-green-soft); stroke-width: 3; opacity: 0; }
+.treatment-mirror .beam { fill: none; stroke: #83e8ff; stroke-width: 4; filter: drop-shadow(0 0 4px #83e8ff); }
+.treatment-mirror .mini-source { fill: #ffe599; stroke: #fff6bf; stroke-width: 2; }
+.treatment-mirror .mini-mirror { fill: var(--earth-blue-soft); stroke: var(--lab-white); stroke-width: 2; transform-origin: 352px 245px; }
+.treatment-mirror .mini-receiver { fill: var(--lab-panel); stroke: var(--earth-green-soft); stroke-width: 3; }
+.treatment-mirror .beam-two { opacity: 0.18; }
+.treatment-running[data-experiment="moon"] .mini-umbrella { animation: earth-umbrella 1.35s ease-in-out; }
+.treatment-running[data-experiment="moon"] .mini-marshmallow { animation: earth-marshmallow 1.35s ease-in-out; }
+.treatment-running[data-experiment="moon"] .mini-bubble { animation: earth-bubble 1.35s ease-out; }
+.treatment-running[data-experiment="star"] .eclipse-veil { animation: earth-eclipse 1.45s ease-in-out; }
+.treatment-running[data-experiment="star"] .mini-ship { animation: earth-ship 1.45s ease-in-out; }
+.treatment-running[data-experiment="star"] .flare-ring { animation: earth-flare 1.45s ease-out; }
+.treatment-running[data-experiment="star"] .light-fragment { animation: earth-fragment 1.45s ease-in-out; }
+.treatment-running[data-experiment="dungeon"] .mess-mark { animation: earth-reset-mess 1.35s ease-in-out; }
+.treatment-running[data-experiment="dungeon"] .reset-mark { animation: earth-reset-flash 1.35s ease-in-out; }
+.treatment-running[data-experiment="dungeon"] .mini-caretaker { animation: earth-caretaker 1.35s ease-in-out; }
+.treatment-running[data-experiment="dungeon"] .mini-party { animation: earth-party 1.35s ease-in-out; }
+.treatment-running[data-experiment="brain"] .stimulus { animation: earth-stimulus 1.45s ease-in-out; }
+.treatment-running[data-experiment="brain"] .network-pulse { animation: earth-neural-pulse 1.45s ease-in-out; }
+.treatment-running[data-experiment="brain"] #planet-surface { animation: earth-turn 1.45s ease-in-out; }
+.treatment-running[data-experiment="scribble"] .arm-one { animation: earth-arm-one 1.5s linear; }
+.treatment-running[data-experiment="scribble"] .arm-two { animation: earth-arm-two 1.5s linear; }
+.treatment-running[data-experiment="scribble"] .trace-path { animation: earth-trace 1.5s linear; }
+.treatment-running[data-experiment="traffic"] .traffic-cars { animation: earth-cars 1.5s linear; }
+.treatment-running[data-experiment="traffic"] .jam-wave { animation: earth-jam 1.5s ease-in-out; }
+.treatment-running[data-experiment="jelly"] .pressure-lines { animation: earth-pressure 1.45s ease-in-out; }
+.treatment-running[data-experiment="mirror"] .mini-mirror { animation: earth-mirror 1.35s ease-in-out; }
+.treatment-running[data-experiment="mirror"] .beam-one { animation: earth-beam-one 1.35s ease-in-out; }
+.treatment-running[data-experiment="mirror"] .beam-two { animation: earth-beam-two 1.35s ease-in-out; }
+.treatment-running[data-experiment="mirror"] .mini-receiver { animation: earth-receiver 1.35s ease-in-out; }
+.reduced-result[data-experiment="moon"] .mini-bubble,
+.reduced-result[data-experiment="star"] :is(.flare-ring, .light-fragment),
+.reduced-result[data-experiment="dungeon"] .reset-mark,
+.reduced-result[data-experiment="brain"] .network-pulse,
+.reduced-result[data-experiment="traffic"] .jam-wave,
+.reduced-result[data-experiment="jelly"] .pressure-lines { opacity: 1; }
+.reduced-result[data-experiment="scribble"] .trace-path { stroke-dashoffset: 0; }
+.reduced-result[data-experiment="mirror"] .beam-one { opacity: 0.18; }
+.reduced-result[data-experiment="mirror"] .beam-two { opacity: 1; }
+@keyframes earth-umbrella { 35%, 70% { transform: translate(-8px, -7px) rotate(-6deg); } }
+@keyframes earth-marshmallow { 45%, 70% { transform: translate(-30px, -14px); } }
+@keyframes earth-bubble { 0%, 32% { opacity: 0; transform: translate(0, 20px) scale(0.6); } 50% { opacity: 1; } 100% { opacity: 0; transform: translate(-190px, -185px) scale(1); } }
+@keyframes earth-eclipse { 45%, 72% { opacity: 0.18; transform: translateX(34px); } }
+@keyframes earth-ship { 50% { transform: rotate(35deg); } }
+@keyframes earth-flare { 0%, 22% { opacity: 0; transform: scale(0.2); } 48% { opacity: 1; } 82%, 100% { opacity: 0; transform: scale(4); } }
+@keyframes earth-fragment { 0%, 42% { opacity: 0; transform: translate(0, 0); } 58% { opacity: 1; } 100% { opacity: 0; transform: translate(-105px, 70px); } }
+@keyframes earth-reset-mess { 0%, 38% { opacity: 1; } 70%, 100% { opacity: 0.18; transform: scale(0.7); } }
+@keyframes earth-reset-flash { 0%, 28% { opacity: 0; } 45%, 72% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes earth-caretaker { 50% { transform: translateX(58px); } }
+@keyframes earth-party { 0%, 55% { transform: translateX(25px); opacity: 0.25; } 100% { transform: translateX(0); opacity: 1; } }
+@keyframes earth-stimulus { 50% { transform: translate(56px, 25px); } }
+@keyframes earth-neural-pulse { 0%, 20% { opacity: 0; transform: translate(0, 0); } 45% { opacity: 1; } 100% { opacity: 0; transform: translate(105px, 42px); } }
+@keyframes earth-turn { 50% { transform: translateX(-4px) rotate(-1.4deg); } }
+@keyframes earth-arm-one { 50% { transform: rotate(28deg); } }
+@keyframes earth-arm-two { 50% { transform: rotate(-34deg); } }
+@keyframes earth-trace { 75%, 100% { stroke-dashoffset: 0; } }
+@keyframes earth-cars { to { transform: rotate(240deg); } }
+@keyframes earth-jam { 0%, 25% { opacity: 0; stroke-dashoffset: 0; } 45%, 80% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: -44; } }
+@keyframes earth-pressure { 35%, 72% { opacity: 1; transform: translateX(-8px); } }
+@keyframes earth-mirror { 50% { transform: rotate(24deg); } }
+@keyframes earth-beam-one { 45%, 75% { opacity: 0.18; } }
+@keyframes earth-beam-two { 45%, 75% { opacity: 1; } }
+@keyframes earth-receiver { 45%, 75% { filter: drop-shadow(0 0 9px var(--earth-green-soft)); } }
 .globe-step {
   position: relative;
   z-index: 5;
@@ -1413,6 +1593,25 @@ footer {
   .globe-zone {
     grid-column: 1;
     min-height: 330px;
+  }
+  .planet-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+    margin: -8px auto 5px;
+    width: min(100%, 280px);
+  }
+  .planet-poke {
+    min-height: 44px;
+    width: 100%;
+  }
+  .planet-status {
+    min-height: 25px;
+    min-width: 0;
+    text-align: center;
+  }
+  .planet-teaser-label {
+    max-width: 280px;
   }
   .globe-stage {
     width: min(100%, 330px);

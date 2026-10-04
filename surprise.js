@@ -1,182 +1,297 @@
-const experiments = {
+const treatments = {
   moon: {
     name: "Moon Snail",
     route: "games/moon-snail/index.html",
+    action: "Catch & bubble",
+    running: "Umbrella open",
     summary: "Slide, leave slowing slime, catch marshmallows with an umbrella, and send them moonward in bubbles.",
-    label: "Sketch of a snail catching a marshmallow beneath an umbrella while a bubble rises toward the moon",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <circle class="moon-orb" cx="211" cy="32" r="17" />
-      <path class="moon-tide" d="M28 127c46-13 82 21 132 3s61 3 77 13" />
-      <path class="snail-trail" d="M31 137c27-20 45 13 76-4" />
-      <g class="snail-body"><path d="M56 118c0-10 13-14 24-8 9 5 24 0 31 12-3 10-18 11-34 10-13 0-21-4-21-14z"/><circle cx="77" cy="108" r="14"/><path d="M76 115c-13-1-10-18 1-14 8 3 4 14-2 10-4-2 0-6 3-3"/><path d="M105 117l4-14m-2 14 10-11"/></g>
-      <g class="umbrella"><path d="M65 83q27-29 54 0z"/><path d="M92 83v31q0 10 8 7"/></g>
-      <circle class="marshmallow" cx="128" cy="109" r="8" />
-      <g class="bubble"><circle cx="145" cy="91" r="12"/><circle cx="145" cy="91" r="4"/></g>
-    </svg>`,
+    art: `<g class="treatment-moon">
+      <circle class="mini-moon" cx="92" cy="104" r="18" />
+      <path class="mini-trail" d="M286 333c25-17 43 12 71-5" />
+      <g class="mini-snail"><path d="M306 316c0-9 12-13 22-7 8 4 20 1 27 11-4 9-18 9-30 8-12 0-19-4-19-12z"/><circle cx="324" cy="307" r="12"/><path d="M324 313c-11-1-8-16 1-12 7 3 3 12-2 8"/></g>
+      <g class="mini-umbrella"><path d="M301 285q27-29 54 0z"/><path d="M328 285v31"/></g>
+      <circle class="mini-marshmallow" cx="377" cy="305" r="8" />
+      <g class="mini-bubble"><circle cx="340" cy="286" r="12"/><circle cx="340" cy="286" r="4"/></g>
+      <text class="treatment-label" x="62" y="78">MOON DELIVERY</text>
+    </g>`,
   },
   star: {
     name: "Starfall: Last Light",
     route: "games/starfall/index.html",
+    action: "Fire a flare",
+    running: "Light spent · fragment returning",
     summary: "Move and fire, spend the same light that keeps you alive, then recover fragments before the eclipse closes in.",
-    label: "Sketch of a ship firing at drones while a light fragment returns to its shared reserve",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <path class="eclipse" d="M0 16h260v138H0z"/>
-      <g class="star-ship"><path d="M52 82l35-18-10 18 10 18z"/><circle cx="69" cy="82" r="5"/></g>
-      <path class="star-shot" d="M88 82h62" />
-      <g class="star-drone"><circle cx="172" cy="82" r="14"/><path d="M158 82h-13m41 0h13M172 68V56m0 40v12"/></g>
-      <path class="light-fragment" d="M170 48l6 9 10 2-8 7 1 10-9-5-9 5 2-10-8-7 10-2z" />
-      <rect class="light-meter" x="32" y="139" width="196" height="10" rx="5"/><rect class="light-level" x="32" y="139" width="142" height="10" rx="5"/>
-    </svg>`,
+    art: `<g class="treatment-star">
+      <path class="eclipse-veil" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C275 344 286 146 220 103Z" />
+      <g class="mini-ship"><path d="M330 188l27-14-8 14 8 14z"/><circle cx="343" cy="188" r="4"/></g>
+      <circle class="flare-ring" cx="342" cy="187" r="8" />
+      <path class="light-fragment" d="M330 149l5 8 9 2-7 6 1 9-8-4-8 4 2-9-7-6 9-2z" />
+      <text class="treatment-label" x="82" y="87">LAST LIGHT</text>
+    </g>`,
   },
   dungeon: {
     name: "Dungeon Reset",
     route: "games/dungeon-reset/index.html",
+    action: "Reset the bench",
+    running: "Caretaker at work",
     summary: "Return the staff, reset traps, repair the door, restock treasure, and clean up before the next hero party arrives.",
-    label: "Sketch of a dungeon caretaker returning a monster and repairing a door before heroes arrive",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <path class="dungeon-floor" d="M18 137h224M27 117h206" />
-      <g class="dungeon-door"><path d="M180 42h48v75h-48z"/><path d="M190 117V62q14-20 28 0v55"/><circle cx="213" cy="91" r="3"/></g>
-      <g class="caretaker"><circle cx="86" cy="74" r="10"/><path d="M86 84v31m0-23-18 15m18-15 18 12m-18 11-14 20m14-20 16 20"/><path d="M103 103l25-13"/></g>
-      <g class="dungeon-monster"><path d="M35 112q8-28 32 0v18H35z"/><circle cx="46" cy="111" r="3"/><circle cx="58" cy="111" r="3"/></g>
-      <g class="hero-party"><path d="M239 79h-22m11-11v22"/><path d="M245 99h-17"/></g>
-      <path class="repair-spark" d="M170 73l-8-8m8 8-10 2m10-2-4 10" />
-    </svg>`,
+    art: `<g class="treatment-dungeon">
+      <g class="mess-mark"><path d="M144 183l18 18m0-18-18 18"/><path d="M211 289h20v18h-20z"/><path d="M282 190l16 28h-32z"/></g>
+      <g class="reset-mark"><path d="M139 176l-7-7m7 7-10 2M207 282l-7-7m7 7-10 2M302 181l7-7m-7 7 10 2"/></g>
+      <g class="mini-caretaker"><circle cx="92" cy="335" r="9"/><path d="M92 344v27m0-18-14 11m14-11 16 9m-16 9-11 17m11-17 13 17"/></g>
+      <g class="mini-party"><path d="M371 205h-20m10-10v20M381 226h-18"/></g>
+      <text class="treatment-label" x="74" y="102">POST-RAID RESET</text>
+    </g>`,
   },
   brain: {
     name: "Brain in a Jar",
     route: "games/brain-in-a-jar/index.html",
+    action: "Move the light",
+    running: "Signal crossing the controller",
     summary: "Move the light, swap the creature’s eyes, or edit one real connection in its hand-wired neural controller.",
-    label: "Sketch of a creature sensing a moving light while signals travel through a small wired network",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <circle class="brain-light" cx="42" cy="46" r="13" />
-      <path class="sensor-ray" d="M54 51l63 34M54 41l65 30" />
-      <g class="brain-creature"><ellipse cx="123" cy="98" rx="22" ry="16"/><circle cx="115" cy="92" r="4"/><circle cx="131" cy="92" r="4"/><path d="M109 110l-10 15m38-15 10 15"/></g>
-      <g class="network-wire"><path d="M160 57l34 20-34 22 34 22M194 77l30-20m-30 20 30 22m-30 22 30-22"/></g>
-      <g class="network-node"><circle cx="160" cy="57" r="6"/><circle cx="160" cy="99" r="6"/><circle cx="194" cy="77" r="6"/><circle cx="194" cy="121" r="6"/><circle cx="224" cy="57" r="6"/><circle cx="224" cy="99" r="6"/></g>
-      <circle class="brain-signal" cx="160" cy="57" r="4" />
-    </svg>`,
+    art: `<g class="treatment-brain">
+      <circle class="stimulus" cx="73" cy="173" r="13" />
+      <path class="sensor-rays" d="M86 177l89 44M86 168l91 34" />
+      <g class="network-lines"><path d="M175 202l42 24-42 26 42 25M217 226l43-25m-43 25 43 26m-43 25 43-25"/></g>
+      <g class="network-nodes"><circle cx="175" cy="202" r="6"/><circle cx="175" cy="252" r="6"/><circle cx="217" cy="226" r="6"/><circle cx="217" cy="277" r="6"/><circle cx="260" cy="201" r="6"/><circle cx="260" cy="252" r="6"/></g>
+      <circle class="network-pulse" cx="175" cy="202" r="5" />
+      <text class="treatment-label" x="76" y="146">VISIBLE CONTROLLER</text>
+    </g>`,
   },
   scribble: {
     name: "Scribble Engine",
     route: "games/scribble-engine/index.html",
+    action: "Trace a loop",
+    running: "Two arms · one pen",
     summary: "Two rotating arms share one pen. Change their lengths, speeds, and directions to alter the drawing.",
-    label: "Sketch of two rotating arms moving one pen along a looping drawn path",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <path class="scribble-paper" d="M21 21h218v128H21z" />
-      <path class="scribble-trace" d="M49 104c26-70 55 58 83-16s52 63 80-13c-7 58-50 66-81 28s-54 35-82 1z" />
-      <g class="arm-one"><circle cx="78" cy="83" r="7"/><path d="M78 83l54 19"/></g>
-      <g class="arm-two"><circle cx="182" cy="63" r="7"/><path d="M182 63l-50 39"/></g>
-      <circle class="shared-pen" cx="132" cy="102" r="6" />
-    </svg>`,
+    art: `<g class="treatment-scribble">
+      <path class="drawing-arm arm-one" d="M68 361L176 254" />
+      <path class="drawing-arm arm-two" d="M372 361L176 254" />
+      <circle class="arm-joint" cx="68" cy="361" r="8"/><circle class="arm-joint" cx="372" cy="361" r="8"/><circle class="arm-joint" cx="176" cy="254" r="7"/>
+      <path class="trace-path" d="M112 267c34-95 69 77 105-21s67 85 103-17c-9 77-64 88-104 37s-69 47-104 1z" />
+      <text class="treatment-label" x="139" y="105">DUAL-ARM TRACE</text>
+    </g>`,
   },
   traffic: {
     name: "Traffic With No Excuse",
     route: "games/traffic-with-no-excuse/index.html",
+    action: "Tap a car",
+    running: "Brake wave traveling backward",
     summary: "Brake one identical driver on an obstacle-free ring, remove the cause, and watch the slowdown keep traveling.",
-    label: "Sketch of identical cars circling a clear road while a compact braking wave moves backward",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <ellipse class="traffic-road" cx="130" cy="85" rx="94" ry="57" />
-      <ellipse class="traffic-island" cx="130" cy="85" rx="60" ry="28" />
-      <g class="traffic-cars"><rect x="126" y="22" width="16" height="8" rx="3"/><rect x="187" y="42" width="16" height="8" rx="3"/><rect x="211" y="82" width="16" height="8" rx="3"/><rect x="181" y="124" width="16" height="8" rx="3"/><rect x="118" y="139" width="16" height="8" rx="3"/><rect x="55" y="121" width="16" height="8" rx="3"/><rect x="34" y="78" width="16" height="8" rx="3"/><rect x="66" y="37" width="16" height="8" rx="3"/></g>
-      <path class="brake-wave" d="M50 106q26 28 65 31" />
-      <circle class="brake-light" cx="63" cy="123" r="5" />
-    </svg>`,
+    art: `<g class="treatment-traffic">
+      <ellipse class="traffic-ring" cx="220" cy="245" rx="142" ry="42" />
+      <g class="traffic-cars"><rect x="212" y="198" width="16" height="8" rx="3"/><rect x="284" y="207" width="16" height="8" rx="3"/><rect x="346" y="240" width="16" height="8" rx="3"/><rect x="286" y="277" width="16" height="8" rx="3"/><rect x="212" y="284" width="16" height="8" rx="3"/><rect x="139" y="276" width="16" height="8" rx="3"/><rect x="79" y="241" width="16" height="8" rx="3"/><rect x="140" y="207" width="16" height="8" rx="3"/></g>
+      <path class="jam-wave" d="M91 262q53 42 114 22" />
+      <text class="treatment-label" x="154" y="184">FLOW TEST</text>
+    </g>`,
   },
   jelly: {
     name: "Jelly Bench",
     route: "games/jelly-bench/index.html",
+    action: "Press the planet",
+    running: "Pressure applied · spring recovery",
     summary: "Tune stiffness, damping, pressure, and rest length, then see whether one soft body can squeeze through the gap.",
-    label: "Sketch of a soft jelly blob deforming as it squeezes through a narrow platform gap",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <path class="jelly-platform" d="M19 69h85v18H19zm137 0h85v18h-85zM19 138h222" />
-      <path class="jelly-blob" d="M77 44c24-17 58-9 71 13 11 18 1 27 17 43 11 11 4 31-17 38-25 8-67 1-79-23-9-18 8-31-1-45-7-11-3-19 9-26z" />
-      <g class="jelly-nodes"><circle cx="90" cy="59" r="3"/><circle cx="124" cy="54" r="3"/><circle cx="145" cy="78" r="3"/><circle cx="144" cy="112" r="3"/><circle cx="109" cy="130" r="3"/><circle cx="79" cy="106" r="3"/></g>
-    </svg>`,
+    art: `<g class="treatment-jelly">
+      <path class="pressure-lines" d="M365 221l-12 8m14 16h-16m14 25-12-8" />
+      <text class="treatment-label" x="267" y="201">SOFT-BODY TEST</text>
+    </g>`,
   },
   mirror: {
     name: "Mirror Mischief",
     route: "games/mirror-mischief/index.html",
+    action: "Tilt the mirror",
+    running: "Downstream path changed",
     summary: "Move or rotate mirrors, splitters, blockers, and receivers; one small adjustment changes everything downstream.",
-    label: "Sketch of a light beam reflecting from a rotating mirror toward a receiver",
-    art: `<svg viewBox="0 0 260 170" aria-hidden="true">
-      <g class="light-source"><circle cx="35" cy="88" r="13"/><path d="M35 66V55m0 66v-11M13 88H2m66 0H57"/></g>
-      <path class="beam beam-one" d="M49 88h75" />
-      <g class="preview-mirror"><rect x="119" y="54" width="10" height="68" rx="4"/></g>
-      <path class="beam beam-two" d="M126 88l78-44" />
-      <path class="beam beam-three" d="M126 88l78 44" />
-      <g class="receiver"><path d="M203 28h35v32h-35z"/><circle cx="220" cy="44" r="8"/></g>
-      <g class="blocker"><path d="M207 116h27v31h-27z"/><path d="M211 122l19 19m0-19-19 19"/></g>
-    </svg>`,
+    art: `<g class="treatment-mirror">
+      <circle class="mini-source" cx="66" cy="245" r="12" />
+      <path class="beam beam-source" d="M79 245h267" />
+      <rect class="mini-mirror" x="347" y="216" width="10" height="58" rx="4" />
+      <path class="beam beam-one" d="M352 245L303 129" />
+      <path class="beam beam-two" d="M352 245L300 354" />
+      <g class="mini-receiver"><rect x="284" y="111" width="38" height="28" rx="4"/><circle cx="303" cy="125" r="7"/></g>
+      <text class="treatment-label" x="83" y="224">OPTICS PATH</text>
+    </g>`,
   },
 };
 
-const experimentList = Object.values(experiments);
+const REST_PATH = "M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z";
+const treatmentList = Object.values(treatments);
 const surpriseButton = document.querySelector("#surprise-experiment");
 const preview = document.querySelector("#bench-preview");
 const previewTitle = document.querySelector("#preview-title");
 const previewSummary = document.querySelector("#preview-summary");
-const previewArt = document.querySelector("#preview-art");
 const previewOpen = document.querySelector("#preview-open");
 const previewClose = document.querySelector("#preview-close");
-const markers = [...document.querySelectorAll("[data-experiment]")];
+const markers = [...document.querySelectorAll(".globe-marker[data-experiment]")];
+const globeZone = document.querySelector(".globe-zone");
+const globeStage = document.querySelector(".globe-stage");
+const planetTreatment = document.querySelector("#planet-treatment");
+const planetShell = document.querySelector("#planet-shell");
+const planetClip = document.querySelector("#planet-clip-shape");
+const planetSurface = document.querySelector("#planet-surface");
+const probeMoving = document.querySelector("#planet-probe-moving");
+const treatmentButton = document.querySelector("#poke-planet");
+const planetStatus = document.querySelector("#planet-status");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let selectedKey = null;
 let lastMarker = null;
-let previewInView = true;
+let runToken = 0;
+let runTimer = 0;
+let runFrame = 0;
+let apparatusInView = true;
 
-function setPreviewPaused(paused) {
-  preview?.classList.toggle("preview-paused", paused);
+function easeInOut(value) {
+  return value < 0.5 ? 2 * value * value : 1 - ((-2 * value + 2) ** 2) / 2;
+}
+
+function dentPath(amount) {
+  const edge = 362 - 18 * amount;
+  const shoulder = 362 - 9 * amount;
+  return `M220 103C298 103 362 166 362 218C${shoulder} 225 ${edge} 237 ${edge} 245C${edge} 253 ${shoulder} 265 362 272C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z`;
+}
+
+function applyPlanet({ dent = 0, wobble = 0, probe = 0 } = {}) {
+  const path = dent ? dentPath(dent) : REST_PATH;
+  planetShell?.setAttribute("d", path);
+  planetClip?.setAttribute("d", path);
+  if (planetSurface) {
+    planetSurface.style.transform = wobble ? `translateX(${wobble}px) rotate(${wobble * 0.32}deg)` : "";
+  }
+  if (probeMoving) probeMoving.style.transform = probe ? `translateX(${-18 * probe}px)` : "";
+}
+
+function setTreatmentBusy(busy) {
+  if (!treatmentButton) return;
+  treatmentButton.disabled = busy || !selectedKey;
+  if (busy) treatmentButton.setAttribute("aria-busy", "true");
+  else treatmentButton.removeAttribute("aria-busy");
+}
+
+function cancelTreatment({ announce = false } = {}) {
+  runToken += 1;
+  window.clearTimeout(runTimer);
+  cancelAnimationFrame(runFrame);
+  globeZone?.classList.remove("treatment-running", "reduced-result");
+  applyPlanet();
+  setTreatmentBusy(false);
+  if (announce && selectedKey) planetStatus.textContent = "Test canceled · Earth at rest";
+}
+
+function finishTreatment(token) {
+  if (token !== runToken) return;
+  globeZone?.classList.remove("treatment-running", "reduced-result");
+  applyPlanet();
+  setTreatmentBusy(false);
+  planetStatus.textContent = "Earth returned to rest";
+}
+
+function runJellyTreatment(token, startTime) {
+  const elapsed = performance.now() - startTime;
+  if (token !== runToken) return;
+  if (elapsed >= 1500) {
+    finishTreatment(token);
+    return;
+  }
+  const extend = elapsed < 180
+    ? easeInOut(elapsed / 180)
+    : elapsed < 410
+      ? 1
+      : elapsed < 650
+        ? 1 - easeInOut((elapsed - 410) / 240)
+        : 0;
+  const dent = elapsed < 170
+    ? 0
+    : elapsed < 310
+      ? 0.84 * easeInOut((elapsed - 170) / 140)
+      : Math.max(0, 0.84 * Math.exp(-(elapsed - 310) / 410) * (0.7 + 0.3 * Math.cos((elapsed - 310) / 72)));
+  const wobble = elapsed < 280 ? 0 : 4.2 * Math.sin((elapsed - 280) / 72) * Math.exp(-(elapsed - 280) / 380);
+  applyPlanet({ dent, wobble, probe: extend });
+  runFrame = requestAnimationFrame(() => runJellyTreatment(token, startTime));
+}
+
+function runTreatment() {
+  const treatment = treatments[selectedKey];
+  if (!treatment || treatmentButton.disabled) return;
+  cancelTreatment();
+  const token = runToken;
+  setTreatmentBusy(true);
+  planetStatus.textContent = treatment.running;
+
+  if (reduceMotion.matches) {
+    globeZone.classList.add("reduced-result");
+    if (selectedKey === "jelly") applyPlanet({ dent: 0.62, probe: 1 });
+    runTimer = window.setTimeout(() => finishTreatment(token), 280);
+    return;
+  }
+
+  globeZone.classList.add("treatment-running");
+  if (selectedKey === "jelly") {
+    runFrame = requestAnimationFrame(timestamp => runJellyTreatment(token, timestamp));
+  } else {
+    runTimer = window.setTimeout(() => finishTreatment(token), 1520);
+  }
 }
 
 function selectExperiment(key) {
-  const experiment = experiments[key];
-  if (!experiment || !preview) return;
-
+  const treatment = treatments[key];
+  if (!treatment || !preview) return;
+  cancelTreatment();
+  selectedKey = key;
   markers.forEach(marker => marker.setAttribute("aria-pressed", String(marker.dataset.experiment === key)));
-  lastMarker = document.querySelector(`[data-experiment="${key}"]`);
+  lastMarker = document.querySelector(`.globe-marker[data-experiment="${key}"]`);
   preview.dataset.experiment = key;
-  previewTitle.textContent = experiment.name;
-  previewSummary.textContent = experiment.summary;
-  previewArt.className = `preview-art preview-${key}`;
-  previewArt.setAttribute("aria-label", experiment.label);
-  previewArt.innerHTML = experiment.art;
-  previewOpen.href = experiment.route;
+  globeZone.dataset.experiment = key;
+  previewTitle.textContent = treatment.name;
+  previewSummary.textContent = treatment.summary;
+  previewOpen.href = treatment.route;
   previewOpen.hidden = false;
   previewClose.hidden = false;
+  planetTreatment.innerHTML = treatment.art;
+  treatmentButton.innerHTML = `${treatment.action} <span aria-hidden="true">→</span>`;
+  setTreatmentBusy(false);
+  planetStatus.textContent = `${treatment.name} ready`;
 }
 
 function closePreview({ restoreFocus = false } = {}) {
+  cancelTreatment();
   markers.forEach(marker => marker.setAttribute("aria-pressed", "false"));
+  selectedKey = null;
   delete preview.dataset.experiment;
+  delete globeZone.dataset.experiment;
   previewTitle.textContent = "Pick a numbered specimen";
   previewSummary.textContent = "Select a marker around Earth to wake one small machine.";
-  previewArt.className = "preview-art preview-idle";
-  previewArt.setAttribute("aria-label", "A quiet laboratory preview screen");
-  previewArt.innerHTML = `<svg viewBox="0 0 260 170" aria-hidden="true"><path class="idle-orbit" d="M43 101c35-67 137-78 176-15s-31 84-83 69-76-67-34-103"/><circle class="idle-dot" cx="130" cy="85" r="9"/><path class="idle-bench" d="M55 139h150M83 139l-10 20m104-20 10 20M64 159h132"/></svg>`;
   previewOpen.hidden = true;
   previewClose.hidden = true;
+  planetTreatment.innerHTML = "";
+  treatmentButton.innerHTML = 'Select an experiment <span aria-hidden="true">→</span>';
+  treatmentButton.disabled = true;
+  planetStatus.textContent = "Earth ready for a test";
   if (restoreFocus) lastMarker?.focus();
 }
 
 markers.forEach(marker => marker.addEventListener("click", () => selectExperiment(marker.dataset.experiment)));
+treatmentButton?.addEventListener("click", runTreatment);
 previewClose?.addEventListener("click", () => closePreview({ restoreFocus: true }));
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && preview?.dataset.experiment) closePreview({ restoreFocus: true });
+  if (event.key === "Escape" && selectedKey) closePreview({ restoreFocus: true });
 });
 
-if (preview && "IntersectionObserver" in window) {
+if (globeStage && "IntersectionObserver" in window) {
   const observer = new IntersectionObserver(entries => {
-    previewInView = Boolean(entries[0]?.isIntersecting);
-    setPreviewPaused(!previewInView || document.hidden);
+    apparatusInView = Boolean(entries[0]?.isIntersecting);
+    if (!apparatusInView) cancelTreatment();
   }, { threshold: 0.08 });
-  observer.observe(preview);
+  observer.observe(globeStage);
 }
-document.addEventListener("visibilitychange", () => setPreviewPaused(document.hidden || !previewInView));
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || !apparatusInView) cancelTreatment({ announce: true });
+});
 
 surpriseButton?.addEventListener("click", () => {
-  const destination = experimentList[Math.floor(Math.random() * experimentList.length)].route;
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
+  const destination = treatmentList[Math.floor(Math.random() * treatmentList.length)].route;
+  const reduced = reduceMotion.matches;
   surpriseButton.disabled = true;
   surpriseButton.setAttribute("aria-busy", "true");
   surpriseButton.classList.add("launched");
-  window.setTimeout(() => window.location.assign(destination), reduceMotion ? 0 : 550);
+  window.setTimeout(() => window.location.assign(destination), reduced ? 0 : 550);
 });

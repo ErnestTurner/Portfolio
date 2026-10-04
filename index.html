@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=workbench-preview-1" />
+    <link rel="stylesheet" href="playground.css?v=earth-treatments-1" />
   </head>
   <body>
     <a class="skip" href="#experiments">Skip to experiments</a>
@@ -73,7 +73,7 @@
           </div>
           <p class="small">No downloads. No sign-up. Just a little curiosity.</p>
         </div>
-        <div class="workbench" aria-label="Earth workbench with links to eight experiments">
+        <div class="workbench" aria-label="Earth experiment bench with eight selectable previews">
           <div class="workbench-tools">
             <p>CHOOSE AN EXPERIMENT</p>
             <button class="ufo-button" id="surprise-experiment" type="button">
@@ -90,23 +90,40 @@
           </div>
           <div class="bench-display">
           <div class="globe-zone">
-            <div class="globe-stage" role="group" aria-label="Choose one of eight experiment previews orbiting Earth">
+            <div class="globe-stage" role="group" aria-label="Earth mounted in a three-point cradle with one articulated test probe and eight experiment preview controls">
               <svg class="globe-machine" viewBox="0 0 440 470" aria-hidden="true">
+                <defs>
+                  <clipPath id="planet-clip"><path id="planet-clip-shape" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z" /></clipPath>
+                </defs>
                 <g class="stand-lines" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M77 419H363M114 446H326M137 419L125 446M303 419L315 446" />
-                  <path d="M106 370C73 283 83 183 151 112M334 370C367 283 357 183 289 112" />
-                  <circle cx="220" cy="245" r="157" />
-                  <path d="M206 79h28M206 411h28" />
+                  <path class="cradle-arm" d="M137 419L112 333M303 419l25-86M220 419v-31" />
+                  <circle class="cradle-pad" cx="112" cy="333" r="9" />
+                  <circle class="cradle-pad" cx="328" cy="333" r="9" />
+                  <circle class="cradle-pad" cx="220" cy="388" r="9" />
                 </g>
-                <g class="globe-surface">
-                  <circle class="ocean" cx="220" cy="245" r="142" />
-                  <path class="continent" d="M101 154l25-32 35-13 27 9 11 20 24 9-8 18-25 6-10 23-24 5-15 27-18-8-5-24-20-17z" />
-                  <path class="continent" d="M181 226l28 2 23 20 2 31-13 24-3 29-17 34-14-18 3-28-13-29 5-25-10-20z" />
-                  <path class="continent" d="M223 150l18-13 19 3 10 12-9 12-20-2zM239 170l24-3 22 21-4 24 16 22-14 49-23 38-14-13 3-27-17-24 8-26-14-21z" />
-                  <path class="continent" d="M266 145l28-24 35 5 11 18 21 8-7 23-25 2-11 18-28-4-16 12-13-21 15-16z" />
-                  <path class="continent" d="M317 296l27-8 18 15-3 25-29 10-20-18z" />
-                  <path class="continent" d="M174 112l16-18 21 5 3 20-19 14z" />
-                  <path class="globe-line" d="M86 245h268M99 196c75 25 167 25 242 0M99 294c75-25 167-25 242 0M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142" />
+                <g class="globe-surface" id="planet-surface">
+                  <path class="ocean" id="planet-shell" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z" />
+                  <g class="planet-map" clip-path="url(#planet-clip)">
+                    <path class="continent" d="M101 154l25-32 35-13 27 9 11 20 24 9-8 18-25 6-10 23-24 5-15 27-18-8-5-24-20-17z" />
+                    <path class="continent" d="M181 226l28 2 23 20 2 31-13 24-3 29-17 34-14-18 3-28-13-29 5-25-10-20z" />
+                    <path class="continent" d="M223 150l18-13 19 3 10 12-9 12-20-2zM239 170l24-3 22 21-4 24 16 22-14 49-23 38-14-13 3-27-17-24 8-26-14-21z" />
+                    <path class="continent" d="M266 145l28-24 35 5 11 18 21 8-7 23-25 2-11 18-28-4-16 12-13-21 15-16z" />
+                    <path class="continent" d="M317 296l27-8 18 15-3 25-29 10-20-18z" />
+                    <path class="continent" d="M174 112l16-18 21 5 3 20-19 14z" />
+                    <path class="globe-line" d="M86 245h276M99 196c75 25 167 25 263 9M99 294c75-25 167-25 263-9M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142" />
+                  </g>
+                </g>
+                <g class="planet-treatment" id="planet-treatment"></g>
+                <g class="planet-probe-frame">
+                  <path d="M405 419V245M388 419h34M394 245h22" />
+                  <circle cx="405" cy="245" r="8" />
+                  <circle class="probe-bolt" cx="396" cy="419" r="3" />
+                  <circle class="probe-bolt" cx="414" cy="419" r="3" />
+                </g>
+                <g class="planet-probe-moving" id="planet-probe-moving">
+                  <path class="probe-arm" d="M405 245H380" />
+                  <rect class="probe-pad" x="368" y="225" width="12" height="40" rx="6" />
                 </g>
               </svg>
               <button class="globe-marker marker-moon" type="button" data-experiment="moon" aria-label="Preview Moon Snail" aria-controls="bench-preview" aria-pressed="false"><span>01</span></button>
@@ -118,6 +135,11 @@
               <button class="globe-marker marker-jelly" type="button" data-experiment="jelly" aria-label="Preview Jelly Bench" aria-controls="bench-preview" aria-pressed="false"><span>07</span></button>
               <button class="globe-marker marker-mirror" type="button" data-experiment="mirror" aria-label="Preview Mirror Mischief" aria-controls="bench-preview" aria-pressed="false"><span>08</span></button>
             </div>
+            <div class="planet-actions">
+              <button class="button planet-poke" id="poke-planet" type="button" disabled>Select an experiment <span aria-hidden="true">→</span></button>
+              <span class="planet-status" id="planet-status" role="status" aria-live="polite">Earth ready for a test</span>
+            </div>
+            <p class="planet-teaser-label">Representative Earth treatment · not gameplay footage</p>
           </div>
           <section class="bench-preview" id="bench-preview" aria-labelledby="preview-title">
             <div class="preview-head">
@@ -127,16 +149,6 @@
             <div class="preview-copy" role="status" aria-live="polite" aria-atomic="true">
               <h2 id="preview-title">Pick a numbered specimen</h2>
               <p class="preview-summary" id="preview-summary">Select a marker around Earth to wake one small machine.</p>
-            </div>
-            <div class="preview-window">
-              <div class="preview-art preview-idle" id="preview-art" role="img" aria-label="A quiet laboratory preview screen">
-                <svg viewBox="0 0 260 170" aria-hidden="true">
-                  <path class="idle-orbit" d="M43 101c35-67 137-78 176-15s-31 84-83 69-76-67-34-103" />
-                  <circle class="idle-dot" cx="130" cy="85" r="9" />
-                  <path class="idle-bench" d="M55 139h150M83 139l-10 20m104-20 10 20M64 159h132" />
-                </svg>
-              </div>
-              <span class="preview-label">Representative sketch · not gameplay footage</span>
             </div>
             <a class="button preview-open" id="preview-open" href="#experiments" hidden>Open experiment <span>↗</span></a>
           </section>
@@ -303,6 +315,6 @@
       </div>
       <a href="#top">Back to the lab ↑</a>
     </footer>
-    <script src="surprise.js?v=2"></script>
+    <script src="surprise.js?v=earth-treatments-1"></script>
   </body>
 </html>

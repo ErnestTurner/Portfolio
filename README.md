@@ -7,7 +7,7 @@ Ernest's developer portfolio and browser-game showcase.
 ## Current direction
 
 - Trikzik Labs and creator Ernest Turner lead the homepage
-- A selectable world-on-the-workbench introduces all eight experiments as peers
+- A recognizable Earth-on-the-workbench launches all eight standalone experiments directly
 - Moon Snail remains available as a peer playable experiment
 - Starfall remains preserved as an earlier finished experiment
 - Dungeon Reset is a complete five-raid browser game in the arcade and at its own route

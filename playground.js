@@ -2,7 +2,8 @@
   "use strict";
   const $ = (id) => document.getElementById(id),
     frame = $("game-frame");
-  let current = "moon";
+  let current = "moon",
+    benchCurrent = "brain";
   const order = ["moon", "star", "dungeon", "brain", "scribble", "traffic", "jelly", "mirror"];
   const games = {
     moon: {
@@ -95,6 +96,69 @@
         "<p><kbd>Drag</kbd> Move a piece</p><p><kbd>Slider</kbd> Rotate selected optics</p><p><kbd>Add Piece</kbd> Extend the tabletop</p>",
     },
   };
+  const benchDetails = {
+    moon: {
+      symbol: "MOON",
+      summary: "Catch marshmallows in soap bubbles, then feed them to a moon with its own gravity.",
+    },
+    star: {
+      symbol: "LIGHT",
+      summary: "Spend the same dwindling light on movement, weapons, survival, and one last flare.",
+    },
+    dungeon: {
+      symbol: "RESET",
+      summary: "Restore monsters, traps, and rooms before the next hero party finds every shortcut.",
+    },
+    brain: {
+      symbol: "4×4×2",
+      summary: "Change one neural connection and watch a tiny creature decide differently.",
+    },
+    scribble: {
+      symbol: "DRAW",
+      summary: "Tune two rotating arms, let their shared pen draw, then export the result.",
+    },
+    traffic: {
+      symbol: "24 CARS",
+      summary: "Brake one car for two seconds and watch the traffic jam outlive its cause.",
+    },
+    jelly: {
+      symbol: "SOFT",
+      summary: "Change a soft body's properties and test whether it can still squeeze through the gap.",
+    },
+    mirror: {
+      symbol: "LIGHT",
+      summary: "Move one optical piece and rewrite every beam, split, block, and receiver downstream.",
+    },
+  };
+  function updateWorkbench(name) {
+    if (!games[name]) return;
+    const game = games[name],
+      detail = benchDetails[name],
+      index = order.indexOf(name),
+      url = location.protocol === "file:" && game.fileUrl ? game.fileUrl : game.url,
+      sketch = $("bench-sketch"),
+      signal = $("signal-line");
+    benchCurrent = name;
+    $("bench-number").textContent = String(index + 1).padStart(2, "0") + " / 08";
+    $("bench-title").textContent = game.title;
+    $("bench-summary").textContent = detail.summary;
+    $("bench-symbol").textContent = detail.symbol;
+    $("bench-open").href = url;
+    $("active-marker-label").textContent = game.title;
+    $("globe-surface").style.transform = `rotate(${(3 - index) * 17}deg)`;
+    sketch.className = "specimen-sketch art-" + name;
+    sketch.classList.add("changing");
+    void sketch.offsetWidth;
+    sketch.classList.remove("changing");
+    document.querySelectorAll("[data-bench-game]").forEach((button) => {
+      const active = button.dataset.benchGame === name;
+      button.classList.toggle("selected", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    signal.classList.remove("transmitting");
+    void signal.offsetWidth;
+    signal.classList.add("transmitting");
+  }
   function choose(name) {
     if (!games[name]) return;
     const g = games[name],
@@ -123,6 +187,7 @@
     $("screen-name").textContent =
       "SPECIMEN " + String(order.indexOf(name) + 1).padStart(3, "0") + " / " + g.title.toUpperCase();
     $("inspector-guide").hidden = name !== "moon";
+    updateWorkbench(name);
   }
   document.querySelectorAll("[data-game]").forEach((b) => {
     b.onclick = (e) => {
@@ -155,62 +220,40 @@
           choose(a.dataset.select);
         }),
     );
-  const habitat = $("habitat"),
-    snail = $("snail"),
-    reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let x = 100,
-    y = 140,
-    tx = 100,
-    ty = 140,
-    prev = 0,
-    lastTrail = 0,
-    boops = 0;
-  function target(e) {
-    const r = habitat.getBoundingClientRect();
-    tx = Math.max(12, Math.min(r.width - 125, e.clientX - r.left - 55));
-    ty = Math.max(55, Math.min(r.height - 110, e.clientY - r.top - 40));
-    if (reduced) {
-      x = tx;
-      y = ty;
-      snail.style.transform = `translate(${x}px,${y}px)`;
-    }
-  }
-  habitat.addEventListener("pointermove", target);
-  habitat.addEventListener("pointerdown", (e) => {
-    if (e.target.closest("#snail")) return;
-    target(e);
+  document.querySelectorAll("[data-bench-game]").forEach((button) => {
+    button.addEventListener("click", () => choose(button.dataset.benchGame));
   });
-  snail.onclick = () => {
-    boops++;
-    $("reaction").textContent = [
-      "Boop accepted. Dignity intact.",
-      "An excellent use of your time.",
-      "You have a very small friend now.",
-      "The moon would like a turn.",
-    ][Math.min(boops - 1, 3)];
-    snail.classList.remove("boop");
-    void snail.offsetWidth;
-    snail.classList.add("boop");
-  };
-  function animate(t) {
-    const dt = Math.min((t - prev) / 1000 || 0.016, 0.05);
-    prev = t;
-    const dx = tx - x,
-      dy = ty - y;
-    if (Math.hypot(dx, dy) > 0.7) {
-      x += dx * dt * 3;
-      y += dy * dt * 3;
-      snail.style.transform = `translate(${x}px,${y}px)`;
-      if (t - lastTrail > 90) {
-        lastTrail = t;
-        const dot = document.createElement("i");
-        dot.style.left = x + 28 + "px";
-        dot.style.top = y + 65 + "px";
-        $("slime").append(dot);
-        setTimeout(() => dot.remove(), 2100);
-      }
-    }
-    requestAnimationFrame(animate);
+  document.querySelectorAll(".globe-marker").forEach((button) => {
+    button.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const index = order.indexOf(button.dataset.benchGame),
+        name =
+          event.key === "Home"
+            ? order[0]
+            : event.key === "End"
+              ? order.at(-1)
+              : event.key === "ArrowRight"
+                ? order[(index + 1) % order.length]
+                : order[(index - 1 + order.length) % order.length];
+      choose(name);
+      document.querySelector(`.globe-marker[data-bench-game="${name}"]`).focus();
+    });
+  });
+  function stepBench(direction) {
+    const index = order.indexOf(benchCurrent),
+      name = order[(index + direction + order.length) % order.length];
+    choose(name);
   }
-  if (!reduced) requestAnimationFrame(animate);
+  $("previous-specimen").addEventListener("click", () => stepBench(-1));
+  $("next-specimen").addEventListener("click", () => stepBench(1));
+  $("surprise-specimen").addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    button.classList.remove("launched");
+    void button.offsetWidth;
+    button.classList.add("launched");
+    stepBench(3);
+  });
+  if (matchMedia("(max-width: 760px)").matches) $("clipboard-list").closest("details").open = false;
+  updateWorkbench("brain");
 })();

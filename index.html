@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=support-footer-1" />
+    <link rel="stylesheet" href="playground.css?v=workbench-1" />
   </head>
   <body>
     <a class="skip" href="#arcade">Skip to the lab</a>
@@ -59,52 +59,82 @@
       </nav>
     </header>
     <main id="top">
-      <section class="hero">
+      <section class="hero workbench-hero" aria-labelledby="workbench-title">
         <div class="intro">
-          <p class="kicker"><span class="live-dot"></span> SMALL SYSTEMS. QUESTIONABLE CONDITIONS.</p>
-          <h1>Go on.<br /><em>Play with it.</em></h1>
+          <p class="kicker"><span class="live-dot"></span> CREATED BY ERNEST TURNER</p>
+          <h1 id="workbench-title">Trikzik<br /><em>Labs.</em></h1>
           <p class="lead">
-            I'm Ernest Turner. I build games and interactive software.<br />This is where the ideas get out
-            of their boxes.
+            Games, curious little machines, and useful tools by Ernest Turner.<br />Come scratch your
+            tinker itch.
           </p>
           <div class="actions">
-            <a class="button primary" href="#arcade">Enter the lab <span>↗</span></a
-            ><a class="text-link" href="#work">See what makes it tick ↓</a>
+            <a class="button primary" href="#arcade">Enter the full lab <span>↘</span></a
+            ><a class="text-link" href="#work">Read the lab notes ↓</a>
           </div>
           <p class="small">No downloads. No sign-up. Just a little curiosity.</p>
         </div>
-        <div class="habitat" id="habitat">
-          <div class="habitat-top"><span>SPECIMEN 001</span><span>MOON SNAIL</span></div>
-          <div class="orbit o1"></div>
-          <div class="orbit o2"></div>
-          <div class="little-moon"></div>
-          <div class="slime" id="slime" aria-hidden="true"></div>
-          <button id="snail" aria-label="Boop the snail" class="snail">
-            <svg viewBox="0 0 140 100" aria-hidden="true">
-              <path d="M15 75Q8 65 25 61H104Q128 70 109 82H28Z" fill="#a3ffd3" />
-              <circle cx="58" cy="49" r="32" fill="#b9a7fb" />
-              <path
-                d="M64 70C19 68 29 13 60 25C91 37 70 68 51 56C35 45 54 32 62 45"
-                fill="none"
-                stroke="#605187"
-                stroke-width="6"
-                stroke-linecap="round"
-              />
-              <path
-                d="M104 65L111 39M113 66L130 48"
-                stroke="#a3ffd3"
-                stroke-width="5"
-                stroke-linecap="round"
-              />
-              <circle cx="111" cy="37" r="7" fill="#c9ffe6" />
-              <circle cx="130" cy="46" r="7" fill="#c9ffe6" />
-              <circle cx="113" cy="36" r="2.5" fill="#1d3a44" />
-              <circle cx="132" cy="45" r="2.5" fill="#1d3a44" />
-            </svg>
-          </button>
-          <div class="habitat-bottom">
-            <span id="reaction" aria-live="polite">A curious little local.</span
-            ><span>Move nearby · click to boop</span>
+        <div class="workbench" aria-label="Interactive experiment workbench">
+          <div class="workbench-tools">
+            <p>CHOOSE AN EXPERIMENT</p>
+            <button class="ufo-button" id="surprise-specimen" type="button">
+              <span class="ufo" aria-hidden="true"><i>?</i></span>
+              <span>Surprise specimen →</span>
+            </button>
+          </div>
+          <div class="globe-zone">
+            <button class="globe-step previous" id="previous-specimen" type="button" aria-label="Previous experiment">←</button>
+            <div class="globe-stage" id="globe-stage" role="group" aria-label="Choose one of eight experiments">
+              <svg class="globe-machine" viewBox="0 0 440 470" aria-hidden="true">
+                <g class="stand-lines" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M77 419H363M114 446H326M137 419L125 446M303 419L315 446" />
+                  <path d="M106 370C73 283 83 183 151 112M334 370C367 283 357 183 289 112" />
+                  <circle cx="220" cy="245" r="157" />
+                  <path d="M206 79h28M206 411h28" />
+                </g>
+                <g class="globe-surface" id="globe-surface">
+                  <circle class="ocean" cx="220" cy="245" r="142" />
+                  <path class="continent" d="M122 170c22-42 62-67 103-68l12 25-16 26-34 9-9 26-31 7-25-25zm125 4 42-28 35 25 20 47-21 23-15-17-30 6-12-21zm-91 60 35-20 29 12 12 38-18 27 13 37-32 45-31-26 8-36-24-29zm105 31 43-17 23 31-20 55-36 31-23-26 17-30-15-22z" />
+                  <path class="globe-line" d="M86 245h268M99 196c75 25 167 25 242 0M99 294c75-25 167-25 242 0M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142" />
+                </g>
+              </svg>
+              <button class="globe-marker marker-moon" type="button" data-bench-game="moon" aria-label="Select Moon Snail"><span>01</span></button>
+              <button class="globe-marker marker-star" type="button" data-bench-game="star" aria-label="Select Starfall"><span>02</span></button>
+              <button class="globe-marker marker-dungeon" type="button" data-bench-game="dungeon" aria-label="Select Dungeon Reset"><span>03</span></button>
+              <button class="globe-marker marker-brain selected" type="button" data-bench-game="brain" aria-label="Select Brain in a Jar" aria-pressed="true"><span>04</span></button>
+              <button class="globe-marker marker-scribble" type="button" data-bench-game="scribble" aria-label="Select Scribble Engine"><span>05</span></button>
+              <button class="globe-marker marker-traffic" type="button" data-bench-game="traffic" aria-label="Select Traffic With No Excuse"><span>06</span></button>
+              <button class="globe-marker marker-jelly" type="button" data-bench-game="jelly" aria-label="Select Jelly Bench"><span>07</span></button>
+              <button class="globe-marker marker-mirror" type="button" data-bench-game="mirror" aria-label="Select Mirror Mischief"><span>08</span></button>
+              <div class="active-marker-label" id="active-marker-label">Brain in a Jar</div>
+            </div>
+            <button class="globe-step next" id="next-specimen" type="button" aria-label="Next experiment">→</button>
+          </div>
+          <div class="signal-line" id="signal-line" aria-hidden="true"><i></i><i></i><i></i></div>
+          <article class="bench-station" aria-live="polite">
+            <p class="station-kicker">ON THE BENCH · <span id="bench-number">04 / 08</span></p>
+            <h2 id="bench-title">Brain in a Jar</h2>
+            <div class="specimen-sketch art-brain" id="bench-sketch" aria-hidden="true">
+              <span id="bench-symbol">4×4×2</span>
+            </div>
+            <p class="sketch-label">Representative system sketch</p>
+            <p id="bench-summary">Change one neural connection and watch a tiny creature decide differently.</p>
+            <a class="button station-open" id="bench-open" href="games/brain-in-a-jar/index.html">Open experiment <span>→</span></a>
+          </article>
+          <details class="experiment-clipboard" open>
+            <summary>All experiments <span>(8)</span><i aria-hidden="true">+</i></summary>
+            <div class="clipboard-list" id="clipboard-list">
+              <button type="button" data-bench-game="moon"><span>01</span>Moon Snail</button>
+              <button type="button" data-bench-game="star"><span>02</span>Starfall</button>
+              <button type="button" data-bench-game="dungeon"><span>03</span>Dungeon Reset</button>
+              <button type="button" data-bench-game="brain" class="selected" aria-pressed="true"><span>04</span>Brain in a Jar</button>
+              <button type="button" data-bench-game="scribble"><span>05</span>Scribble Engine</button>
+              <button type="button" data-bench-game="traffic"><span>06</span>Traffic With No Excuse</button>
+              <button type="button" data-bench-game="jelly"><span>07</span>Jelly Bench</button>
+              <button type="button" data-bench-game="mirror"><span>08</span>Mirror Mischief</button>
+            </div>
+          </details>
+          <div class="bench-edge" aria-hidden="true">
+            <span>MADE WITH CURIOSITY</span><span>EIGHT WORKING EXPERIMENTS</span>
           </div>
         </div>
       </section>
@@ -456,8 +486,8 @@
           >Buy me a coffee<span class="visually-hidden"> (opens in a new tab)</span></a
         >
       </div>
-      <a href="#top">Back to the snail ↑</a>
+      <a href="#top">Back to the lab ↑</a>
     </footer>
-    <script src="playground.js?v=mirror-mischief-1"></script>
+    <script src="playground.js?v=workbench-1"></script>
   </body>
 </html>

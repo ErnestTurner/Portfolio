@@ -295,6 +295,13 @@ h1 em {
 .ufo-button.launched .ufo {
   animation: ufo-hop 0.55s ease;
 }
+.bench-display {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.35fr) minmax(220px, 0.75fr);
+  gap: 16px;
+  align-items: center;
+  min-width: 0;
+}
 .globe-zone {
   position: relative;
   display: block;
@@ -373,9 +380,14 @@ h1 em {
   font: bold 8px "Courier New", monospace;
 }
 .globe-marker:hover,
-.globe-marker:focus-visible {
+.globe-marker:focus-visible,
+.globe-marker[aria-pressed="true"] {
   transform: scale(1.18);
   background: var(--blue);
+}
+.globe-marker[aria-pressed="true"] {
+  color: #102034;
+  box-shadow: 0 0 0 3px var(--mint), 0 0 24px #b4f7a755;
 }
 .marker-moon { left: 3%; top: 45%; }
 .marker-star { left: 15%; top: 18%; }
@@ -523,6 +535,205 @@ h1 em {
   border-color: var(--mint);
   background: #2d7bea;
 }
+.bench-preview {
+  align-self: center;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #dfe8e1;
+  border-radius: 12px;
+  background: #08121be8;
+  box-shadow: 4px 4px 0 #0d2530;
+}
+.preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 30px;
+}
+.preview-head .station-kicker {
+  margin: 0;
+  color: #b8c6ce;
+}
+.preview-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #536875;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+}
+.preview-close:hover {
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.preview-close[hidden],
+.preview-open[hidden] {
+  display: none;
+}
+.bench-preview h2 {
+  margin: 7px 0 6px;
+  color: var(--mint);
+  font-size: clamp(19px, 1.8vw, 25px);
+  letter-spacing: -0.6px;
+}
+.preview-summary {
+  min-height: 68px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.preview-window {
+  overflow: hidden;
+  border: 1px solid #3f5663;
+  border-radius: 8px;
+  background:
+    linear-gradient(#ffffff08 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff08 1px, transparent 1px),
+    #091722;
+  background-size: 18px 18px;
+}
+.preview-art {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  color: var(--text);
+}
+.preview-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  overflow: visible;
+}
+.preview-art svg path,
+.preview-art svg circle,
+.preview-art svg ellipse,
+.preview-art svg rect {
+  vector-effect: non-scaling-stroke;
+}
+.preview-label {
+  display: block;
+  padding: 7px 9px;
+  border-top: 1px solid #3f5663;
+  color: #91a7b5;
+  font: 700 8px/1.4 "Courier New", monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.preview-open {
+  width: 100%;
+  margin-top: 10px;
+  border-color: #397ce4;
+  background: #236fdd;
+  color: #fff;
+}
+.preview-open:hover {
+  border-color: var(--mint);
+  background: #2d7bea;
+}
+.preview-paused .preview-art *,
+.preview-art * {
+  animation-play-state: paused;
+}
+.bench-preview[data-experiment]:not(.preview-paused) .preview-art * {
+  animation-play-state: running;
+}
+.idle-orbit,
+.idle-bench {
+  fill: none;
+  stroke: #657b88;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.idle-dot {
+  fill: var(--mint);
+}
+.preview-moon .moon-orb { fill: #d8ccff; stroke: #f2eeff; stroke-width: 2; }
+.preview-moon .moon-tide { fill: none; stroke: #6fa8ff; stroke-width: 3; }
+.preview-moon .snail-trail { fill: none; stroke: var(--mint); stroke-width: 4; stroke-linecap: round; opacity: 0.55; }
+.preview-moon .snail-body { fill: #bca7fb; stroke: #eff5fa; stroke-width: 2; animation: snail-slide 2.8s ease-in-out infinite alternate; }
+.preview-moon .umbrella { fill: #397ce4; stroke: #eff5fa; stroke-width: 2; animation: umbrella-bob 1.4s ease-in-out infinite alternate; }
+.preview-moon .marshmallow { fill: #fff1e6; stroke: #ffafcc; stroke-width: 2; animation: marshmallow-chase 2.8s ease-in-out infinite; }
+.preview-moon .bubble { fill: #a2c8ff33; stroke: #a2c8ff; stroke-width: 2; animation: bubble-rise 2.8s ease-in infinite; }
+.preview-star .eclipse { fill: #090d1a; opacity: 0.45; animation: eclipse-breathe 3s ease-in-out infinite alternate; }
+.preview-star .star-ship { fill: #eff5fa; stroke: #a2c8ff; stroke-width: 2; animation: ship-drift 1.2s ease-in-out infinite alternate; }
+.preview-star .star-shot { fill: none; stroke: #ffe599; stroke-width: 3; stroke-dasharray: 10 16; animation: shot-stream 0.8s linear infinite; }
+.preview-star .star-drone { fill: #172331; stroke: #ffafcc; stroke-width: 2; animation: drone-wobble 1.6s ease-in-out infinite alternate; }
+.preview-star .light-fragment { fill: #ffe599; stroke: #fff6bf; stroke-width: 1; animation: fragment-return 2.2s ease-in-out infinite; }
+.preview-star .light-meter { fill: #101d2b; stroke: #526777; stroke-width: 1; }
+.preview-star .light-level { fill: #ffe599; animation: light-reserve 2.2s ease-in-out infinite alternate; transform-origin: left center; }
+.preview-dungeon .dungeon-floor { fill: none; stroke: #685b4e; stroke-width: 3; }
+.preview-dungeon .dungeon-door { fill: #2e2526; stroke: #efc978; stroke-width: 3; }
+.preview-dungeon .caretaker { fill: none; stroke: #eff5fa; stroke-width: 3; stroke-linecap: round; animation: caretaker-work 2.4s ease-in-out infinite alternate; }
+.preview-dungeon .dungeon-monster { fill: #bca7fb; stroke: #eff5fa; stroke-width: 2; animation: monster-return 2.4s ease-in-out infinite alternate; }
+.preview-dungeon .hero-party { fill: none; stroke: #ffafcc; stroke-width: 3; animation: party-wait 2.4s ease-in-out infinite alternate; }
+.preview-dungeon .repair-spark { fill: none; stroke: #ffe599; stroke-width: 3; animation: repair-flash 0.75s steps(2) infinite; }
+.preview-brain .brain-light { fill: #ffe599; stroke: #fff6bf; stroke-width: 2; animation: brain-light-move 2.8s ease-in-out infinite alternate; }
+.preview-brain .sensor-ray { fill: none; stroke: #ffe59988; stroke-width: 2; stroke-dasharray: 5 5; }
+.preview-brain .brain-creature { fill: #b4f7a7; stroke: #eff5fa; stroke-width: 2; animation: creature-turn 2.8s ease-in-out infinite alternate; transform-origin: 123px 98px; }
+.preview-brain .network-wire { fill: none; stroke: #6fa8ff; stroke-width: 2; }
+.preview-brain .network-node { fill: #102631; stroke: #b4f7a7; stroke-width: 2; }
+.preview-brain .brain-signal { fill: #ffafcc; animation: signal-hop 1.8s ease-in-out infinite; }
+.preview-scribble .scribble-paper { fill: #0b1425; stroke: #647a87; stroke-width: 2; }
+.preview-scribble .scribble-trace { fill: none; stroke: #b4f7a7; stroke-width: 2; stroke-dasharray: 310; stroke-dashoffset: 310; animation: draw-trace 4s linear infinite; }
+.preview-scribble .arm-one,
+.preview-scribble .arm-two { fill: #102631; stroke: #eff5fa; stroke-width: 3; transform-box: view-box; }
+.preview-scribble .arm-one { transform-origin: 78px 83px; animation: arm-spin 3.2s linear infinite; }
+.preview-scribble .arm-two { transform-origin: 182px 63px; animation: arm-spin-reverse 2.1s linear infinite; }
+.preview-scribble .shared-pen { fill: #ffafcc; stroke: #eff5fa; stroke-width: 2; animation: pen-pulse 1s ease-in-out infinite alternate; }
+.preview-traffic .traffic-road { fill: none; stroke: #8ba1ac; stroke-width: 18; }
+.preview-traffic .traffic-island { fill: #173447; stroke: #486272; stroke-width: 2; }
+.preview-traffic .traffic-cars { fill: #ffd166; transform-box: view-box; transform-origin: 130px 85px; animation: cars-circle 5s linear infinite; }
+.preview-traffic .traffic-cars rect:nth-child(6),
+.preview-traffic .traffic-cars rect:nth-child(7),
+.preview-traffic .traffic-cars rect:nth-child(8) { fill: #b94b42; }
+.preview-traffic .brake-wave { fill: none; stroke: #ffafcc; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 9 8; animation: brake-travel 1.4s linear infinite; }
+.preview-traffic .brake-light { fill: #ff5d55; animation: brake-blink 0.65s steps(2) infinite; }
+.preview-jelly .jelly-platform { fill: #263647; stroke: #eff5fa; stroke-width: 2; }
+.preview-jelly .jelly-blob { fill: #6fa8ff99; stroke: #a2c8ff; stroke-width: 3; transform-origin: 117px 91px; animation: jelly-squeeze 2.6s ease-in-out infinite alternate; }
+.preview-jelly .jelly-nodes { fill: #ffafcc; transform-origin: 117px 91px; animation: jelly-squeeze 2.6s ease-in-out infinite alternate; }
+.preview-mirror .light-source { fill: #ffe599; stroke: #fff6bf; stroke-width: 2; }
+.preview-mirror .beam { fill: none; stroke: #83e8ff; stroke-width: 4; filter: drop-shadow(0 0 4px #83e8ff); }
+.preview-mirror .preview-mirror { fill: #a2c8ff; stroke: #eff5fa; stroke-width: 2; transform-origin: 124px 88px; animation: mirror-tilt 2.6s ease-in-out infinite alternate; }
+.preview-mirror .beam-two { animation: beam-choice 2.6s ease-in-out infinite alternate; }
+.preview-mirror .beam-three { animation: beam-choice 2.6s ease-in-out infinite alternate-reverse; }
+.preview-mirror .receiver { fill: #163448; stroke: #b4f7a7; stroke-width: 2; animation: receiver-glow 2.6s ease-in-out infinite alternate; }
+.preview-mirror .blocker { fill: #2b2428; stroke: #ffafcc; stroke-width: 2; }
+@keyframes snail-slide { to { transform: translateX(18px); } }
+@keyframes umbrella-bob { to { transform: translateY(-5px) rotate(-2deg); } }
+@keyframes marshmallow-chase { 50% { transform: translate(-17px, -8px); } }
+@keyframes bubble-rise { 0% { opacity: 0; transform: translate(0, 28px) scale(0.65); } 35% { opacity: 1; } 100% { opacity: 0; transform: translate(57px, -55px) scale(1.05); } }
+@keyframes eclipse-breathe { to { opacity: 0.68; } }
+@keyframes ship-drift { to { transform: translateY(-7px); } }
+@keyframes shot-stream { to { stroke-dashoffset: -26; } }
+@keyframes drone-wobble { to { transform: translate(4px, -6px) rotate(8deg); } }
+@keyframes fragment-return { 0% { transform: translate(22px, -10px) scale(0.7); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-95px, 75px) scale(0.35); } }
+@keyframes light-reserve { to { transform: scaleX(0.55); } }
+@keyframes caretaker-work { to { transform: translateX(25px); } }
+@keyframes monster-return { to { transform: translateX(21px); } }
+@keyframes party-wait { to { transform: translateX(-8px); opacity: 0.55; } }
+@keyframes repair-flash { 50% { opacity: 0.2; } }
+@keyframes brain-light-move { to { transform: translate(55px, 12px); } }
+@keyframes creature-turn { to { transform: rotate(8deg) translateX(4px); } }
+@keyframes signal-hop { 0% { transform: translate(0, 0); } 50% { transform: translate(34px, 20px); } 100% { transform: translate(64px, 0); } }
+@keyframes draw-trace { 55%, 100% { stroke-dashoffset: 0; } }
+@keyframes arm-spin { to { transform: rotate(360deg); } }
+@keyframes arm-spin-reverse { to { transform: rotate(-360deg); } }
+@keyframes pen-pulse { to { transform: scale(1.35); } }
+@keyframes cars-circle { to { transform: rotate(360deg); } }
+@keyframes brake-travel { to { stroke-dashoffset: -34; } }
+@keyframes brake-blink { 50% { opacity: 0.2; } }
+@keyframes jelly-squeeze { to { transform: translateX(34px) scale(0.62, 1.18); } }
+@keyframes mirror-tilt { to { transform: rotate(24deg); } }
+@keyframes beam-choice { to { opacity: 0.16; } }
+@keyframes receiver-glow { to { filter: drop-shadow(0 0 8px #b4f7a7); } }
 .experiment-clipboard {
   display: block;
   margin: 6px 12px 22px;
@@ -1064,6 +1275,10 @@ footer {
     padding: 0 8px 6px;
     font-size: 9px;
   }
+  .bench-display {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
   .ufo-button {
     gap: 6px;
   }
@@ -1127,6 +1342,17 @@ footer {
     width: 100%;
     max-width: 420px;
     margin: auto;
+  }
+  .bench-preview {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+  }
+  .preview-summary {
+    min-height: 0;
+  }
+  .preview-art {
+    min-height: 145px;
   }
   #bench-summary {
     min-height: 0;

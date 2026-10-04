@@ -47,7 +47,7 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=workbench-launcher-3" />
+    <link rel="stylesheet" href="playground.css?v=workbench-preview-1" />
   </head>
   <body>
     <a class="skip" href="#experiments">Skip to experiments</a>
@@ -81,8 +81,9 @@
               <span>Surprise experiment ↗</span>
             </button>
           </div>
+          <div class="bench-display">
           <div class="globe-zone">
-            <div class="globe-stage" role="group" aria-label="Eight experiment links orbiting Earth">
+            <div class="globe-stage" role="group" aria-label="Choose one of eight experiment previews orbiting Earth">
               <svg class="globe-machine" viewBox="0 0 440 470" aria-hidden="true">
                 <g class="stand-lines" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M77 419H363M114 446H326M137 419L125 446M303 419L315 446" />
@@ -101,15 +102,37 @@
                   <path class="globe-line" d="M86 245h268M99 196c75 25 167 25 242 0M99 294c75-25 167-25 242 0M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142" />
                 </g>
               </svg>
-              <a class="globe-marker marker-moon" href="games/moon-snail/index.html" aria-label="Open Moon Snail"><span>01</span></a>
-              <a class="globe-marker marker-star" href="games/starfall/index.html" aria-label="Open Starfall"><span>02</span></a>
-              <a class="globe-marker marker-dungeon" href="games/dungeon-reset/index.html" aria-label="Open Dungeon Reset"><span>03</span></a>
-              <a class="globe-marker marker-brain" href="games/brain-in-a-jar/index.html" aria-label="Open Brain in a Jar"><span>04</span></a>
-              <a class="globe-marker marker-scribble" href="games/scribble-engine/index.html" aria-label="Open Scribble Engine"><span>05</span></a>
-              <a class="globe-marker marker-traffic" href="games/traffic-with-no-excuse/index.html" aria-label="Open Traffic With No Excuse"><span>06</span></a>
-              <a class="globe-marker marker-jelly" href="games/jelly-bench/index.html" aria-label="Open Jelly Bench"><span>07</span></a>
-              <a class="globe-marker marker-mirror" href="games/mirror-mischief/index.html" aria-label="Open Mirror Mischief"><span>08</span></a>
+              <button class="globe-marker marker-moon" type="button" data-experiment="moon" aria-label="Preview Moon Snail" aria-controls="bench-preview" aria-pressed="false"><span>01</span></button>
+              <button class="globe-marker marker-star" type="button" data-experiment="star" aria-label="Preview Starfall" aria-controls="bench-preview" aria-pressed="false"><span>02</span></button>
+              <button class="globe-marker marker-dungeon" type="button" data-experiment="dungeon" aria-label="Preview Dungeon Reset" aria-controls="bench-preview" aria-pressed="false"><span>03</span></button>
+              <button class="globe-marker marker-brain" type="button" data-experiment="brain" aria-label="Preview Brain in a Jar" aria-controls="bench-preview" aria-pressed="false"><span>04</span></button>
+              <button class="globe-marker marker-scribble" type="button" data-experiment="scribble" aria-label="Preview Scribble Engine" aria-controls="bench-preview" aria-pressed="false"><span>05</span></button>
+              <button class="globe-marker marker-traffic" type="button" data-experiment="traffic" aria-label="Preview Traffic With No Excuse" aria-controls="bench-preview" aria-pressed="false"><span>06</span></button>
+              <button class="globe-marker marker-jelly" type="button" data-experiment="jelly" aria-label="Preview Jelly Bench" aria-controls="bench-preview" aria-pressed="false"><span>07</span></button>
+              <button class="globe-marker marker-mirror" type="button" data-experiment="mirror" aria-label="Preview Mirror Mischief" aria-controls="bench-preview" aria-pressed="false"><span>08</span></button>
             </div>
+          </div>
+          <section class="bench-preview" id="bench-preview" aria-labelledby="preview-title">
+            <div class="preview-head">
+              <p class="station-kicker">BENCH PREVIEW</p>
+              <button class="preview-close" id="preview-close" type="button" aria-label="Close experiment preview" hidden>×</button>
+            </div>
+            <div class="preview-copy" role="status" aria-live="polite" aria-atomic="true">
+              <h2 id="preview-title">Pick a numbered specimen</h2>
+              <p class="preview-summary" id="preview-summary">Select a marker around Earth to wake one small machine.</p>
+            </div>
+            <div class="preview-window">
+              <div class="preview-art preview-idle" id="preview-art" role="img" aria-label="A quiet laboratory preview screen">
+                <svg viewBox="0 0 260 170" aria-hidden="true">
+                  <path class="idle-orbit" d="M43 101c35-67 137-78 176-15s-31 84-83 69-76-67-34-103" />
+                  <circle class="idle-dot" cx="130" cy="85" r="9" />
+                  <path class="idle-bench" d="M55 139h150M83 139l-10 20m104-20 10 20M64 159h132" />
+                </svg>
+              </div>
+              <span class="preview-label">Representative sketch · not gameplay footage</span>
+            </div>
+            <a class="button preview-open" id="preview-open" href="#experiments" hidden>Open experiment <span>↗</span></a>
+          </section>
           </div>
           <nav class="experiment-clipboard" id="experiments" aria-label="All experiments">
             <h2>All experiments <span>(8)</span></h2>
@@ -273,6 +296,6 @@
       </div>
       <a href="#top">Back to the lab ↑</a>
     </footer>
-    <script src="surprise.js?v=1"></script>
+    <script src="surprise.js?v=2"></script>
   </body>
 </html>

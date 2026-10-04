@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 470" role="img" aria-labelledby="title desc">
+  <title id="title">Trikzik Labs Earth workbench icon</title>
+  <desc id="desc">A blue and green Earth mounted in a white three-point laboratory cradle.</desc>
+  <rect width="440" height="470" rx="82" fill="#081018"/>
+  <g fill="none" stroke="#eff5fa" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M77 419H363M114 446H326M137 419L112 333M303 419l25-86M220 419v-31"/><circle cx="112" cy="333" r="9" fill="#081018"/><circle cx="328" cy="333" r="9" fill="#081018"/><circle cx="220" cy="388" r="9" fill="#081018"/></g>
+  <path d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z" fill="#2b74d8" stroke="#eff5fa" stroke-width="8"/>
+  <g fill="#38cd75"><path d="M101 154l25-32 35-13 27 9 11 20 24 9-8 18-25 6-10 23-24 5-15 27-18-8-5-24-20-17z"/><path d="M181 226l28 2 23 20 2 31-13 24-3 29-17 34-14-18 3-28-13-29 5-25-10-20z"/><path d="M223 150l18-13 19 3 10 12-9 12-20-2zM239 170l24-3 22 21-4 24 16 22-14 49-23 38-14-13 3-27-17-24 8-26-14-21z"/><path d="M266 145l28-24 35 5 11 18 21 8-7 23-25 2-11 18-28-4-16 12-13-21 15-16z"/><path d="M317 296l27-8 18 15-3 25-29 10-20-18zM174 112l16-18 21 5 3 20-19 14z"/></g>
+  <g fill="none" stroke="#a8ef9d" stroke-width="3" opacity=".7"><path d="M86 245h268M99 196c75 25 167 25 242 0M99 294c75-25 167-25 242 0M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142"/></g>
+</svg>

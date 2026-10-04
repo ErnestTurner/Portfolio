@@ -54,15 +54,16 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
       gap: clamp(18px, 3vw, 34px);
-      align-items: center;
+      align-items: start;
     }
 
     .drawing-wrap {
       min-width: 0;
       display: grid;
       place-items: center;
-      position: relative;
+      position: sticky;
       padding: clamp(7px, 1.4vw, 14px);
+      top: clamp(14px, 2.5vw, 30px);
     }
 
     .apparatus-label { position: absolute; top: 24px; left: 26px; z-index: 2; color: #a2c8ffb8; font: 700 9px/1 "Courier New", monospace; letter-spacing: .16em; text-transform: uppercase; pointer-events: none; }
@@ -172,6 +173,42 @@
     .arm-one input[type="range"] { accent-color: var(--pink); }
     .arm-two input[type="range"] { accent-color: var(--mint); }
 
+    .ink-tools legend { color: var(--blue); }
+    .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 12px; }
+    .tool-grid .wide { grid-column: 1 / -1; }
+    .compact-label { display: block; margin: 0 0 7px; color: #dbe5ee; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+    .color-row { display: flex; align-items: center; gap: 7px; }
+    input[type="color"] { width: 42px; height: 34px; padding: 2px; border: 1px solid #40566d; border-radius: 6px; background: #0b1627; cursor: pointer; }
+    .swatches { display: flex; gap: 5px; flex-wrap: wrap; }
+    .swatch { width: 25px; min-height: 25px; padding: 0; border-radius: 50%; background: var(--swatch); box-shadow: inset 0 0 0 2px #08101e; }
+    .swatch:hover { background: var(--swatch); transform: scale(1.08); }
+    select { width: 100%; min-height: 36px; border: 1px solid #40566d; border-radius: 6px; padding: 5px 8px; background: #14243a; color: var(--ink); font: inherit; }
+    select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .paper-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 9px; }
+    .transparent-toggle { display: flex; justify-content: flex-start; align-items: center; gap: 7px; margin: 0; color: var(--muted); font-size: .78rem; }
+    .transparent-toggle input { width: 18px; height: 18px; accent-color: var(--mint); }
+    .preview-button { width: 100%; border-color: #6687a7; color: var(--blue); }
+    .pen-toggle { display: flex; justify-content: space-between; align-items: center; border-color: var(--mint); text-align: left; }
+    .pen-toggle span:first-child { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+    .pen-toggle span:last-child { color: var(--mint); font: 700 .79rem "Courier New", monospace; }
+    .pen-toggle[aria-pressed="false"] { border-color: #6687a7; }
+    .pen-toggle[aria-pressed="false"] span:last-child { color: var(--blue); }
+    .vector-status { grid-column: 1 / -1; margin: -3px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
+    .vector-status.limit { color: var(--pink); }
+    .checkpoint-tools legend { color: var(--mint); }
+    .checkpoint-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checkpoint-status { margin: 0 0 11px; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; letter-spacing: .04em; }
+    #saveCheckpoint { border-color: #557565; }
+    .setup-tools legend { color: var(--pink); }
+    .setup-note { margin: 0 0 12px; color: var(--muted); font-size: .78rem; line-height: 1.45; }
+    .setup-name { display: block; margin-bottom: 10px; }
+    .setup-name span { display: block; margin-bottom: 6px; color: #dbe5ee; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+    input[type="text"] { width: 100%; min-height: 42px; border: 1px solid #40566d; border-radius: 6px; padding: 8px 10px; background: #14243a; color: var(--ink); font: inherit; }
+    .setup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #downloadSetup { border-color: #755c69; }
+    .setup-status { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
+    .setup-status.error { color: var(--pink); }
+
     button {
       min-height: 44px;
       border: 1px solid #40566d;
@@ -209,11 +246,27 @@
 
     .shared {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
     }
     .shared button:first-child { border-color: #6e8ca1; background: #1a3045; }
-    .shared button:last-child { color: var(--pink); }
+    .shared #reset { color: var(--pink); }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+
+    dialog { width: min(760px, calc(100% - 28px)); max-height: calc(100dvh - 28px); padding: 0; overflow: auto; border: 1px solid #466079; border-radius: 14px; background: #0c1728; color: var(--ink); box-shadow: 0 28px 100px #000b; }
+    dialog::backdrop { background: #050915cc; backdrop-filter: blur(5px); }
+    .export-panel { padding: clamp(16px, 3vw, 24px); }
+    .export-head { display: flex; justify-content: space-between; align-items: start; gap: 20px; margin-bottom: 14px; }
+    .export-head h2 { margin: 3px 0 0; font-size: clamp(1.35rem, 4vw, 2rem); text-transform: uppercase; letter-spacing: -.04em; }
+    .export-head p { margin: 5px 0 0; color: var(--muted); font-size: .82rem; }
+    .preview-shell { padding: clamp(8px, 2vw, 14px); border: 1px solid #354a62; border-radius: 10px; background-color: #d7d7d7; background-image: linear-gradient(45deg, #aaa 25%, transparent 25%), linear-gradient(-45deg, #aaa 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #aaa 75%), linear-gradient(-45deg, transparent 75%, #aaa 75%); background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0; }
+    .export-canvas { width: 100%; max-height: min(62dvh, 650px); border: 0; border-radius: 4px; box-shadow: none; background: transparent; object-fit: contain; }
+    .export-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 14px; }
+    .download-button { background: var(--mint); border-color: var(--mint); color: #102219; }
+    .download-button:hover { background: #d0ffc6; color: #102219; }
+    .confirm-dialog { width: min(430px, calc(100% - 28px)); }
+    .confirm-dialog h2 { margin: 4px 0 10px; text-transform: uppercase; }
+    .confirm-dialog p { color: #c7d3df; line-height: 1.55; }
 
     @media (max-width: 760px) {
       main {
@@ -224,10 +277,16 @@
       canvas { width: min(100%, 590px); }
       .controls { width: min(100%, 590px); justify-self: center; }
       .apparatus-label { top: 19px; left: 21px; }
+      .drawing-wrap { position: relative; top: auto; }
     }
 
     @media (max-width: 390px) {
       .shared { grid-template-columns: 1fr; }
+      .tool-grid { grid-template-columns: 1fr; }
+      .tool-grid .wide { grid-column: auto; }
+      .export-actions { display: grid; grid-template-columns: 1fr; }
+      .checkpoint-row { grid-template-columns: 1fr; }
+      .setup-actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -275,15 +334,132 @@
         </button>
       </fieldset>
 
+      <fieldset class="ink-tools">
+        <legend>Ink / Export</legend>
+        <div class="tool-grid">
+          <div>
+            <label class="compact-label" for="inkColor">Ink color</label>
+            <div class="color-row">
+              <input id="inkColor" type="color" value="#eff5fa" aria-label="Ink color">
+              <div class="swatches" aria-label="Ink color presets">
+                <button class="swatch" type="button" style="--swatch:#eff5fa" data-color="#eff5fa" aria-label="Ivory ink"></button>
+                <button class="swatch" type="button" style="--swatch:#b4f7a7" data-color="#b4f7a7" aria-label="Mint ink"></button>
+                <button class="swatch" type="button" style="--swatch:#ffafcc" data-color="#ffafcc" aria-label="Pink ink"></button>
+                <button class="swatch" type="button" style="--swatch:#a2c8ff" data-color="#a2c8ff" aria-label="Blue ink"></button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="compact-label" for="strokeStyle">Stroke style</label>
+            <select id="strokeStyle">
+              <option value="solid">Solid</option>
+              <option value="dashed">Dashed</option>
+              <option value="dotted">Dotted</option>
+            </select>
+          </div>
+          <div class="wide control-row">
+            <label for="lineWidth">Line width <output id="lineWidthValue" for="lineWidth">1.5 px</output></label>
+            <input id="lineWidth" type="range" min="0.5" max="8" step="0.5" value="1.5">
+          </div>
+          <div>
+            <label class="compact-label" for="paperColor">Paper color</label>
+            <div class="paper-row">
+              <input id="paperColor" type="color" value="#0b1425" aria-label="Paper color">
+              <label class="transparent-toggle" for="transparentPaper">
+                <input id="transparentPaper" type="checkbox">
+                Transparent export
+              </label>
+            </div>
+          </div>
+          <div>
+            <span class="compact-label">Clean view</span>
+            <button class="preview-button" id="openPreview" type="button">Export Preview</button>
+          </div>
+          <button class="pen-toggle wide" id="penToggle" type="button" aria-pressed="true" aria-label="Pen is down and drawing. Activate to lift it.">
+            <span>Pen</span><span>Down · Drawing</span>
+          </button>
+          <p class="vector-status" id="vectorStatus" role="status" aria-live="polite">SVG record ready · 0 / 200,000 points</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="checkpoint-tools">
+        <legend>Checkpoint</legend>
+        <p class="checkpoint-status" id="checkpointStatus">Empty · current page session only</p>
+        <div class="checkpoint-row">
+          <button id="saveCheckpoint" type="button">Save Checkpoint</button>
+          <button id="restoreCheckpoint" type="button" disabled>Restore Checkpoint</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="setup-tools">
+        <legend>Reusable Setup</legend>
+        <p class="setup-note">Starting configuration only · no artwork, checkpoint, or project history.</p>
+        <label class="setup-name" for="setupName">
+          <span>Setup name</span>
+          <input id="setupName" type="text" maxlength="60" value="Untitled experiment" autocomplete="off">
+        </label>
+        <div class="setup-actions">
+          <button id="downloadSetup" type="button">Download Setup</button>
+          <button id="loadSetup" type="button">Load Setup</button>
+          <input id="setupFile" type="file" accept="application/json,.json" hidden>
+        </div>
+        <p class="setup-status" id="setupStatus" role="status" aria-live="polite">Named file · survives reloads</p>
+      </fieldset>
+
       <p class="note">Both arm angles are measured from the page, independently—not from each other.</p>
 
       <div class="shared">
         <button id="pause" type="button">Pause</button>
         <button id="clear" type="button">Clear Paper</button>
+        <button id="restoreClear" type="button" disabled>Restore Clear</button>
         <button id="reset" type="button">Reset</button>
       </div>
     </section>
   </main>
+
+  <dialog id="exportDialog" aria-labelledby="exportTitle">
+    <section class="export-panel">
+      <header class="export-head">
+        <div>
+          <p class="eyebrow">Clean consequence record</p>
+          <h2 id="exportTitle">Export Preview</h2>
+          <p id="exportDescription">Artwork only · 600 × 600 PNG</p>
+        </div>
+        <button id="closePreview" type="button" aria-label="Close export preview">Close</button>
+      </header>
+      <div class="preview-shell" id="previewShell">
+        <canvas class="export-canvas" id="exportCanvas" width="600" height="600" aria-label="Clean artwork export preview"></canvas>
+      </div>
+      <div class="export-actions">
+        <button id="downloadPng" class="download-button" type="button">Download PNG</button>
+        <button id="downloadSvg" class="download-button" type="button">Download SVG</button>
+      </div>
+    </section>
+  </dialog>
+
+  <dialog class="confirm-dialog" id="checkpointDialog" aria-labelledby="checkpointDialogTitle">
+    <section class="export-panel">
+      <p class="eyebrow">Checkpoint interference</p>
+      <h2 id="checkpointDialogTitle">Confirm action</h2>
+      <p id="checkpointDialogMessage"></p>
+      <div class="export-actions">
+        <button id="cancelCheckpointAction" type="button">Cancel</button>
+        <button id="confirmCheckpointAction" class="download-button" type="button">Confirm</button>
+      </div>
+    </section>
+  </dialog>
+
+  <dialog class="confirm-dialog" id="setupDialog" aria-labelledby="setupDialogTitle">
+    <section class="export-panel">
+      <p class="eyebrow">Fresh paper protocol</p>
+      <h2 id="setupDialogTitle">Load setup?</h2>
+      <p id="setupDialogMessage"></p>
+      <div class="export-actions">
+        <button id="cancelSetupLoad" type="button">Cancel</button>
+        <button id="confirmSetupLoad" class="download-button" type="button">Load Fresh Setup</button>
+      </div>
+    </section>
+  </dialog>
 
   <script>
     'use strict';
@@ -295,7 +471,10 @@
       length1: 100, length2: 70,
       speed1: 30, speed2: 90,
       direction1: 1, direction2: -1,
-      angle1: 0, angle2: 0
+      angle1: 0, angle2: 0,
+      inkColor: '#eff5fa', lineWidth: 1.5, strokeStyle: 'solid',
+      paperColor: '#0b1425', transparentPaper: false,
+      penDown: true
     });
     const state = { ...DEFAULTS, running: true };
 
@@ -304,8 +483,27 @@
     const ink = document.createElement('canvas');
     ink.width = ink.height = SIZE;
     const inkContext = ink.getContext('2d');
+    const exportDialog = document.querySelector('#exportDialog');
+    const exportCanvas = document.querySelector('#exportCanvas');
+    const exportContext = exportCanvas.getContext('2d');
+    const checkpointDialog = document.querySelector('#checkpointDialog');
+    const setupDialog = document.querySelector('#setupDialog');
+    const MAX_VECTOR_POINTS = 200000;
     let previousPen = null;
+    let strokeDistance = 0;
+    let hasInk = false;
+    let lastClear = null;
+    let checkpoint = null;
+    let pendingCheckpointAction = null;
+    let pendingSetup = null;
+    let previewDirty = true;
     let previousTime = performance.now();
+    let vectorStrokes = [];
+    let vectorPointCount = 0;
+    let activeVectorStroke = null;
+    let vectorComplete = true;
+    let recordingLimitReached = false;
+    let exportSnapshot = null;
 
     // Kinematics: both angles are absolute page angles, exactly as shown here.
     function positions(source = state) {
@@ -319,33 +517,487 @@
       };
     }
 
-    function breakStroke() {
-      previousPen = null;
+    // Vector recording: flat point arrays keep the continuously running toy
+    // bounded while grouping many sampled segments into one editable path.
+    function cloneVectorStrokes(strokes) {
+      return strokes.map(stroke => ({ ...stroke, dashArray: [...stroke.dashArray], points: [...stroke.points] }));
     }
 
-    function clearInk() {
-      inkContext.clearRect(0, 0, SIZE, SIZE);
+    function captureGeometry() {
+      return {
+        strokes: cloneVectorStrokes(vectorStrokes),
+        pointCount: vectorPointCount,
+        complete: vectorComplete,
+        limitReached: recordingLimitReached
+      };
+    }
+
+    function resetGeometry() {
+      vectorStrokes = [];
+      vectorPointCount = 0;
+      activeVectorStroke = null;
+      vectorComplete = true;
+      recordingLimitReached = false;
+    }
+
+    function restoreGeometry(geometry, containsInk) {
+      if (!geometry) {
+        // Defensive compatibility for any in-memory raster-only snapshot.
+        resetGeometry();
+        vectorComplete = !containsInk;
+        return;
+      }
+      vectorStrokes = cloneVectorStrokes(geometry.strokes);
+      vectorPointCount = geometry.pointCount;
+      vectorComplete = geometry.complete;
+      recordingLimitReached = geometry.limitReached;
+      activeVectorStroke = null;
+    }
+
+    function currentStrokeSpec() {
+      const spacingUnit = Math.max(3, state.lineWidth * 2.4);
+      return {
+        color: state.inkColor,
+        width: state.lineWidth,
+        style: state.strokeStyle,
+        dashArray: state.strokeStyle === 'dashed'
+          ? [spacingUnit * 2.2, spacingUnit]
+          : state.strokeStyle === 'dotted' ? [0, spacingUnit] : []
+      };
+    }
+
+    function sameStrokeSpec(stroke, spec) {
+      return stroke
+        && stroke.color === spec.color
+        && stroke.width === spec.width
+        && stroke.style === spec.style
+        && stroke.dashArray.length === spec.dashArray.length
+        && stroke.dashArray.every((value, index) => value === spec.dashArray[index]);
+    }
+
+    function pauseAtRecordingLimit() {
+      state.running = false;
+      recordingLimitReached = true;
+      previousPen = null;
+      activeVectorStroke = null;
+      strokeDistance = 0;
+      syncControls();
+    }
+
+    function recordVectorSegment(from, to) {
+      const spec = currentStrokeSpec();
+      const continuing = sameStrokeSpec(activeVectorStroke, spec);
+      const pointsNeeded = continuing ? 1 : 2;
+      if (vectorPointCount + pointsNeeded > MAX_VECTOR_POINTS) {
+        pauseAtRecordingLimit();
+        return false;
+      }
+
+      const previousCount = vectorPointCount;
+      if (!continuing) {
+        activeVectorStroke = {
+          ...spec,
+          dashOffset: -strokeDistance,
+          points: [from.x, from.y, to.penX, to.penY]
+        };
+        vectorStrokes.push(activeVectorStroke);
+      } else {
+        activeVectorStroke.points.push(to.penX, to.penY);
+      }
+      vectorPointCount += pointsNeeded;
+      if (Math.floor(previousCount / 250) !== Math.floor(vectorPointCount / 250)) updateVectorStatus();
+      return true;
+    }
+
+    function breakStroke() {
+      previousPen = null;
+      strokeDistance = 0;
+      activeVectorStroke = null;
+    }
+
+    function togglePen() {
+      state.penDown = !state.penDown;
+      // Both lifting and lowering begin a new stroke and a fresh dash phase.
       breakStroke();
+      syncControls();
+    }
+
+    function clearInk(recoverable = true) {
+      if (recoverable && hasInk) {
+        lastClear = {
+          artwork: inkContext.getImageData(0, 0, SIZE, SIZE),
+          geometry: captureGeometry(),
+          hasInk
+        };
+      } else if (!recoverable) {
+        lastClear = null;
+      }
+      inkContext.clearRect(0, 0, SIZE, SIZE);
+      hasInk = false;
+      previewDirty = true;
+      resetGeometry();
+      breakStroke();
+      syncControls();
+    }
+
+    function restoreLastClear() {
+      if (!lastClear) return;
+      const legacyRasterOnly = !lastClear.artwork;
+      inkContext.putImageData(legacyRasterOnly ? lastClear : lastClear.artwork, 0, 0);
+      restoreGeometry(legacyRasterOnly ? null : lastClear.geometry, true);
+      lastClear = null;
+      hasInk = true;
+      previewDirty = true;
+      breakStroke();
+      syncControls();
+    }
+
+    function captureCheckpoint() {
+      // getImageData returns a detached pixel copy; later drawing cannot mutate it.
+      return {
+        artwork: inkContext.getImageData(0, 0, SIZE, SIZE),
+        geometry: captureGeometry(),
+        state: { ...state },
+        hasInk,
+        strokeDistance,
+        savedAt: new Date()
+      };
+    }
+
+    function commitCheckpointSave() {
+      checkpoint = captureCheckpoint();
+      syncControls();
+    }
+
+    function commitCheckpointRestore() {
+      if (!checkpoint) return;
+      // Clear recovery is deliberately untouched: it remains a separate one-step undo.
+      inkContext.clearRect(0, 0, SIZE, SIZE);
+      inkContext.putImageData(checkpoint.artwork, 0, 0);
+      restoreGeometry(checkpoint.geometry, checkpoint.hasInk);
+      Object.assign(state, checkpoint.state, { running: false });
+      hasInk = checkpoint.hasInk;
+      previewDirty = true;
+
+      // Do not reconnect from a stale pen sample. Keep only the saved dash phase.
+      previousPen = null;
+      strokeDistance = checkpoint.strokeDistance;
+      previousTime = performance.now();
+      syncControls();
+    }
+
+    function requestCheckpointAction(action) {
+      if (action === 'save' && !checkpoint) {
+        commitCheckpointSave();
+        return;
+      }
+      if (action === 'restore' && !checkpoint) return;
+
+      pendingCheckpointAction = action;
+      document.querySelector('#checkpointDialogTitle').textContent = action === 'save'
+        ? 'Replace checkpoint?'
+        : 'Restore checkpoint?';
+      document.querySelector('#checkpointDialogMessage').textContent = action === 'save'
+        ? 'The existing checkpoint will be replaced with the current drawing and machine state.'
+        : 'Current artwork and settings will be replaced. The saved checkpoint will remain available.';
+      document.querySelector('#confirmCheckpointAction').textContent = action === 'save'
+        ? 'Replace Checkpoint'
+        : 'Restore Checkpoint';
+      checkpointDialog.showModal();
+    }
+
+    // Reusable setups are deliberately small configuration files, never artwork.
+    const SETUP_SCHEMA = 'trikzik.scribble-engine.setup';
+    const SETUP_VERSION = 1;
+    const MAX_SETUP_BYTES = 16 * 1024;
+
+    function captureSetup(name) {
+      return {
+        schema: SETUP_SCHEMA,
+        version: SETUP_VERSION,
+        name,
+        machine: {
+          length1: state.length1,
+          length2: state.length2,
+          speed1: state.speed1,
+          speed2: state.speed2,
+          direction1: state.direction1,
+          direction2: state.direction2,
+          angle1: state.angle1,
+          angle2: state.angle2,
+          penDown: state.penDown
+        },
+        ink: {
+          color: state.inkColor,
+          width: state.lineWidth,
+          style: state.strokeStyle
+        },
+        paper: {
+          color: state.paperColor,
+          transparent: state.transparentPaper
+        }
+      };
+    }
+
+    function validateSetupFile(value) {
+      const fail = message => { throw new Error(`Setup rejected: ${message}`); };
+      const record = item => item !== null && typeof item === 'object' && !Array.isArray(item);
+      const numberIn = (item, minimum, maximum) =>
+        typeof item === 'number' && Number.isFinite(item) && item >= minimum && item <= maximum;
+      const color = item => typeof item === 'string' && /^#[0-9a-f]{6}$/i.test(item);
+
+      if (!record(value)) fail('the top level must be a JSON object.');
+      if (value.schema !== SETUP_SCHEMA) fail('this is not a Scribble Engine setup file.');
+      if (value.version !== SETUP_VERSION) fail(`version ${String(value.version)} is not supported.`);
+      if (typeof value.name !== 'string' || !value.name.trim() || value.name.trim().length > 60 || /[\u0000-\u001f\u007f]/.test(value.name)) {
+        fail('name must contain 1–60 printable characters.');
+      }
+      if (!record(value.machine) || !record(value.ink) || !record(value.paper)) fail('required settings are missing.');
+
+      for (const key of ['length1', 'length2']) {
+        if (!numberIn(value.machine[key], 20, 140) || !Number.isInteger(value.machine[key])) fail(`${key} is outside its supported range.`);
+      }
+      for (const key of ['speed1', 'speed2']) {
+        if (!numberIn(value.machine[key], 0, 360) || !Number.isInteger(value.machine[key])) fail(`${key} is outside its supported range.`);
+      }
+      for (const key of ['direction1', 'direction2']) {
+        if (value.machine[key] !== 1 && value.machine[key] !== -1) fail(`${key} must be 1 or -1.`);
+      }
+      for (const key of ['angle1', 'angle2']) {
+        if (!numberIn(value.machine[key], -Math.PI * 2, Math.PI * 2)) fail(`${key} is not a finite supported angle.`);
+      }
+      if (value.machine.penDown !== undefined && typeof value.machine.penDown !== 'boolean') fail('pen state must be true or false.');
+      if (!color(value.ink.color)) fail('ink color must use six-digit hex notation.');
+      if (!numberIn(value.ink.width, 0.5, 8) || !Number.isInteger(value.ink.width * 2)) fail('ink width is outside its supported range.');
+      if (!['solid', 'dashed', 'dotted'].includes(value.ink.style)) fail('stroke style is not supported.');
+      if (!color(value.paper.color)) fail('paper color must use six-digit hex notation.');
+      if (typeof value.paper.transparent !== 'boolean') fail('transparent paper must be true or false.');
+
+      return {
+        name: value.name.trim(),
+        state: {
+          length1: value.machine.length1,
+          length2: value.machine.length2,
+          speed1: value.machine.speed1,
+          speed2: value.machine.speed2,
+          direction1: value.machine.direction1,
+          direction2: value.machine.direction2,
+          angle1: value.machine.angle1,
+          angle2: value.machine.angle2,
+          // Version-1 setup files from before pen control mean Pen Down.
+          penDown: value.machine.penDown ?? true,
+          inkColor: value.ink.color.toLowerCase(),
+          lineWidth: value.ink.width,
+          strokeStyle: value.ink.style,
+          paperColor: value.paper.color.toLowerCase(),
+          transparentPaper: value.paper.transparent
+        }
+      };
+    }
+
+    function setSetupStatus(message, isError = false) {
+      const status = document.querySelector('#setupStatus');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function setupFilename(name) {
+      const safeName = name.normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/gi, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 48)
+        .toLowerCase();
+      return `${safeName || 'scribble-engine'}.scribble-setup.json`;
+    }
+
+    function downloadSetup() {
+      const name = controls.setupName.value.trim();
+      if (!name) {
+        setSetupStatus('Give this setup a name before downloading.', true);
+        controls.setupName.focus();
+        return;
+      }
+      const blob = new Blob([`${JSON.stringify(captureSetup(name), null, 2)}\n`], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = setupFilename(name);
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setSetupStatus(`Downloaded “${name}” · starting configuration only`);
+    }
+
+    function applySetup(setup) {
+      // This uses the existing one-step clear recovery and never touches checkpoint.
+      clearInk(true);
+      Object.assign(state, setup.state, { running: false });
+      hasInk = false;
+      previewDirty = true;
+      previousPen = null;
+      strokeDistance = 0;
+      previousTime = performance.now();
+      controls.setupName.value = setup.name;
+      setSetupStatus(`Loaded “${setup.name}” · paused on fresh paper`);
+      syncControls();
+    }
+
+    function requestSetupLoad(setup) {
+      if (!hasInk) {
+        applySetup(setup);
+        return;
+      }
+      pendingSetup = setup;
+      document.querySelector('#setupDialogMessage').textContent =
+        `“${setup.name}” will replace the current artwork with fresh paper and start paused. The displaced artwork can be restored with Restore Clear; your checkpoint will not change.`;
+      setupDialog.showModal();
+    }
+
+    async function importSetup(file) {
+      try {
+        if (!file) return;
+        if (file.size > MAX_SETUP_BYTES) throw new Error('Setup rejected: file is larger than 16 KB.');
+        const text = await file.text();
+        if (new Blob([text]).size > MAX_SETUP_BYTES) throw new Error('Setup rejected: file is larger than 16 KB.');
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          throw new Error('Setup rejected: the file is not valid JSON.');
+        }
+        requestSetupLoad(validateSetupFile(parsed));
+      } catch (error) {
+        setSetupStatus(error instanceof Error ? error.message : 'Setup rejected.', true);
+      } finally {
+        controls.setupFile.value = '';
+      }
     }
 
     // Drawing: ink accumulates in one bounded canvas; machinery is redrawn separately.
     function addInk(point) {
+      // The mechanism still supplies every live position while raised, but no
+      // ink sample survives to bridge the pen-up interval.
+      if (!state.penDown) {
+        breakStroke();
+        return;
+      }
       if (previousPen) {
+        const segmentLength = Math.hypot(point.penX - previousPen.x, point.penY - previousPen.y);
+        if (segmentLength < 1e-9) {
+          previousPen = { x: point.penX, y: point.penY };
+          return;
+        }
+        // Record first; if the bounded vector store is full, pause before the
+        // raster canvas can receive artwork that SVG would silently omit.
+        if (!recordVectorSegment(previousPen, point)) return;
+        const spacingUnit = Math.max(3, state.lineWidth * 2.4);
+        const pattern = state.strokeStyle === 'dashed'
+          ? [spacingUnit * 2.2, spacingUnit]
+          : state.strokeStyle === 'dotted' ? [0, spacingUnit] : [];
         inkContext.beginPath();
         inkContext.moveTo(previousPen.x, previousPen.y);
         inkContext.lineTo(point.penX, point.penY);
-        inkContext.strokeStyle = '#eff5fa';
-        inkContext.lineWidth = 1.15;
+        inkContext.strokeStyle = state.inkColor;
+        inkContext.lineWidth = state.lineWidth;
         inkContext.lineCap = 'round';
         inkContext.lineJoin = 'round';
+        inkContext.setLineDash(pattern);
+        inkContext.lineDashOffset = -strokeDistance;
         inkContext.stroke();
+        strokeDistance += segmentLength;
+        hasInk = true;
+        previewDirty = true;
       }
       previousPen = { x: point.penX, y: point.penY };
     }
 
+    function drawCheckerboard(context) {
+      const cell = 24;
+      context.fillStyle = '#d8d8d8';
+      context.fillRect(0, 0, SIZE, SIZE);
+      context.fillStyle = '#adadad';
+      for (let y = 0; y < SIZE; y += cell) {
+        for (let x = 0; x < SIZE; x += cell) {
+          if ((x / cell + y / cell) % 2 === 0) context.fillRect(x, y, cell, cell);
+        }
+      }
+    }
+
+    function drawPaperSurface(context) {
+      if (state.transparentPaper) drawCheckerboard(context);
+      else {
+        context.fillStyle = state.paperColor;
+        context.fillRect(0, 0, SIZE, SIZE);
+      }
+    }
+
+    function renderExportPreview() {
+      // Pixels and vector paths are captured in the same synchronous turn so
+      // PNG and SVG downloads cannot mix moments while the machine keeps moving.
+      exportSnapshot = {
+        geometry: captureGeometry(),
+        hasInk,
+        paperColor: state.paperColor,
+        transparentPaper: state.transparentPaper
+      };
+      exportContext.clearRect(0, 0, SIZE, SIZE);
+      if (!exportSnapshot.transparentPaper) {
+        exportContext.fillStyle = exportSnapshot.paperColor;
+        exportContext.fillRect(0, 0, SIZE, SIZE);
+      }
+      exportContext.drawImage(ink, 0, 0);
+      document.querySelector('#exportDescription').textContent = exportSnapshot.transparentPaper
+        ? 'Artwork only · transparent 600 × 600 PNG / SVG'
+        : `Artwork on ${exportSnapshot.paperColor.toUpperCase()} · 600 × 600 PNG / SVG`;
+      previewDirty = false;
+      updateVectorStatus();
+    }
+
+    function svgNumber(value) {
+      return String(Number(value.toFixed(3)));
+    }
+
+    function escapeSvgAttribute(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function serializeSvg(snapshot) {
+      if (snapshot.hasInk && !snapshot.geometry.complete) {
+        throw new Error('SVG export is unavailable because this artwork contains raster-only marks.');
+      }
+      const elements = [];
+      if (!snapshot.transparentPaper) {
+        elements.push(`<rect width="${SIZE}" height="${SIZE}" fill="${escapeSvgAttribute(snapshot.paperColor)}"/>`);
+      }
+      for (const stroke of snapshot.geometry.strokes) {
+        if (stroke.points.length < 4) continue;
+        let path = `M${svgNumber(stroke.points[0])} ${svgNumber(stroke.points[1])}`;
+        for (let index = 2; index < stroke.points.length; index += 2) {
+          path += `L${svgNumber(stroke.points[index])} ${svgNumber(stroke.points[index + 1])}`;
+        }
+        const dash = stroke.dashArray.length
+          ? ` stroke-dasharray="${stroke.dashArray.map(svgNumber).join(' ')}" stroke-dashoffset="${svgNumber(stroke.dashOffset)}"`
+          : '';
+        elements.push(`<path d="${path}" fill="none" stroke="${escapeSvgAttribute(stroke.color)}" stroke-width="${svgNumber(stroke.width)}" stroke-linecap="round" stroke-linejoin="round"${dash}/>`);
+      }
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">\n${elements.join('\n')}\n</svg>\n`;
+    }
+
+    function downloadBlob(blob, filename) {
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
     function drawMechanism(point) {
-      viewContext.fillStyle = '#0b1425';
-      viewContext.fillRect(0, 0, SIZE, SIZE);
+      drawPaperSurface(viewContext);
 
       // A faint drafting grid gives the workbench texture without becoming ink.
       viewContext.beginPath();
@@ -463,6 +1115,7 @@
         state.angle1 = (state.angle1 + radians1 * step) % (Math.PI * 2);
         state.angle2 = (state.angle2 + radians2 * step) % (Math.PI * 2);
         addInk(positions());
+        if (!state.running) break;
       }
     }
 
@@ -482,8 +1135,37 @@
       speed2: document.querySelector('#speed2'),
       direction1: document.querySelector('#direction1'),
       direction2: document.querySelector('#direction2'),
+      inkColor: document.querySelector('#inkColor'),
+      lineWidth: document.querySelector('#lineWidth'),
+      strokeStyle: document.querySelector('#strokeStyle'),
+      paperColor: document.querySelector('#paperColor'),
+      transparentPaper: document.querySelector('#transparentPaper'),
+      penToggle: document.querySelector('#penToggle'),
+      vectorStatus: document.querySelector('#vectorStatus'),
+      downloadSvg: document.querySelector('#downloadSvg'),
+      restoreClear: document.querySelector('#restoreClear'),
+      saveCheckpoint: document.querySelector('#saveCheckpoint'),
+      restoreCheckpoint: document.querySelector('#restoreCheckpoint'),
+      setupName: document.querySelector('#setupName'),
+      setupFile: document.querySelector('#setupFile'),
       pause: document.querySelector('#pause')
     };
+
+    function updateVectorStatus() {
+      const snapshot = exportDialog.open && exportSnapshot ? exportSnapshot : null;
+      const geometry = snapshot ? snapshot.geometry : { complete: vectorComplete };
+      const snapshotHasInk = snapshot ? snapshot.hasInk : hasInk;
+      const pointCount = snapshot ? geometry.pointCount : vectorPointCount;
+      const atLimit = snapshot ? geometry.limitReached : recordingLimitReached;
+      const unavailable = snapshotHasInk && !geometry.complete;
+      controls.vectorStatus.classList.toggle('limit', atLimit || unavailable);
+      controls.vectorStatus.textContent = atLimit
+        ? `Vector limit reached · ${MAX_VECTOR_POINTS.toLocaleString()} points · motion paused; export or clear paper`
+        : unavailable
+          ? 'SVG unavailable · this restored artwork contains raster-only marks'
+          : `SVG record ready · ${pointCount.toLocaleString()} / ${MAX_VECTOR_POINTS.toLocaleString()} points`;
+      controls.downloadSvg.disabled = unavailable;
+    }
 
     function syncControls() {
       for (const key of ['length1', 'length2', 'speed1', 'speed2']) {
@@ -496,7 +1178,27 @@
         controls[key].setAttribute('aria-pressed', String(counterclockwise));
         controls[key].lastElementChild.textContent = counterclockwise ? 'Counterclockwise ↺' : 'Clockwise ↻';
       }
+      controls.inkColor.value = state.inkColor;
+      controls.lineWidth.value = state.lineWidth;
+      document.querySelector('#lineWidthValue').value = `${state.lineWidth.toFixed(1)} px`;
+      controls.strokeStyle.value = state.strokeStyle;
+      controls.paperColor.value = state.paperColor;
+      controls.transparentPaper.checked = state.transparentPaper;
+      controls.penToggle.setAttribute('aria-pressed', String(state.penDown));
+      controls.penToggle.setAttribute('aria-label', state.penDown
+        ? 'Pen is down and drawing. Activate to lift it.'
+        : 'Pen is up and travelling. Activate to lower it.');
+      controls.penToggle.lastElementChild.textContent = state.penDown
+        ? 'Down · Drawing'
+        : 'Up · Travelling';
+      controls.restoreClear.disabled = !lastClear;
+      controls.saveCheckpoint.textContent = checkpoint ? 'Replace Checkpoint' : 'Save Checkpoint';
+      controls.restoreCheckpoint.disabled = !checkpoint;
+      document.querySelector('#checkpointStatus').textContent = checkpoint
+        ? `Saved ${checkpoint.savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · current session only`
+        : 'Empty · current page session only';
       controls.pause.textContent = state.running ? 'Pause' : 'Resume';
+      updateVectorStatus();
     }
 
     for (const key of ['length1', 'length2']) {
@@ -521,6 +1223,40 @@
       });
     }
 
+    controls.inkColor.addEventListener('input', event => {
+      state.inkColor = event.target.value;
+    });
+
+    document.querySelectorAll('.swatch').forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        state.inkColor = swatch.dataset.color;
+        syncControls();
+      });
+    });
+
+    controls.lineWidth.addEventListener('input', event => {
+      state.lineWidth = Number(event.target.value);
+      syncControls();
+    });
+
+    controls.strokeStyle.addEventListener('change', event => {
+      state.strokeStyle = event.target.value;
+      strokeDistance = 0;
+      activeVectorStroke = null;
+    });
+
+    controls.paperColor.addEventListener('input', event => {
+      state.paperColor = event.target.value;
+      previewDirty = true;
+    });
+
+    controls.transparentPaper.addEventListener('change', event => {
+      state.transparentPaper = event.target.checked;
+      previewDirty = true;
+    });
+
+    controls.penToggle.addEventListener('click', togglePen);
+
     controls.pause.addEventListener('click', () => {
       state.running = !state.running;
       breakStroke();
@@ -528,13 +1264,73 @@
       syncControls();
     });
 
-    document.querySelector('#clear').addEventListener('click', clearInk);
+    document.querySelector('#clear').addEventListener('click', () => clearInk(true));
+    controls.restoreClear.addEventListener('click', restoreLastClear);
+    controls.saveCheckpoint.addEventListener('click', () => requestCheckpointAction('save'));
+    controls.restoreCheckpoint.addEventListener('click', () => requestCheckpointAction('restore'));
+    document.querySelector('#downloadSetup').addEventListener('click', downloadSetup);
+    document.querySelector('#loadSetup').addEventListener('click', () => controls.setupFile.click());
+    controls.setupFile.addEventListener('change', event => importSetup(event.target.files[0]));
+
+    document.querySelector('#cancelCheckpointAction').addEventListener('click', () => {
+      pendingCheckpointAction = null;
+      checkpointDialog.close();
+    });
+
+    document.querySelector('#confirmCheckpointAction').addEventListener('click', () => {
+      const action = pendingCheckpointAction;
+      pendingCheckpointAction = null;
+      checkpointDialog.close();
+      if (action === 'save') commitCheckpointSave();
+      else if (action === 'restore') commitCheckpointRestore();
+    });
+
+    document.querySelector('#cancelSetupLoad').addEventListener('click', () => {
+      pendingSetup = null;
+      setupDialog.close();
+      setSetupStatus('Load canceled · current drawing unchanged');
+    });
+
+    document.querySelector('#confirmSetupLoad').addEventListener('click', () => {
+      const setup = pendingSetup;
+      pendingSetup = null;
+      setupDialog.close();
+      if (setup) applySetup(setup);
+    });
+
+    setupDialog.addEventListener('close', () => {
+      if (!setupDialog.returnValue) pendingSetup = null;
+    });
 
     document.querySelector('#reset').addEventListener('click', () => {
       Object.assign(state, DEFAULTS, { running: true });
-      clearInk();
+      clearInk(false);
       previousTime = performance.now();
       syncControls();
+    });
+
+    document.querySelector('#openPreview').addEventListener('click', () => {
+      renderExportPreview();
+      exportDialog.showModal();
+      updateVectorStatus();
+    });
+
+    document.querySelector('#closePreview').addEventListener('click', () => {
+      exportDialog.close();
+      updateVectorStatus();
+    });
+
+    document.querySelector('#downloadPng').addEventListener('click', () => {
+      exportCanvas.toBlob(blob => {
+        if (!blob) return;
+        downloadBlob(blob, 'scribble-engine.png');
+      }, 'image/png');
+    });
+
+    controls.downloadSvg.addEventListener('click', () => {
+      if (!exportSnapshot || controls.downloadSvg.disabled) return;
+      const svg = serializeSvg(exportSnapshot);
+      downloadBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'scribble-engine.svg');
     });
 
     document.addEventListener('visibilitychange', () => {

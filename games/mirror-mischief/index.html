@@ -129,12 +129,13 @@
       .panel section + section { margin-top: 14px; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
     }
   </style>
+  <link rel="stylesheet" href="../lab-shell.css?v=1">
 </head>
-<body>
+<body class="lab-themed-game game-mirror">
   <main class="shell">
-    <header>
+    <header class="lab-game-header">
       <div>
-        <a class="lab-link" href="../../#arcade">← TRIKZIK'S LAB</a>
+        <a class="lab-link lab-back-link" href="../../#experiments" aria-label="Back to the lab">← TRIKZIK'S LAB</a>
         <h1>Mirror <span>Mischief</span></h1>
         <p class="tagline">A small tabletop for large optical consequences and minor disobedience.</p>
       </div>
@@ -151,7 +152,7 @@
         </div>
       </section>
 
-      <aside class="panel" aria-label="Tabletop controls">
+      <aside class="panel lab-shell-panel" aria-label="Tabletop controls">
         <section>
           <h2>Add Piece</h2>
           <div class="add-grid">

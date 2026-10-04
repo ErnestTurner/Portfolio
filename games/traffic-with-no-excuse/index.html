@@ -289,11 +289,12 @@
       canvas { scroll-behavior: auto; }
     }
   </style>
+  <link rel="stylesheet" href="../lab-shell.css?v=1">
 </head>
-<body>
+<body class="lab-themed-game game-traffic">
   <main>
     <section class="stage" aria-labelledby="title">
-      <a class="arcade-back" href="../../#arcade" target="_top">← Trikzik's Lab</a>
+      <a class="arcade-back lab-back-link" href="../../#experiments" target="_top" aria-label="Back to the lab">← Trikzik's Lab</a>
       <h1 id="title">Traffic With No Excuse</h1>
       <p class="kicker">One road. One rule. No obvious cause.</p>
       <div class="road-wrap">
@@ -310,7 +311,7 @@
       </div>
     </section>
 
-    <aside aria-label="Driver settings">
+    <aside class="lab-shell-panel" aria-label="Driver settings">
       <div class="control">
         <label for="timeGap"><span>Following gap T</span><output id="timeGapValue">1.1 s</output></label>
         <input id="timeGap" type="range" min="0.6" max="2.5" step="0.1" value="1.1">

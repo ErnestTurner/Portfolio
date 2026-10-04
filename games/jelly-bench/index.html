@@ -325,13 +325,14 @@
       button { transition: none; }
     }
   </style>
+  <link rel="stylesheet" href="../lab-shell.css?v=1">
 </head>
-<body>
+<body class="lab-themed-game game-jelly">
   <main class="app">
     <section class="stage-column" aria-labelledby="title">
-      <header>
+      <header class="lab-game-header">
         <div>
-          <a class="lab-link" href="../../#arcade">← TRIKZIK'S LAB</a>
+          <a class="lab-link lab-back-link" href="../../#experiments" aria-label="Back to the lab">← TRIKZIK'S LAB</a>
           <p class="eyebrow">Soft-body experiment 01</p>
           <h1 id="title">Jelly Bench</h1>
         </div>
@@ -343,7 +344,7 @@
       </div>
     </section>
 
-    <aside class="panel" aria-label="Jelly controls">
+    <aside class="panel lab-shell-panel" aria-label="Jelly controls">
       <div class="panel-head">
         <h2>Bench Controls</h2>
         <span class="live">Live</span>

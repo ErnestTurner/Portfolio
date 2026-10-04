@@ -120,20 +120,21 @@
     }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
   </style>
+  <link rel="stylesheet" href="../lab-shell.css?v=1">
 </head>
-<body>
+<body class="lab-themed-game game-brain">
   <main>
-    <header>
+    <header class="lab-game-header">
       <div>
         <div class="eyebrow">Behavior bench 01</div>
         <h1>Brain in a Jar</h1>
         <p class="subtitle">Open the controller. Touch a wire. Watch the creature change.</p>
       </div>
-      <div class="status"><a class="arcade-back" href="../../#arcade" target="_top">← Trikzik's Lab</a><span id="status-dot" class="status-dot"></span><span id="status-text">Running</span></div>
+      <div class="status"><a class="arcade-back lab-back-link" href="../../#experiments" target="_top" aria-label="Back to the lab">← Trikzik's Lab</a><span id="status-dot" class="status-dot"></span><span id="status-text">Running</span></div>
     </header>
 
     <div class="layout">
-      <section class="panel" aria-labelledby="room-title">
+      <section class="panel lab-shell-panel" aria-labelledby="room-title">
         <div class="panel-head">
           <h2 id="room-title">Bounded room</h2>
           <span>Click or drag to move the light</span>
@@ -148,7 +149,7 @@
         <p class="experiment">Move the light. Swap the eyes. Change one connection. Reset to compare.</p>
       </section>
 
-      <section class="panel" aria-labelledby="brain-title">
+      <section class="panel lab-shell-panel" aria-labelledby="brain-title">
         <div class="panel-head">
           <h2 id="brain-title">Live neural controller</h2>
           <span class="brain-note">Hand-wired neural network. No learning or memory.</span>

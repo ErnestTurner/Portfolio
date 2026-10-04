@@ -289,16 +289,17 @@
       .setup-actions { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="../lab-shell.css?v=1">
 </head>
-<body>
+<body class="lab-themed-game game-scribble">
   <main>
     <section class="drawing-wrap" aria-label="Scribble Engine drawing area">
       <span class="apparatus-label" aria-hidden="true">Live consequence window</span>
       <canvas id="view" width="600" height="600"></canvas>
     </section>
 
-    <section class="controls" aria-label="Scribble Engine controls">
-      <a class="arcade-back" href="../../#arcade" target="_top">← Trikzik's Lab</a>
+    <section class="controls lab-shell-panel" aria-label="Scribble Engine controls">
+      <a class="arcade-back lab-back-link" href="../../#experiments" target="_top" aria-label="Back to the lab">← Trikzik's Lab</a>
       <p class="eyebrow">Trikzik Labs · Experimental apparatus 02</p>
       <h1>Scribble <em>Engine</em></h1>
       <p class="invitation">Can you draw a straight line using two things that only rotate?</p>

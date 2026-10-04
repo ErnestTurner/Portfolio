@@ -1,0 +1,199 @@
+/* Shared Trikzik Labs chrome. Game canvases, in-world art, and mechanics stay page-owned. */
+body.lab-themed-game {
+  --lab-black: #081018;
+  --lab-panel: #0c1924;
+  --lab-panel-raised: #14212e;
+  --lab-line: #37505c;
+  --lab-white: #eff5fa;
+  --lab-muted: #9fb3c1;
+  --lab-blue: #2b74d8;
+  --lab-blue-action: #1f61bd;
+  --lab-green: #38cd75;
+  --lab-focus: #a8ef9d;
+  color-scheme: dark;
+  background-color: var(--lab-black);
+  color: var(--lab-white);
+  accent-color: var(--lab-green);
+}
+
+.lab-themed-game .lab-back-link {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 9px 12px !important;
+  border: 1px solid var(--lab-line) !important;
+  border-radius: 7px;
+  background: var(--lab-panel) !important;
+  color: var(--lab-focus) !important;
+  font-size: 0 !important;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1.2;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lab-themed-game .lab-back-link::after {
+  content: "← Back to the lab";
+  font-size: 0.72rem;
+}
+
+.lab-themed-game .lab-back-link:hover {
+  border-color: var(--lab-green) !important;
+  background: var(--lab-panel-raised) !important;
+  color: var(--lab-white) !important;
+}
+
+.lab-themed-game .lab-game-header {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-black);
+  background-image: linear-gradient(100deg, #14212e99, transparent 68%);
+  color: var(--lab-white);
+}
+
+.lab-themed-game .lab-shell-panel {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-panel) !important;
+  color: var(--lab-white);
+  box-shadow: inset 0 1px 0 #eff5fa0a, 0 14px 40px #0003;
+}
+
+.lab-themed-game :is(a, button, input, select, summary):focus-visible {
+  outline: 3px solid var(--lab-focus) !important;
+  outline-offset: 4px !important;
+}
+
+.lab-themed-game button {
+  border-color: var(--lab-line);
+}
+
+.lab-themed-game button:hover:not(:disabled) {
+  border-color: var(--lab-green);
+}
+
+.lab-themed-game :is(.primary, .primary-button) {
+  border-color: var(--lab-focus) !important;
+  background: var(--lab-focus) !important;
+  color: #102016 !important;
+}
+
+.lab-themed-game :is(.primary, .primary-button):hover:not(:disabled) {
+  background: #baf7b1 !important;
+}
+
+.lab-themed-game :is(input[type="range"], input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--lab-green);
+}
+
+.game-moon .hud,
+.game-moon .ingredients,
+.game-moon .mobile-inspection {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-panel) !important;
+}
+
+.game-moon .iconbutton,
+.game-moon kbd {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-panel-raised) !important;
+  color: var(--lab-white) !important;
+}
+
+.game-starfall .game-shell {
+  border-color: var(--lab-line) !important;
+}
+
+.game-starfall :is(.game-top, .telemetry, .game-foot) {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-panel) !important;
+}
+
+.game-starfall .lab-link,
+.game-starfall :is(.icon-button, .flare-button) {
+  border-color: var(--lab-line);
+}
+
+.game-dungeon .masthead,
+.game-dungeon .shift-bar,
+.game-dungeon footer {
+  border-color: var(--lab-line) !important;
+}
+
+.game-dungeon .masthead {
+  background-color: var(--lab-black) !important;
+}
+
+.game-dungeon .work-panel.lab-shell-panel {
+  background-image: linear-gradient(150deg, #14212eaa, transparent 60%);
+}
+
+.game-brain .panel-head,
+.game-brain footer {
+  border-color: var(--lab-line) !important;
+}
+
+.game-brain .controls button {
+  border-color: var(--lab-line) !important;
+  background-color: var(--lab-panel-raised);
+  color: var(--lab-white);
+}
+
+.game-scribble .controls.lab-shell-panel,
+.game-scribble fieldset,
+.game-scribble .drawing-wrap {
+  border-color: var(--lab-line) !important;
+}
+
+.game-scribble .controls button,
+.game-scribble .controls select {
+  border-color: var(--lab-line) !important;
+}
+
+.game-traffic .lab-shell-panel {
+  background-image: linear-gradient(145deg, #14212ecc, #081018dd) !important;
+}
+
+.game-traffic .readout,
+.game-traffic .lab-shell-panel::before {
+  border-color: var(--lab-line) !important;
+}
+
+.game-jelly .lab-shell-panel,
+.game-jelly .panel-head,
+.game-jelly fieldset {
+  border-color: var(--lab-line) !important;
+}
+
+.game-jelly .panel button {
+  border-color: var(--lab-line);
+}
+
+.game-mirror .lab-shell-panel,
+.game-mirror .stage-card,
+.game-mirror .panel section {
+  border-color: var(--lab-line) !important;
+}
+
+.game-mirror .panel button {
+  border-color: var(--lab-line);
+}
+
+@media (max-width: 500px) {
+  .lab-themed-game .lab-back-link {
+    width: max-content;
+    min-height: 44px;
+    padding-inline: 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-themed-game *,
+  .lab-themed-game *::before,
+  .lab-themed-game *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+  }
+}

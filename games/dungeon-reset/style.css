@@ -9,3 +9,6 @@
 
 @media(min-width:851px) and (max-width:1100px){.play-layout{grid-template-columns:minmax(0,1fr)}.work-panel{padding:22px}#active-clipboard{display:grid;grid-template-columns:1fr 1fr;gap:0 25px}.readiness-heading,#active-clipboard>.meter,#active-clipboard>.party-note{grid-column:1/-1}#task-list{grid-column:1}#inspector{grid-column:2;grid-row:4;margin:0;border:0;padding:0}#open-doors{grid-column:2;align-self:end}#clipboard-intro{display:grid;grid-template-columns:1fr 1fr;gap:0 35px}#clipboard-intro h2{margin:20px 0}.intro-rule,.stamp{display:none}#clipboard-intro>.eyebrow{margin-top:20px}.title-copy h2{font-size:76px}.title-copy p{font-size:19px}.title-copy .eyebrow{font-size:10px}.title-copy{padding:35px 45px}.caretaker-quote{font-size:22px}.run-length{font-size:9px}.title-copy .primary.big{padding:16px 20px}.task{font-size:13px;min-height:32px}}
 
+.mobile-room-key{display:none}
+@media(max-width:540px){.mobile-room-key{display:block;grid-column:1/-1;margin:10px 0 7px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1px}.task{font-size:14px;padding:9px 8px;min-height:44px}.task .task-status{font-size:11px}.party-note,#inspect-description{font-size:14px;line-height:1.55}.room-topline,#room-status{font-size:10px}.room-bottom,.room-bottom button{font-size:9px}}
+

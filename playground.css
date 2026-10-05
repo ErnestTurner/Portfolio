@@ -900,89 +900,71 @@ h1 em {
   color: #13251b;
   background: var(--mint);
 }
-.globe-marker {
-  position: absolute;
-  z-index: 4;
+.experiment-console {
+  position: relative;
+  z-index: 6;
   display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 3px solid var(--lab-white);
-  border-radius: 50%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  width: min(100%, 520px);
+  margin: -16px auto 18px;
+  padding: 9px;
+  border: 1px solid var(--lab-line);
+  border-radius: 9px;
+  background: #07110fe8;
+  box-shadow: 0 6px 0 #020706, inset 0 1px 0 #ffffff0d;
+}
+.globe-marker {
+  position: static;
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  min-height: 46px;
+  padding: 7px 8px;
+  border: 1px solid #4f6562;
+  border-radius: 6px;
   background: var(--lab-panel-raised);
   color: var(--text);
-  box-shadow: 0 0 0 2px #081018;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+  box-shadow: inset 3px 0 0 transparent;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.globe-marker svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: var(--earth-blue-soft);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .globe-marker span {
+  min-width: 0;
+  overflow: hidden;
   color: inherit;
-  font: bold 8px "Courier New", monospace;
-}
-.globe-marker:hover,
-.globe-marker:focus-visible,
-.globe-marker[aria-pressed="true"] {
-  transform: scale(1.18);
-  background: var(--earth-blue);
-  color: var(--lab-white);
-}
-.globe-marker[aria-pressed="true"] {
-  color: var(--lab-black);
-  background: var(--earth-green);
-  box-shadow: 0 0 0 3px var(--mint), 0 0 24px #b4f7a755;
-}
-.marker-moon { left: 3%; top: 45%; }
-.marker-star { left: 15%; top: 18%; }
-.marker-dungeon { left: 42%; top: 6%; }
-.marker-brain { left: 70%; top: 14%; }
-.marker-scribble { left: 89%; top: 42%; }
-.marker-traffic { left: 77%; top: 71%; }
-.marker-jelly { left: 48%; top: 83%; }
-.marker-mirror { left: 17%; top: 73%; }
-.active-marker-label {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  top: 4%;
-  transform: translateX(-50%);
-  max-width: 72%;
-  padding: 7px 13px;
-  border: 1px solid var(--mint);
-  border-radius: 999px;
-  background: #0b171fe8;
-  color: var(--mint);
-  font: bold 11px "Courier New", monospace;
-  text-align: center;
+  font: bold 9px/1.15 "Courier New", monospace;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.signal-line {
-  position: absolute;
-  z-index: 4;
-  left: 57%;
-  top: 255px;
-  width: 9%;
-  height: 2px;
-  background: var(--mint);
-  transform: rotate(9deg);
-  transform-origin: left center;
-  opacity: 0.48;
+.globe-marker:hover,
+.globe-marker:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--earth-blue-soft);
+  background: #102738;
 }
-.signal-line i {
-  position: absolute;
-  top: -4px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--mint);
-  opacity: 0;
+.globe-marker[aria-pressed="true"] {
+  border-color: var(--earth-green-soft);
+  background: #102a22;
+  color: var(--earth-green-soft);
+  box-shadow: inset 4px 0 0 var(--earth-green), 0 0 14px #b4f7a722;
 }
-.signal-line i:nth-child(2) { left: 44%; }
-.signal-line i:nth-child(3) { right: 0; }
-.signal-line.transmitting i {
-  animation: signal-pop 0.5s ease forwards;
+.globe-marker[aria-pressed="true"] svg {
+  stroke: var(--earth-green-soft);
+  filter: drop-shadow(0 0 4px #b4f7a755);
 }
-.signal-line.transmitting i:nth-child(2) { animation-delay: 0.08s; }
-.signal-line.transmitting i:nth-child(3) { animation-delay: 0.16s; }
 .bench-station {
   align-self: center;
   min-width: 0;
@@ -1786,32 +1768,50 @@ footer {
 }
 @media (max-width: 760px) {
   header {
-    padding: 22px 20px;
-    gap: 14px;
+    padding: 14px 16px;
+    gap: 10px;
     flex-wrap: wrap;
   }
   nav {
-    gap: 22px;
+    gap: 14px;
   }
   .hero {
     grid-template-columns: 1fr;
-    padding: 35px 20px;
-    gap: 25px;
+    padding: 20px 14px 28px;
+    gap: 14px;
   }
   h1 {
-    font-size: 66px;
+    font-size: 52px;
     letter-spacing: -3px;
+    margin: 10px 0 14px;
+  }
+  .lead {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .actions {
+    gap: 12px;
+    margin: 14px 0 10px;
+  }
+  .actions .button {
+    min-height: 44px;
+    padding: 9px 12px;
+  }
+  .small {
+    margin: 0;
+    font-size: 10px;
   }
   .workbench {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto auto;
-    padding: 16px 12px 0;
+    padding: 12px 10px 0;
     border-radius: 14px;
   }
   .workbench-tools {
     grid-column: 1;
-    min-height: 86px;
+    min-height: 62px;
     padding: 0 2px;
   }
   .workbench-tools > p {
@@ -1845,7 +1845,7 @@ footer {
   }
   .globe-zone {
     grid-column: 1;
-    min-height: 330px;
+    min-height: 0;
   }
   .planet-actions {
     align-items: stretch;
@@ -1873,32 +1873,19 @@ footer {
     width: 38px;
     height: 38px;
   }
+  .experiment-console {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: min(100%, 340px);
+    margin: -10px auto 16px;
+    padding: 7px;
+  }
   .globe-marker {
-    width: 24px;
-    height: 24px;
+    min-height: 48px;
+    padding: 7px;
   }
-  .active-marker-label {
-    max-width: 75%;
-    font-size: 10px;
-  }
-  .signal-line {
-    position: relative;
-    grid-column: 1;
-    left: auto;
-    top: auto;
-    width: 2px;
-    height: 38px;
-    margin: -14px auto -4px;
-    transform: none;
-  }
-  .signal-line i {
-    left: -4px;
-  }
-  .signal-line i:nth-child(2) { top: 14px; left: -4px; }
-  .signal-line i:nth-child(3) { top: 32px; right: auto; left: -4px; }
-  .signal-line.transmitting i {
-    animation: none;
-    opacity: 1;
+  .globe-marker span {
+    font-size: 9px;
   }
   .bench-station {
     grid-column: 1;
@@ -2054,6 +2041,41 @@ footer {
   *:after {
     animation: none !important;
     transition: none !important;
+  }
+}
+@media (max-width: 760px) and (max-height: 650px) {
+  header {
+    padding-block: 10px;
+  }
+  .hero {
+    padding-top: 12px;
+  }
+  h1 {
+    margin: 6px 0 10px;
+    font-size: 46px;
+  }
+  .lead {
+    line-height: 1.4;
+  }
+  .lead br {
+    display: none;
+  }
+  .actions {
+    margin: 10px 0 6px;
+  }
+  .intro .small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .workbench-tools {
+    min-height: 54px;
   }
 }
 .dungeon-art {

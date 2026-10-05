@@ -161,6 +161,7 @@ let jellyCompletions = 0;
 let peerReviewShown = false;
 let openingStarted = false;
 let openingFinished = reduceMotion.matches;
+let openingVisibilityTimer = 0;
 
 function easeInOut(value) {
   return value < 0.5 ? 2 * value * value : 1 - ((-2 * value + 2) ** 2) / 2;
@@ -185,6 +186,8 @@ function applyPlanet({ dent = 0, wobble = 0, probe = 0 } = {}) {
 function finishOpening() {
   if (openingFinished) return;
   openingFinished = true;
+  window.clearTimeout(openingVisibilityTimer);
+  openingVisibilityTimer = 0;
   globeZone?.classList.remove("opening-running", "opening-paused");
   planetSystem?.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
 }
@@ -193,11 +196,18 @@ function syncOpeningVisibility() {
   if (openingFinished || reduceMotion.matches) return;
   const paused = document.hidden || !apparatusInView;
   globeZone?.classList.toggle("opening-paused", paused);
-  if (!openingStarted && !paused) {
-    openingStarted = true;
-    requestAnimationFrame(() => {
-      if (!openingFinished) globeZone?.classList.add("opening-running");
-    });
+  if (paused) {
+    window.clearTimeout(openingVisibilityTimer);
+    openingVisibilityTimer = 0;
+  } else if (!openingStarted && !openingVisibilityTimer) {
+    openingVisibilityTimer = window.setTimeout(() => {
+      openingVisibilityTimer = 0;
+      if (openingFinished || document.hidden || !apparatusInView) return;
+      openingStarted = true;
+      requestAnimationFrame(() => {
+        if (!openingFinished) globeZone?.classList.add("opening-running");
+      });
+    }, 320);
   }
 }
 
@@ -331,8 +341,8 @@ function closePreview({ restoreFocus = false } = {}) {
   selectedKey = null;
   delete preview.dataset.experiment;
   delete globeZone.dataset.experiment;
-  previewTitle.textContent = "Pick a numbered specimen";
-  previewSummary.textContent = "Select a marker around Earth to wake one small machine.";
+  previewTitle.textContent = "Choose a bench control";
+  previewSummary.textContent = "Use a labeled control below Earth to wake one small machine.";
   previewOpen.hidden = true;
   previewClose.hidden = true;
   planetTreatment.innerHTML = "";
@@ -352,10 +362,12 @@ document.addEventListener("keydown", event => {
 
 if (globeStage && "IntersectionObserver" in window) {
   const observer = new IntersectionObserver(entries => {
-    apparatusInView = Boolean(entries[0]?.isIntersecting);
+    const entry = entries[0];
+    const requiredRatio = window.matchMedia("(max-width: 760px)").matches ? 0.64 : 0.48;
+    apparatusInView = Boolean(entry?.isIntersecting && entry.intersectionRatio >= requiredRatio);
     if (!apparatusInView) cancelTreatment();
     syncOpeningVisibility();
-  }, { threshold: 0.08 });
+  }, { threshold: [0, 0.48, 0.64, 0.8, 1] });
   observer.observe(globeStage);
 }
 document.addEventListener("visibilitychange", () => {

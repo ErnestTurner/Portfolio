@@ -48,9 +48,19 @@
         ]
       }
     </script>
-    <link rel="stylesheet" href="playground.css?v=reference-pilot-1" />
+    <link rel="stylesheet" href="playground.css?v=drawn-pilot-1" />
   </head>
   <body>
+    <svg class="site-symbols" aria-hidden="true">
+      <defs>
+        <symbol id="et-pilot-mark" viewBox="0 0 32 46">
+          <path class="et-pilot-shape inner-alien-head" d="M15 2l-4 1-3 3-2 4v5l2 4 4 3v4l-3 2-3-1-2-3-3 3 2 4 3 2 4 2h2l-1 7 2 2 6 .2 2-2.2-1-7 3-1 4-3 4-4-3-3-3 3-3 1-2-2v-4l3-3 3-4v-5l-2-4-3-3-4-1Z" />
+          <path class="et-pilot-eye et-pilot-eye-left" d="M9 10l2-1 3 2-1 3-3-1-1-3Z" />
+          <path class="et-pilot-eye et-pilot-eye-right" d="M18 11l3-2 3 1-1 3-3 1-2-3Z" />
+          <path class="et-pilot-fold" d="M11.8 26.5l4.2 4 4.2-4M11.4 34.6l4.5-3.9 4.7 3.8" />
+        </symbol>
+      </defs>
+    </svg>
     <a class="skip" href="#experiments">Skip to experiments</a>
     <header>
       <a class="brand" href="#top">TRIKZIK<span> / </span>LABS</a>
@@ -79,11 +89,7 @@
             <p>CHOOSE AN EXPERIMENT</p>
             <button class="ufo-button" id="surprise-experiment" type="button">
               <span class="ufo" aria-hidden="true">
-                <span class="alien-pilot">
-                  <span class="alien-head"><i></i><i></i><b></b></span>
-                  <span class="alien-arm alien-arm-left"></span>
-                  <span class="alien-arm alien-arm-right"></span>
-                </span>
+                <svg class="alien-pilot" viewBox="0 0 32 46"><use href="#et-pilot-mark" /></svg>
               </span>
               <span>Surprise experiment ↗</span>
             </button>
@@ -129,12 +135,7 @@
                       <path class="inner-ufo-dome" d="M142 220c2-25 42-25 45 0z" />
                       <ellipse class="inner-ufo-body" cx="165" cy="222" rx="42" ry="10" />
                       <path class="inner-ufo-legs" d="M143 229l-9 23m55-23 9 23M130 252h11m51 0h11" />
-                      <g class="inner-pilot">
-                        <ellipse class="inner-alien-head" cx="165" cy="201" rx="8" ry="9" />
-                        <path class="inner-alien-eyes" d="M160 199l3 2m7-2-3 2" />
-                        <path class="inner-alien-body" d="M160 209h10l3 11h-16z" />
-                        <path class="inner-alien-arms" d="M158 211l7 6 7-6" />
-                      </g>
+                      <g class="inner-pilot"><use href="#et-pilot-mark" x="151" y="185" width="28" height="40" /></g>
                     </g>
                     <g class="inner-arm-assembly">
                       <path class="inner-arm" d="M196 214l24-12 15 17 19-6" />

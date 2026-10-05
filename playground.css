@@ -298,79 +298,41 @@ h1 em {
   border-left: 2px solid var(--lab-white);
   border-right: 2px solid var(--lab-white);
 }
+.site-symbols {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.et-pilot-shape {
+  fill: #079b12;
+  shape-rendering: crispEdges;
+}
+.et-pilot-eye {
+  fill: #020805;
+  shape-rendering: crispEdges;
+}
+.et-pilot-fold {
+  fill: none;
+  stroke: #056d0d;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .alien-pilot {
   position: relative;
   z-index: 1;
-  bottom: 17px;
+  bottom: 13px;
   display: block;
-  width: 24px;
-  height: 23px;
+  width: 18px;
+  height: 26px;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
   transform-origin: 50% 100%;
 }
-.alien-pilot::after {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 15px;
-  width: 11px;
-  height: 8px;
-  border: 1px solid var(--lab-black);
-  border-radius: 45% 45% 25% 25%;
-  background: var(--earth-green);
-}
-.alien-head {
-  position: absolute;
-  z-index: 2;
-  left: 4px;
-  top: 0;
-  width: 17px;
-  height: 17px;
-  border: 1px solid var(--lab-black);
-  border-radius: 48% 48% 52% 52%;
-  background: var(--earth-green);
-  box-shadow: inset 0 -2px 0 #1ca85a;
-}
-.alien-head i {
-  position: absolute;
-  top: 5px;
-  width: 3px;
-  height: 5px;
-  border-radius: 80% 20% 80% 20%;
-  background: var(--lab-black);
-  transform: rotate(-28deg);
-}
-.alien-head i:first-child { left: 4px; }
-.alien-head i:nth-child(2) { right: 4px; transform: rotate(28deg); }
-.alien-head b {
-  display: none;
-}
-.alien-arm {
-  position: absolute;
-  z-index: 3;
-  bottom: 1px;
-  width: 10px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--earth-green);
-  transition: transform 0.2s ease;
-}
-.alien-arm::after {
-  content: "";
-  position: absolute;
-  top: -1px;
-  width: 4px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--earth-green);
-}
-.alien-arm-left { left: 1px; transform: rotate(32deg); }
-.alien-arm-left::after { left: -1px; }
-.alien-arm-right { right: 1px; transform: rotate(-32deg); }
-.alien-arm-right::after { right: -1px; }
-.ufo-button:hover .alien-arm-right,
-.ufo-button:focus-visible .alien-arm-right {
-  transform: translateY(-4px) rotate(-42deg);
-}
+.ufo-button:hover .alien-pilot,
+.ufo-button:focus-visible .alien-pilot { transform: translateY(-2px) rotate(2deg); }
 .ufo-button.launched .alien-pilot {
   animation: alien-brace 0.55s ease;
 }
@@ -495,22 +457,8 @@ h1 em {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.inner-alien-head,
-.inner-alien-body {
-  fill: var(--earth-green);
-  stroke: #071713;
-  stroke-width: 1.5;
-}
-.inner-alien-eyes,
-.inner-alien-arms {
-  fill: none;
-  stroke: #071713;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 .inner-pilot {
-  transform-origin: 165px 207px;
+  transform-origin: 165px 205px;
 }
 .inner-arm-assembly {
   transform-origin: 196px 214px;
@@ -1816,7 +1764,7 @@ footer {
     bottom: 12px;
   }
   .alien-pilot {
-    bottom: 14px;
+    bottom: 12px;
     transform: scale(0.88);
   }
   .globe-zone {

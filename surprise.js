@@ -5,6 +5,7 @@ const treatments = {
     action: "Catch & bubble",
     running: "Umbrella open",
     summary: "Slide, leave slowing slime, catch marshmallows with an umbrella, and send them moonward in bubbles.",
+    innerArt: `<circle class="inner-accent" cx="314" cy="262" r="6"/><path d="M311 262c0-5 7-5 7 0 0 4-6 5-8 1M307 272h13"/>`,
     art: `<g class="treatment-moon">
       <circle class="mini-moon" cx="92" cy="104" r="18" />
       <path class="mini-trail" d="M286 333c25-17 43 12 71-5" />
@@ -21,6 +22,7 @@ const treatments = {
     action: "Fire a flare",
     running: "Light spent · fragment returning",
     summary: "Move and fire, spend the same light that keeps you alive, then recover fragments before the eclipse closes in.",
+    innerArt: `<path class="inner-accent" d="M314 254l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>`,
     art: `<g class="treatment-star">
       <path class="eclipse-veil" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C275 344 286 146 220 103Z" />
       <g class="mini-ship"><path d="M330 188l27-14-8 14 8 14z"/><circle cx="343" cy="188" r="4"/></g>
@@ -35,6 +37,7 @@ const treatments = {
     action: "Reset the bench",
     running: "Caretaker at work",
     summary: "Return the staff, reset traps, repair the door, restock treasure, and clean up before the next hero party arrives.",
+    innerArt: `<path d="M321 260a9 9 0 1 0 0 10M321 260v7h-7"/><circle class="inner-accent" cx="312" cy="265" r="2"/>`,
     art: `<g class="treatment-dungeon">
       <g class="mess-mark"><path d="M144 183l18 18m0-18-18 18"/><path d="M211 289h20v18h-20z"/><path d="M282 190l16 28h-32z"/></g>
       <g class="reset-mark"><path d="M139 176l-7-7m7 7-10 2M207 282l-7-7m7 7-10 2M302 181l7-7m-7 7 10 2"/></g>
@@ -48,7 +51,8 @@ const treatments = {
     route: "games/brain-in-a-jar/index.html",
     action: "Move the light",
     running: "Signal crossing the controller",
-    summary: "Move the light, swap the creature’s eyes, or edit one real connection in its hand-wired neural controller.",
+    summary: "Move the light, swap the creature's eyes, or edit one real connection in its hand-wired neural controller.",
+    innerArt: `<path d="M307 257l12 13m0-13-12 13"/><circle class="inner-accent" cx="307" cy="257" r="3"/><circle cx="319" cy="257" r="3"/><circle cx="307" cy="270" r="3"/><circle class="inner-accent" cx="319" cy="270" r="3"/>`,
     art: `<g class="treatment-brain">
       <circle class="stimulus" cx="73" cy="173" r="13" />
       <path class="sensor-rays" d="M86 177l89 44M86 168l91 34" />
@@ -64,6 +68,7 @@ const treatments = {
     action: "Trace a loop",
     running: "Two arms · one pen",
     summary: "Two rotating arms share one pen. Change their lengths, speeds, and directions to alter the drawing.",
+    innerArt: `<path d="M304 268c4-15 8 11 13-3s7 12 9-4"/><circle class="inner-accent" cx="304" cy="268" r="2"/>`,
     art: `<g class="treatment-scribble">
       <path class="drawing-arm arm-one" d="M68 361L176 254" />
       <path class="drawing-arm arm-two" d="M372 361L176 254" />
@@ -78,6 +83,7 @@ const treatments = {
     action: "Tap a car",
     running: "Brake wave traveling backward",
     summary: "Brake one identical driver on an obstacle-free ring, remove the cause, and watch the slowdown keep traveling.",
+    innerArt: `<rect x="307" y="253" width="11" height="23" rx="5"/><circle class="inner-accent" cx="312.5" cy="258" r="2.5"/><circle cx="312.5" cy="265" r="2.5"/><circle cx="312.5" cy="272" r="2.5"/>`,
     art: `<g class="treatment-traffic">
       <ellipse class="traffic-ring" cx="220" cy="245" rx="142" ry="42" />
       <g class="traffic-cars"><rect x="212" y="198" width="16" height="8" rx="3"/><rect x="284" y="207" width="16" height="8" rx="3"/><rect x="346" y="240" width="16" height="8" rx="3"/><rect x="286" y="277" width="16" height="8" rx="3"/><rect x="212" y="284" width="16" height="8" rx="3"/><rect x="139" y="276" width="16" height="8" rx="3"/><rect x="79" y="241" width="16" height="8" rx="3"/><rect x="140" y="207" width="16" height="8" rx="3"/></g>
@@ -91,6 +97,7 @@ const treatments = {
     action: "Press the planet",
     running: "Pressure applied · spring recovery",
     summary: "Tune stiffness, damping, pressure, and rest length, then see whether one soft body can squeeze through the gap.",
+    innerArt: `<path class="inner-accent" d="M305 266c0-8 5-12 11-10 7 2 9 13 3 18-5 5-14 1-14-8z"/><path d="M301 253v25m23-25v25"/>`,
     art: `<g class="treatment-jelly">
       <path class="pressure-lines" d="M365 221l-12 8m14 16h-16m14 25-12-8" />
       <g class="counter-probe">
@@ -108,6 +115,7 @@ const treatments = {
     action: "Tilt the mirror",
     running: "Downstream path changed",
     summary: "Move or rotate mirrors, splitters, blockers, and receivers; one small adjustment changes everything downstream.",
+    innerArt: `<path d="M304 270l9-15 10 15"/><rect class="inner-accent" x="313" y="253" width="4" height="23" rx="2" transform="rotate(25 315 264)"/>`,
     art: `<g class="treatment-mirror">
       <circle class="mini-source" cx="66" cy="245" r="12" />
       <path class="beam beam-source" d="M79 245h267" />
@@ -133,6 +141,8 @@ const workbench = document.querySelector(".workbench");
 const globeZone = document.querySelector(".globe-zone");
 const globeStage = document.querySelector(".globe-stage");
 const planetTreatment = document.querySelector("#planet-treatment");
+const innerTreatment = document.querySelector("#inner-treatment");
+const planetSystem = document.querySelector("#planet-system");
 const planetShell = document.querySelector("#planet-shell");
 const planetClip = document.querySelector("#planet-clip-shape");
 const planetSurface = document.querySelector("#planet-surface");
@@ -140,14 +150,17 @@ const probeMoving = document.querySelector("#planet-probe-moving");
 const treatmentButton = document.querySelector("#poke-planet");
 const planetStatus = document.querySelector("#planet-status");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const defaultInnerArt = innerTreatment?.innerHTML || "";
 let selectedKey = null;
 let lastMarker = null;
 let runToken = 0;
 let runTimer = 0;
 let runFrame = 0;
-let apparatusInView = true;
+let apparatusInView = !("IntersectionObserver" in window);
 let jellyCompletions = 0;
 let peerReviewShown = false;
+let openingStarted = false;
+let openingFinished = reduceMotion.matches;
 
 function easeInOut(value) {
   return value < 0.5 ? 2 * value * value : 1 - ((-2 * value + 2) ** 2) / 2;
@@ -163,10 +176,29 @@ function applyPlanet({ dent = 0, wobble = 0, probe = 0 } = {}) {
   const path = dent ? dentPath(dent) : REST_PATH;
   planetShell?.setAttribute("d", path);
   planetClip?.setAttribute("d", path);
-  if (planetSurface) {
-    planetSurface.style.transform = wobble ? `translateX(${wobble}px) rotate(${wobble * 0.32}deg)` : "";
+  if (planetSystem) {
+    planetSystem.style.transform = wobble ? `translateX(${wobble}px) rotate(${wobble * 0.32}deg)` : "";
   }
   if (probeMoving) probeMoving.style.transform = probe ? `translateX(${-18 * probe}px)` : "";
+}
+
+function finishOpening() {
+  if (openingFinished) return;
+  openingFinished = true;
+  globeZone?.classList.remove("opening-running", "opening-paused");
+  planetSystem?.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+}
+
+function syncOpeningVisibility() {
+  if (openingFinished || reduceMotion.matches) return;
+  const paused = document.hidden || !apparatusInView;
+  globeZone?.classList.toggle("opening-paused", paused);
+  if (!openingStarted && !paused) {
+    openingStarted = true;
+    requestAnimationFrame(() => {
+      if (!openingFinished) globeZone?.classList.add("opening-running");
+    });
+  }
 }
 
 function setTreatmentBusy(busy) {
@@ -274,6 +306,7 @@ function runTreatment() {
 function selectExperiment(key) {
   const treatment = treatments[key];
   if (!treatment || !preview) return;
+  finishOpening();
   cancelTreatment();
   selectedKey = key;
   markers.forEach(marker => marker.setAttribute("aria-pressed", String(marker.dataset.experiment === key)));
@@ -286,6 +319,7 @@ function selectExperiment(key) {
   previewOpen.hidden = false;
   previewClose.hidden = false;
   planetTreatment.innerHTML = treatment.art;
+  if (innerTreatment) innerTreatment.innerHTML = treatment.innerArt;
   treatmentButton.innerHTML = `${treatment.action} <span aria-hidden="true">→</span>`;
   setTreatmentBusy(false);
   planetStatus.textContent = `${treatment.name} ready`;
@@ -302,6 +336,7 @@ function closePreview({ restoreFocus = false } = {}) {
   previewOpen.hidden = true;
   previewClose.hidden = true;
   planetTreatment.innerHTML = "";
+  if (innerTreatment) innerTreatment.innerHTML = defaultInnerArt;
   treatmentButton.innerHTML = 'Select an experiment <span aria-hidden="true">→</span>';
   treatmentButton.disabled = true;
   planetStatus.textContent = "Earth ready for a test";
@@ -319,12 +354,23 @@ if (globeStage && "IntersectionObserver" in window) {
   const observer = new IntersectionObserver(entries => {
     apparatusInView = Boolean(entries[0]?.isIntersecting);
     if (!apparatusInView) cancelTreatment();
+    syncOpeningVisibility();
   }, { threshold: 0.08 });
   observer.observe(globeStage);
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden || !apparatusInView) cancelTreatment({ announce: true });
+  syncOpeningVisibility();
 });
+
+planetSystem?.addEventListener("animationend", event => {
+  if (event.animationName === "impossible-outer-reaction") finishOpening();
+});
+reduceMotion.addEventListener?.("change", event => {
+  if (event.matches) finishOpening();
+  else syncOpeningVisibility();
+});
+syncOpeningVisibility();
 
 surpriseButton?.addEventListener("click", () => {
   const destination = treatmentList[Math.floor(Math.random() * treatmentList.length)].route;

@@ -453,6 +453,178 @@ h1 em {
   transform-origin: 220px 245px;
   transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+.planet-system {
+  transform-origin: 220px 245px;
+}
+.impossible-lab {
+  pointer-events: none;
+  transform-origin: 220px 245px;
+}
+.cutaway-shadow {
+  fill: #020706;
+  opacity: 0.75;
+}
+.cutaway-chamber {
+  fill: #071713;
+  stroke: #dce8df;
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+.cutaway-rim {
+  fill: none;
+  stroke: #5f7270;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lab-plumbing {
+  fill: #0a2723;
+  stroke: #315650;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lab-plumbing circle {
+  fill: var(--earth-green-soft);
+  stroke: #0f2924;
+  stroke-width: 2;
+}
+.lab-lamp {
+  fill: #e5ffdc;
+  stroke: var(--lab-white);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px #c9ffc58f);
+}
+.lab-light {
+  fill: #baf7b0;
+  opacity: 0.08;
+}
+.inner-ufo {
+  transform-origin: 165px 222px;
+}
+.inner-ufo-dome {
+  fill: #0c1b23;
+  stroke: #dfeff1;
+  stroke-width: 2;
+}
+.inner-ufo-body {
+  fill: var(--earth-blue);
+  stroke: var(--lab-white);
+  stroke-width: 3;
+}
+.inner-ufo-legs,
+.inner-arm {
+  fill: none;
+  stroke: var(--lab-white);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inner-alien-head,
+.inner-alien-body {
+  fill: var(--earth-green);
+  stroke: #071713;
+  stroke-width: 1.5;
+}
+.inner-antenna,
+.inner-alien-eyes {
+  fill: none;
+  stroke: #071713;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.inner-pilot {
+  transform-origin: 165px 207px;
+}
+.inner-arm-assembly {
+  transform-origin: 196px 214px;
+}
+.inner-arm-joint {
+  fill: var(--lab-panel-raised);
+  stroke: var(--lab-white);
+  stroke-width: 2;
+}
+.inner-probe-tip {
+  fill: #ffe599;
+  stroke: var(--lab-white);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px #ffe599aa);
+}
+.inner-earth {
+  transform-origin: 270px 257px;
+}
+.inner-ocean {
+  fill: var(--earth-blue);
+  stroke: var(--lab-white);
+  stroke-width: 3;
+}
+.inner-land {
+  fill: var(--earth-green);
+  stroke: var(--earth-green-edge);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.inner-grid {
+  fill: none;
+  stroke: #d9ebff66;
+  stroke-width: 1;
+}
+.inner-brace {
+  fill: var(--lab-panel-raised);
+  stroke: var(--lab-outline);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inner-brace circle {
+  fill: var(--earth-blue-deep);
+  stroke: var(--lab-white);
+  stroke-width: 2;
+}
+.inner-console {
+  fill: #0d2421;
+  stroke: #5f7270;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.inner-treatment {
+  fill: var(--earth-green);
+  stroke: var(--earth-green-soft);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inner-treatment path,
+.inner-treatment line,
+.inner-treatment polyline {
+  fill: none;
+}
+.inner-treatment .inner-accent {
+  fill: #ffe599;
+  stroke: #fff6bf;
+}
+.contact-lines {
+  fill: none;
+  stroke: #fff6bf;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+}
+.inner-lab-label {
+  fill: #9bb1aa;
+  font: 700 7px "Courier New", monospace;
+  letter-spacing: 0.8px;
+}
+.opening-running .inner-ufo { animation: impossible-ufo-arrival 4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.opening-running .inner-pilot { animation: impossible-alien-attention 4s ease-in-out both; }
+.opening-running .inner-arm-assembly { animation: impossible-arm-nudge 4s cubic-bezier(0.3, 0.8, 0.2, 1) both; }
+.opening-running .inner-earth { animation: impossible-inner-reaction 4s ease-in-out both; }
+.opening-running .contact-lines { animation: impossible-contact 4s ease-out both; }
+.opening-running .planet-system { animation: impossible-outer-reaction 4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.opening-running .cradle-pad { animation: impossible-brace-load 4s ease-in-out both; }
+.opening-paused :is(.inner-ufo, .inner-pilot, .inner-arm-assembly, .inner-earth, .contact-lines, .planet-system, .cradle-pad) {
+  animation-play-state: paused !important;
+}
 .cradle-arm {
   stroke-width: 5;
 }
@@ -612,10 +784,12 @@ h1 em {
 .treatment-running[data-experiment="traffic"] .traffic-cars { animation: earth-cars 1.5s linear; }
 .treatment-running[data-experiment="traffic"] .jam-wave { animation: earth-jam 1.5s ease-in-out; }
 .treatment-running[data-experiment="jelly"] .pressure-lines { animation: earth-pressure 1.45s ease-in-out; }
+.treatment-running .inner-treatment { animation: inner-apparatus-readout 1.45s ease-in-out; }
 .peer-review-running[data-experiment="jelly"] .counter-probe { animation: earth-counter-probe 1.15s ease-in-out; }
 .peer-review-running[data-experiment="jelly"] .peer-review-caption { animation: earth-peer-caption 1.15s ease-in-out; }
 .peer-review-running[data-experiment="jelly"] :is(.planet-probe-frame, .planet-probe-moving) { animation: earth-apparatus-poke 1.15s ease-in-out; }
 .workbench.peer-review-active .ufo-button { animation: earth-alien-recoil 1.15s ease-in-out; }
+.workbench.peer-review-active .inner-ufo { animation: earth-inner-alien-recoil 1.15s ease-in-out; }
 .peer-review-static[data-experiment="jelly"] .counter-probe,
 .peer-review-static[data-experiment="jelly"] .peer-review-caption { opacity: 1; }
 .peer-review-static[data-experiment="jelly"] :is(.planet-probe-frame, .planet-probe-moving) { transform: translateX(8px); }
@@ -652,6 +826,10 @@ h1 em {
 @keyframes earth-cars { to { transform: rotate(240deg); } }
 @keyframes earth-jam { 0%, 25% { opacity: 0; stroke-dashoffset: 0; } 45%, 80% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: -44; } }
 @keyframes earth-pressure { 35%, 72% { opacity: 1; transform: translateX(-8px); } }
+@keyframes inner-apparatus-readout {
+  0%, 100% { filter: none; }
+  35%, 72% { filter: drop-shadow(0 0 6px var(--earth-green-soft)); transform: translateY(-1px); }
+}
 @keyframes earth-counter-probe {
   0%, 16%, 100% { opacity: 0; transform: scaleX(0.08) rotate(10deg); }
   34% { opacity: 1; transform: scaleX(0.72) rotate(-5deg); }
@@ -661,10 +839,53 @@ h1 em {
 @keyframes earth-peer-caption { 0%, 36%, 100% { opacity: 0; } 48%, 82% { opacity: 1; } }
 @keyframes earth-apparatus-poke { 0%, 42%, 100% { transform: translateX(0); } 50%, 68% { transform: translateX(8px) rotate(1deg); } }
 @keyframes earth-alien-recoil { 0%, 45%, 100% { transform: translate(0, 0) rotate(0); } 52%, 70% { transform: translate(7px, -5px) rotate(3deg); } }
+@keyframes earth-inner-alien-recoil { 0%, 44%, 100% { transform: translate(0, 0) rotate(0); } 52%, 69% { transform: translate(-8px, -4px) rotate(-5deg); } }
 @keyframes earth-mirror { 50% { transform: rotate(24deg); } }
 @keyframes earth-beam-one { 45%, 75% { opacity: 0.18; } }
 @keyframes earth-beam-two { 45%, 75% { opacity: 1; } }
 @keyframes earth-receiver { 45%, 75% { filter: drop-shadow(0 0 9px var(--earth-green-soft)); } }
+@keyframes impossible-ufo-arrival {
+  0% { transform: translate(-28px, 7px) rotate(-5deg); }
+  18% { transform: translate(4px, -3px) rotate(1.5deg); }
+  28%, 100% { transform: translate(0, 0) rotate(0); }
+}
+@keyframes impossible-alien-attention {
+  0%, 24% { transform: rotate(-9deg) translateX(-1px); }
+  36%, 54% { transform: rotate(8deg) translateX(1px); }
+  66% { transform: translate(-3px, -2px) rotate(-7deg); }
+  82%, 100% { transform: rotate(2deg); }
+}
+@keyframes impossible-arm-nudge {
+  0%, 29% { transform: translate(-12px, 6px) rotate(-12deg); }
+  42% { transform: translate(-2px, 1px) rotate(-3deg); }
+  50%, 56% { transform: translate(7px, 4px) rotate(7deg); }
+  68% { transform: translate(-4px, -1px) rotate(-4deg); }
+  84%, 100% { transform: translate(0, 0) rotate(0); }
+}
+@keyframes impossible-inner-reaction {
+  0%, 48% { transform: translate(0, 0) rotate(0); }
+  56% { transform: translate(7px, 4px) rotate(7deg) scale(0.97); }
+  66% { transform: translate(-4px, -2px) rotate(-4deg) scale(1.015); }
+  76% { transform: translate(2px, 1px) rotate(2deg); }
+  88%, 100% { transform: translate(0, 0) rotate(0); }
+}
+@keyframes impossible-contact {
+  0%, 45% { opacity: 0; transform: scale(0.7); }
+  50%, 59% { opacity: 1; transform: scale(1); }
+  68%, 100% { opacity: 0; transform: scale(1.15); }
+}
+@keyframes impossible-outer-reaction {
+  0%, 57% { transform: translate(0, 0) rotate(0); }
+  64% { transform: translate(7px, -4px) rotate(2.2deg); }
+  73% { transform: translate(-4px, 2px) rotate(-1.2deg); }
+  81% { transform: translate(2px, -1px) rotate(0.6deg); }
+  90%, 100% { transform: translate(0, 0) rotate(0); }
+}
+@keyframes impossible-brace-load {
+  0%, 58%, 100% { filter: none; }
+  65% { filter: drop-shadow(0 4px 0 #7b9390); }
+  74% { filter: drop-shadow(0 -2px 0 #314945); }
+}
 .globe-step {
   position: relative;
   z-index: 5;

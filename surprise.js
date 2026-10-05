@@ -93,6 +93,12 @@ const treatments = {
     summary: "Tune stiffness, damping, pressure, and rest length, then see whether one soft body can squeeze through the gap.",
     art: `<g class="treatment-jelly">
       <path class="pressure-lines" d="M365 221l-12 8m14 16h-16m14 25-12-8" />
+      <g class="counter-probe">
+        <circle cx="335" cy="268" r="7" />
+        <path d="M341 268L365 258H391" />
+        <rect x="390" y="249" width="8" height="18" rx="4" />
+      </g>
+      <text class="peer-review-caption" x="289" y="304">PEER REVIEW.</text>
       <text class="treatment-label" x="267" y="201">SOFT-BODY TEST</text>
     </g>`,
   },
@@ -123,6 +129,7 @@ const previewSummary = document.querySelector("#preview-summary");
 const previewOpen = document.querySelector("#preview-open");
 const previewClose = document.querySelector("#preview-close");
 const markers = [...document.querySelectorAll(".globe-marker[data-experiment]")];
+const workbench = document.querySelector(".workbench");
 const globeZone = document.querySelector(".globe-zone");
 const globeStage = document.querySelector(".globe-stage");
 const planetTreatment = document.querySelector("#planet-treatment");
@@ -139,6 +146,8 @@ let runToken = 0;
 let runTimer = 0;
 let runFrame = 0;
 let apparatusInView = true;
+let jellyCompletions = 0;
+let peerReviewShown = false;
 
 function easeInOut(value) {
   return value < 0.5 ? 2 * value * value : 1 - ((-2 * value + 2) ** 2) / 2;
@@ -167,20 +176,50 @@ function setTreatmentBusy(busy) {
   else treatmentButton.removeAttribute("aria-busy");
 }
 
+function clearPeerReview() {
+  globeZone?.classList.remove("peer-review-running", "peer-review-static");
+  workbench?.classList.remove("peer-review-active");
+}
+
 function cancelTreatment({ announce = false } = {}) {
   runToken += 1;
   window.clearTimeout(runTimer);
   cancelAnimationFrame(runFrame);
   globeZone?.classList.remove("treatment-running", "reduced-result");
+  clearPeerReview();
   applyPlanet();
   setTreatmentBusy(false);
   if (announce && selectedKey) planetStatus.textContent = "Test canceled · Earth at rest";
+}
+
+function runPeerReview(token) {
+  if (token !== runToken) return;
+  peerReviewShown = true;
+  globeZone?.classList.remove("treatment-running", "reduced-result");
+  globeZone?.classList.add(reduceMotion.matches ? "peer-review-static" : "peer-review-running");
+  workbench?.classList.add("peer-review-active");
+  applyPlanet();
+  planetStatus.textContent = "Peer review.";
+  runTimer = window.setTimeout(() => {
+    if (token !== runToken) return;
+    clearPeerReview();
+    applyPlanet();
+    setTreatmentBusy(false);
+    planetStatus.textContent = "Earth returned to rest";
+  }, reduceMotion.matches ? 650 : 1250);
 }
 
 function finishTreatment(token) {
   if (token !== runToken) return;
   globeZone?.classList.remove("treatment-running", "reduced-result");
   applyPlanet();
+  if (selectedKey === "jelly") {
+    jellyCompletions += 1;
+    if (jellyCompletions === 3 && !peerReviewShown) {
+      runPeerReview(token);
+      return;
+    }
+  }
   setTreatmentBusy(false);
   planetStatus.textContent = "Earth returned to rest";
 }

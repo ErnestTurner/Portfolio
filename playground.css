@@ -571,6 +571,22 @@ h1 em {
 .treatment-traffic .traffic-cars rect:nth-child(8) { fill: #b94b42; }
 .treatment-traffic .jam-wave { fill: none; stroke: #ffafcc; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 9 8; opacity: 0; }
 .treatment-jelly .pressure-lines { fill: none; stroke: var(--earth-green-soft); stroke-width: 3; opacity: 0; }
+.treatment-jelly .counter-probe {
+  fill: var(--earth-green-soft);
+  stroke: var(--lab-white);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform-origin: 335px 268px;
+}
+.treatment-jelly .counter-probe path { fill: none; stroke-width: 5; }
+.treatment-jelly .peer-review-caption {
+  fill: var(--earth-green-soft);
+  font: 700 9px "Courier New", monospace;
+  letter-spacing: 1px;
+  opacity: 0;
+}
 .treatment-mirror .beam { fill: none; stroke: #83e8ff; stroke-width: 4; filter: drop-shadow(0 0 4px #83e8ff); }
 .treatment-mirror .mini-source { fill: #ffe599; stroke: #fff6bf; stroke-width: 2; }
 .treatment-mirror .mini-mirror { fill: var(--earth-blue-soft); stroke: var(--lab-white); stroke-width: 2; transform-origin: 352px 245px; }
@@ -596,6 +612,13 @@ h1 em {
 .treatment-running[data-experiment="traffic"] .traffic-cars { animation: earth-cars 1.5s linear; }
 .treatment-running[data-experiment="traffic"] .jam-wave { animation: earth-jam 1.5s ease-in-out; }
 .treatment-running[data-experiment="jelly"] .pressure-lines { animation: earth-pressure 1.45s ease-in-out; }
+.peer-review-running[data-experiment="jelly"] .counter-probe { animation: earth-counter-probe 1.15s ease-in-out; }
+.peer-review-running[data-experiment="jelly"] .peer-review-caption { animation: earth-peer-caption 1.15s ease-in-out; }
+.peer-review-running[data-experiment="jelly"] :is(.planet-probe-frame, .planet-probe-moving) { animation: earth-apparatus-poke 1.15s ease-in-out; }
+.workbench.peer-review-active .ufo-button { animation: earth-alien-recoil 1.15s ease-in-out; }
+.peer-review-static[data-experiment="jelly"] .counter-probe,
+.peer-review-static[data-experiment="jelly"] .peer-review-caption { opacity: 1; }
+.peer-review-static[data-experiment="jelly"] :is(.planet-probe-frame, .planet-probe-moving) { transform: translateX(8px); }
 .treatment-running[data-experiment="mirror"] .mini-mirror { animation: earth-mirror 1.35s ease-in-out; }
 .treatment-running[data-experiment="mirror"] .beam-one { animation: earth-beam-one 1.35s ease-in-out; }
 .treatment-running[data-experiment="mirror"] .beam-two { animation: earth-beam-two 1.35s ease-in-out; }
@@ -629,6 +652,15 @@ h1 em {
 @keyframes earth-cars { to { transform: rotate(240deg); } }
 @keyframes earth-jam { 0%, 25% { opacity: 0; stroke-dashoffset: 0; } 45%, 80% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: -44; } }
 @keyframes earth-pressure { 35%, 72% { opacity: 1; transform: translateX(-8px); } }
+@keyframes earth-counter-probe {
+  0%, 16%, 100% { opacity: 0; transform: scaleX(0.08) rotate(10deg); }
+  34% { opacity: 1; transform: scaleX(0.72) rotate(-5deg); }
+  48%, 67% { opacity: 1; transform: scaleX(1) rotate(0); }
+  84% { opacity: 1; transform: scaleX(0.42) rotate(6deg); }
+}
+@keyframes earth-peer-caption { 0%, 36%, 100% { opacity: 0; } 48%, 82% { opacity: 1; } }
+@keyframes earth-apparatus-poke { 0%, 42%, 100% { transform: translateX(0); } 50%, 68% { transform: translateX(8px) rotate(1deg); } }
+@keyframes earth-alien-recoil { 0%, 45%, 100% { transform: translate(0, 0) rotate(0); } 52%, 70% { transform: translate(7px, -5px) rotate(3deg); } }
 @keyframes earth-mirror { 50% { transform: rotate(24deg); } }
 @keyframes earth-beam-one { 45%, 75% { opacity: 0.18; } }
 @keyframes earth-beam-two { 45%, 75% { opacity: 1; } }

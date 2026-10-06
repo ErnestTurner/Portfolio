@@ -258,6 +258,7 @@ function trafficSnapshot(state = trafficState) {
     queuedIndices: state.cars.map((car, index) => index !== 0 && car.speed < 47 ? index : -1).filter(index => index > 0),
     maxQueueAfterRelease: state.maxQueueAfterRelease,
     persistence: Number(Math.max(0, state.lastJamTime - state.brakeDuration).toFixed(2)),
+    queuePresentAtEnd: state.time >= state.endTime && queued > 0,
     positions: state.cars.map(car => Number(car.position.toFixed(2))),
     speeds: state.cars.map(car => Number(car.speed.toFixed(2)))
   };
@@ -323,13 +324,19 @@ function finishTrafficTrial(token, experiment, value) {
   scopeMode.textContent = "COMPLETE";
   const metrics = trafficSnapshot();
   const cars = metrics.maxQueueAfterRelease;
-  const result = `Cause ended at ${(value / 10).toFixed(1)} s; ${cars} following car${cars === 1 ? "" : "s"} queued after release; the wave persisted ${metrics.persistence.toFixed(1)} s without it.`;
+  const persistence = metrics.queuePresentAtEnd
+    ? `was still present at the observation cutoff, at least ${metrics.persistence.toFixed(1)} s after release`
+    : `cleared ${metrics.persistence.toFixed(1)} s after release`;
+  const receiptPersistence = metrics.queuePresentAtEnd
+    ? `at least ${metrics.persistence.toFixed(1)} s / still present at cutoff`
+    : `cleared after ${metrics.persistence.toFixed(1)} s`;
+  const result = `Cause ended at ${(value / 10).toFixed(1)} s; ${cars} following car${cars === 1 ? "" : "s"} queued after release; the wave ${persistence}.`;
   status.textContent = result;
-  setReceiver(`Traffic receipt: ${cars} cars queued after release / ${metrics.persistence.toFixed(1)} s persistence`, "traffic");
+  setReceiver(`Traffic receipt: ${cars} cars queued after release / ${receiptPersistence}`, "traffic");
   if (trafficRecord && trafficRecordCause && trafficRecordEffect) {
     trafficRecord.hidden = false;
     trafficRecordCause.textContent = `${(value / 10).toFixed(1)} s marked-car brake`;
-    trafficRecordEffect.textContent = `${cars} following cars / ${metrics.persistence.toFixed(1)} s after release`;
+    trafficRecordEffect.textContent = `${cars} following cars / ${receiptPersistence}`;
   }
   clearTimeout(deliveryTimer);
   deliveryTimer = setTimeout(() => apparatus?.classList.remove("traffic-received"), reduceMotion.matches ? 20 : 900);

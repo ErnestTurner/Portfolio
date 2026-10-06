@@ -15,8 +15,8 @@ const experiments = {
     trace: value => `M44 282C126 ${310-value} 156 ${112+value} 236 220S374 ${310-value} 430 176S520 ${122+value} 596 148`,
     art(value) {
       const count = Math.max(1, Math.round(value / 20));
-      const bubbles = Array.from({ length: count }, (_, index) => `<circle class="thin" cx="${310 + index * 33}" cy="${225 - index * 26}" r="${10 + index}"/>`).join("");
-      return `<circle class="solid" cx="500" cy="105" r="48"/><path class="thin" d="M476 86c26 5 30 30 3 39M520 91c-17 8-12 28 8 31"/><path class="solid" d="M119 287c0-28 40-41 70-20 20 14 49 5 67 30-13 23-49 24-82 21-34-3-55-13-55-31Z"/><circle class="line" cx="168" cy="273" r="29"/><path class="thin" d="M168 289c-28-4-20-39 4-29 18 8 9 30-6 20M203 255q48-55 98 0M252 255v55"/>${bubbles}<text x="83" y="92">CAPTURE → BUBBLE → MOON</text>`;
+      const bubbles = Array.from({ length: count }, (_, index) => { const cx=310+index*33, cy=225-index*26; return `<circle class="thin moon-bubble" cx="${cx}" cy="${cy}" r="${10+index}" style="--bubble-step:${index};--bubble-dx:${500-cx}px;--bubble-dy:${105-cy}px"/>`; }).join("");
+      return `<circle class="solid moon-target" cx="500" cy="105" r="48"/><path class="thin" d="M476 86c26 5 30 30 3 39M520 91c-17 8-12 28 8 31"/><path class="solid moon-capture" d="M119 287c0-28 40-41 70-20 20 14 49 5 67 30-13 23-49 24-82 21-34-3-55-13-55-31Z"/><circle class="line" cx="168" cy="273" r="29"/><path class="thin moon-umbrella" d="M168 289c-28-4-20-39 4-29 18 8 9 30-6 20M203 255q48-55 98 0M252 255v55"/>${bubbles}<text x="83" y="92">CAPTURE → BUBBLE → MOON</text>`;
     }
   },
   star: {
@@ -32,7 +32,7 @@ const experiments = {
     trace: value => `M44 258L150 258L205 ${280-value}L258 258L320 ${132+value}L378 258L470 ${310-value}L596 258`,
     art(value) {
       const eclipse = 38 + value * .75;
-      return `<circle class="solid" cx="474" cy="210" r="86"/><circle class="dark" cx="${474+eclipse}" cy="190" r="93"/><path class="paper" d="m126 214 91-43-27 43 27 43Z"/><circle class="hot" cx="190" cy="214" r="${8+value*.12}"/><path class="line" d="M216 214h${75+value*1.2}"/><path class="thin" d="m310 180 11 19 22 4-16 15 3 22-20-10-19 10 3-22-16-15 22-4Z"/><text x="82" y="92">ONE RESERVE / THREE BAD IDEAS</text>`;
+      return `<circle class="solid star-world" cx="474" cy="210" r="86"/><circle class="dark star-shadow" cx="${474+eclipse}" cy="190" r="93"/><path class="paper star-ship" d="m126 214 91-43-27 43 27 43Z"/><circle class="hot star-flare" cx="190" cy="214" r="${8+value*.12}" style="--flare-distance:${220+value}px"/><path class="line star-beam" d="M216 214h${75+value*1.2}"/><path class="thin star-target" d="m310 180 11 19 22 4-16 15 3 22-20-10-19 10 3-22-16-15 22-4Z"/><text x="82" y="92">ONE RESERVE / THREE BAD IDEAS</text>`;
     }
   },
   dungeon: {
@@ -48,7 +48,7 @@ const experiments = {
     trace: value => `M44 300L130 300L130 ${320-value*1.7}L210 ${320-value*1.7}L210 ${285-value}L300 ${285-value}L300 ${250-value*.45}L596 ${250-value*.45}`,
     art(value) {
       const door = Math.max(8, 84-value*.72);
-      return `<path class="solid" d="M104 320V137h148v183M135 320V178h86v142"/><path class="thin" d="M84 320h190M126 137q52-62 104 0"/><rect class="paper" x="328" y="131" width="185" height="190" rx="6"/><path class="thin" d="M350 172h139M350 212h139M350 252h139M350 292h139"/><path class="line" d="m350 166 9 9 17-22m-26 53 9 9 17-22m-26 53 9 9 17-22"/><path class="line" d="M350 286h${140-door}"/><text x="86" y="92">POST-RAID MAINTENANCE WINDOW</text>`;
+      return `<path class="solid dungeon-door" d="M104 320V137h148v183M135 320V178h86v142"/><path class="thin" d="M84 320h190M126 137q52-62 104 0"/><rect class="paper dungeon-sheet" x="328" y="131" width="185" height="190" rx="6"/><path class="thin" d="M350 172h139M350 212h139M350 252h139M350 292h139"/><path class="line dungeon-checks" d="m350 166 9 9 17-22m-26 53 9 9 17-22m-26 53 9 9 17-22"/><path class="line dungeon-progress" d="M350 286h${140-door}"/><text x="86" y="92">POST-RAID MAINTENANCE WINDOW</text>`;
     }
   },
   brain: {
@@ -66,7 +66,7 @@ const experiments = {
       const lightX = 86 + value * 4.4;
       const activeLeft = value < 50 ? "hot" : "solid";
       const activeRight = value >= 50 ? "hot" : "solid";
-      return `<circle class="hot" cx="${lightX}" cy="115" r="19"/><path class="thin" d="M${lightX} 134 225 194M${lightX} 134 225 278"/><path class="solid" d="M197 235c0-45 43-78 89-65 43-26 97 8 93 55 32 34 2 91-43 82-32 36-92 20-94-27-31-2-48-22-45-45Z"/><g class="thin"><path d="M225 194 301 216 369 185M225 194 301 260 369 289M225 278 301 216 369 289M225 278 301 260 369 185"/></g><circle class="${activeLeft}" cx="225" cy="194" r="10"/><circle class="${activeRight}" cx="225" cy="278" r="10"/><circle class="solid" cx="301" cy="216" r="10"/><circle class="solid" cx="301" cy="260" r="10"/><circle class="${activeRight}" cx="369" cy="185" r="11"/><circle class="${activeLeft}" cx="369" cy="289" r="11"/><text x="82" y="72">STIMULUS → SENSOR → OPINION</text>`;
+      return `<circle class="hot brain-stimulus" cx="${lightX}" cy="115" r="19"/><path class="thin brain-input" d="M${lightX} 134 225 194M${lightX} 134 225 278"/><path class="solid brain-body" d="M197 235c0-45 43-78 89-65 43-26 97 8 93 55 32 34 2 91-43 82-32 36-92 20-94-27-31-2-48-22-45-45Z"/><g class="thin brain-wire"><path d="M225 194 301 216 369 185M225 194 301 260 369 289M225 278 301 216 369 289M225 278 301 260 369 185"/></g><circle class="${activeLeft} brain-node" cx="225" cy="194" r="10"/><circle class="${activeRight} brain-node" cx="225" cy="278" r="10"/><circle class="solid brain-node" cx="301" cy="216" r="10"/><circle class="solid brain-node" cx="301" cy="260" r="10"/><circle class="${activeRight} brain-node brain-output" cx="369" cy="185" r="11"/><circle class="${activeLeft} brain-node brain-output" cx="369" cy="289" r="11"/><text x="82" y="72">STIMULUS → SENSOR → OPINION</text>`;
     }
   },
   scribble: {
@@ -82,7 +82,7 @@ const experiments = {
     trace: value => `M44 250C120 ${70+value} 180 ${350-value} 248 220S370 ${60+value*1.2} 438 ${315-value*.7}S528 ${120+value} 596 218`,
     art(value) {
       const elbowY = 145 + value * .65;
-      return `<circle class="solid" cx="112" cy="318" r="13"/><circle class="solid" cx="518" cy="318" r="13"/><path class="line" d="M112 318 287 ${elbowY} 518 318"/><circle class="hot" cx="287" cy="${elbowY}" r="12"/><path class="thin" d="M83 247c68-156 128 145 204-35s132 157 248-13c-32 118-134 139-238 52S154 355 83 247Z"/><text x="83" y="82">COUPLED MOTION / UNCOUPLED INTENT</text>`;
+      return `<circle class="solid scribble-pivot" cx="112" cy="318" r="13"/><circle class="solid scribble-pivot" cx="518" cy="318" r="13"/><path class="line scribble-arm" d="M112 318 287 ${elbowY} 518 318"/><circle class="hot scribble-pen" cx="287" cy="${elbowY}" r="12"/><path class="thin scribble-drawing" d="M83 247c68-156 128 145 204-35s132 157 248-13c-32 118-134 139-238 52S154 355 83 247Z"/><text x="83" y="82">COUPLED MOTION / UNCOUPLED INTENT</text>`;
     }
   },
   traffic: {
@@ -119,7 +119,7 @@ const experiments = {
     trace: value => `M44 215C112 ${330-value} 168 ${330-value} 225 215S340 ${100+value} 405 215S520 ${330-value*1.2} 596 215`,
     art(value) {
       const width=165-value*.62, height=76+value*.3, x=320-width/2;
-      return `<path class="thin" d="M86 108v225h176V254M554 108v225H378V254"/><path class="solid" d="M${x} 250c0-${height*.7} ${width*.2}-${height} ${width*.5}-${height}s${width*.5} ${height*.3} ${width*.5} ${height}c0 ${height*.72}-${width*.19} ${height}-${width*.5} ${height}s-${width*.5}-${height*.28}-${width*.5}-${height}Z"/><path class="line" d="M272 214h-48m144 0h48"/><text x="83" y="74">PROPERTY CHANGE / SAME BODY</text>`;
+      return `<path class="thin jelly-barrier" d="M86 108v225h176V254M554 108v225H378V254"/><path class="solid jelly-body${value>72?" can-pass":""}" d="M${x} 250c0-${height*.7} ${width*.2}-${height} ${width*.5}-${height}s${width*.5} ${height*.3} ${width*.5} ${height}c0 ${height*.72}-${width*.19} ${height}-${width*.5} ${height}s-${width*.5}-${height*.28}-${width*.5}-${height}Z"/><path class="line jelly-force" d="M272 214h-48m144 0h48"/><text x="83" y="74">PROPERTY CHANGE / SAME BODY</text>`;
     }
   },
   mirror: {
@@ -135,7 +135,7 @@ const experiments = {
     trace: value => `M44 215H280L390 ${215-value*2.2}L486 ${215+value*1.35}L596 ${215-value*.8}`,
     art(value) {
       const y1=215-value*2.2, y2=215+value*1.35;
-      return `<circle class="hot" cx="89" cy="215" r="20"/><path class="line" d="M110 215H280L390 ${y1}M280 215 390 ${y2}"/><rect class="solid" x="272" y="161" width="16" height="108" rx="7" transform="rotate(${value} 280 215)"/><rect class="dark" x="390" y="${y1-28}" width="68" height="56" rx="8"/><rect class="dark" x="390" y="${y2-28}" width="68" height="56" rx="8"/><circle class="hot" cx="424" cy="${y1}" r="10"/><circle class="solid" cx="424" cy="${y2}" r="10"/><text x="83" y="78">ONE MOVE / EVERYTHING AFTER</text>`;
+      return `<circle class="hot mirror-source" cx="89" cy="215" r="20"/><path class="line mirror-beam" d="M110 215H280L390 ${y1}M280 215 390 ${y2}"/><rect class="solid mirror-plate" x="272" y="161" width="16" height="108" rx="7" transform="rotate(${value} 280 215)"/><rect class="dark mirror-receiver" x="390" y="${y1-28}" width="68" height="56" rx="8"/><rect class="dark mirror-receiver" x="390" y="${y2-28}" width="68" height="56" rx="8"/><circle class="hot mirror-hit" cx="424" cy="${y1}" r="10"/><circle class="solid mirror-hit" cx="424" cy="${y2}" r="10"/><text x="83" y="78">ONE MOVE / EVERYTHING AFTER</text>`;
     }
   }
 };
@@ -168,6 +168,7 @@ const favicon = document.querySelector("#dynamic-favicon");
 const trafficRecord = document.querySelector("#traffic-trial-record");
 const trafficRecordCause = document.querySelector("#traffic-record-cause");
 const trafficRecordEffect = document.querySelector("#traffic-record-effect");
+const supportPhrase = document.querySelector("#support-link .support-phrase");
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const keys = Object.keys(experiments);
 let selectedKey = null;
@@ -175,6 +176,7 @@ let trialToken = 0;
 let trialTimer = 0;
 let trafficFrame = 0;
 let deliveryTimer = 0;
+let leverTimer = 0;
 let trafficState = null;
 let apparatusVisible = true;
 let lastControl = null;
@@ -371,11 +373,14 @@ function cancelTrial(message = "") {
   trialToken += 1;
   clearTimeout(trialTimer);
   clearTimeout(deliveryTimer);
+  clearTimeout(leverTimer);
   cancelAnimationFrame(trafficFrame);
   trafficFrame = 0;
   trafficState = null;
   apparatus?.classList.remove("trial-running");
   apparatus?.classList.remove("traffic-received");
+  apparatus?.classList.remove("disturbed");
+  surpriseButton?.classList.remove("lever-pulled");
   runButton?.removeAttribute("aria-busy");
   if (runButton) runButton.disabled = !selectedKey;
   if (selectedKey) scopeMode.textContent = "READY";
@@ -386,7 +391,6 @@ function setReceiver(message, key = selectedKey) {
   if (!receiver || !receiverText) return;
   receiver.classList.add("received");
   receiverText.textContent = message.toUpperCase();
-  document.querySelectorAll("[data-record]").forEach(record => record.classList.toggle("is-active", record.dataset.record === key));
 }
 
 function completeTrial(token, experiment, value) {
@@ -406,6 +410,7 @@ function runTrial() {
   cancelTrial();
   const token = trialToken;
   const value = Number(parameter.value);
+  void apparatus.offsetWidth;
   apparatus.classList.add("trial-running");
   runButton.disabled = true;
   runButton.setAttribute("aria-busy", "true");
@@ -451,7 +456,7 @@ function applySelection(key, { history = "none", focus = false, announce = true 
   updateBoundaryCue(experiment);
   receiver?.classList.remove("received");
   if (receiverText) receiverText.textContent = "TRIAL SELECTED / AWAITING SIGNAL";
-  document.querySelectorAll("[data-record]").forEach(record => record.classList.toggle("is-active", record.dataset.record === key));
+  if (trafficRecord) trafficRecord.hidden = true;
   if (announce) status.textContent = `${experiment.name} mounted. ${experiment.parameter.label} ready.`;
   safeStorage("setItem", key);
   if (history === "push") historyPush(key);
@@ -491,7 +496,7 @@ function clearSelection({ history = "none", focus = false } = {}) {
   status.textContent = "Bench idle. No emergency, technically.";
   receiver?.classList.remove("received");
   if (receiverText) receiverText.textContent = "NO TRIAL RECEIVED";
-  document.querySelectorAll("[data-record]").forEach(record => record.classList.remove("is-active"));
+  if (trafficRecord) trafficRecord.hidden = true;
   updateBoundaryCue(null);
   safeStorage("removeItem");
   if (history === "push") historyPush(null);
@@ -522,12 +527,26 @@ clearButton?.addEventListener("click", () => clearSelection({ history: "push", f
 openLink?.addEventListener("click", event => { if (openLink.getAttribute("aria-disabled") === "true") event.preventDefault(); });
 
 surpriseButton?.addEventListener("click", () => {
-  const choices = keys.filter(key => key !== selectedKey);
-  const key = choices[Math.floor(Math.random() * choices.length)];
-  surpriseButton.classList.remove("lever-pulled");
-  requestAnimationFrame(() => surpriseButton.classList.add("lever-pulled"));
-  applySelection(key, { history: "push" });
-  setTimeout(() => surpriseButton.classList.remove("lever-pulled"), reduceMotion.matches ? 20 : 520);
+  const experiment = experiments[selectedKey];
+  if (!experiment) {
+    status.textContent = "The lever refuses to move without a mounted specimen.";
+    return;
+  }
+  cancelTrial();
+  const low = Number(experiment.parameter.min);
+  const high = Number(experiment.parameter.max);
+  const current = Number(parameter.value);
+  const target = current <= (low + high) / 2 ? high : low;
+  parameter.value = target;
+  updateDiagram(experiment, target);
+  apparatus?.classList.add("disturbed");
+  surpriseButton.classList.add("lever-pulled");
+  status.textContent = `Unknown disturbance moved ${experiment.parameter.label.toLowerCase()} to ${experiment.parameter.format(target)}.`;
+  leverTimer = setTimeout(() => {
+    apparatus?.classList.remove("disturbed");
+    surpriseButton.classList.remove("lever-pulled");
+    runTrial();
+  }, reduceMotion.matches ? 20 : 260);
 });
 
 document.addEventListener("keydown", event => {
@@ -553,6 +572,11 @@ const storedKey = safeStorage("getItem");
 if (experiments[urlKey]) applySelection(urlKey, { history: "none", announce: false });
 else if (experiments[storedKey]) applySelection(storedKey, { history: "replace", announce: false });
 else clearSelection();
+
+if (supportPhrase) {
+  const phrases = ["Keep the experiments running", "Fund the next question", "Help us see what happens"];
+  supportPhrase.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+}
 
 window.__trikzikLabTest = Object.freeze({
   keys: [...keys],

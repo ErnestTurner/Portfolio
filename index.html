@@ -43,7 +43,7 @@
     <header class="site-header">
       <a class="brand" href="#top" aria-label="Trikzik Labs home">TRIKZIK <span>/</span> LABS</a>
       <nav aria-label="Main navigation">
-        <a href="#experiments">Bench</a><a href="#work">Records</a><a href="#about">Ernest</a><a href="https://github.com/ErnestTurner" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="#experiments">Bench</a><a href="#about">Ernest</a><a href="https://github.com/ErnestTurner" target="_blank" rel="noopener">GitHub ↗</a>
       </nav>
     </header>
 
@@ -54,25 +54,25 @@
           <span class="power-readout"><i></i> LAB POWER: MOSTLY STABLE</span>
         </div>
         <div class="lab-intro">
-          <div><p class="kicker">CREATED BY ERNEST TURNER</p><h1 id="lab-title">Trikzik Labs <em>unresolved significance.</em></h1></div>
-          <div class="intro-copy"><p>Games, curious little machines, and useful tools by Ernest Turner. Come scratch your tinker itch.</p><p class="small">Choose a specimen. Change one thing. See what else objects.</p></div>
+          <div><p class="kicker">CREATED BY ERNEST TURNER</p><h1 id="lab-title">Trikzik Labs</h1></div>
+          <div class="intro-copy"><p>Choose a specimen. Change one variable. Run the bench.</p></div>
         </div>
 
         <div class="bench-grid">
           <section class="station specimen-selector" id="experiments" aria-labelledby="selector-title">
             <header class="station-head"><div><span>INPUT BANK</span><h2 id="selector-title">Mount a specimen</h2></div><output id="selection-count">0 / 8</output></header>
             <div class="selector-grid" role="group" aria-label="Choose an experiment to inspect">
-              <button class="experiment-control" type="button" data-experiment="moon" aria-pressed="false"><span>01</span><b>Moon Snail</b><small>capture loop</small></button>
-              <button class="experiment-control" type="button" data-experiment="star" aria-pressed="false"><span>02</span><b>Starfall</b><small>light economy</small></button>
-              <button class="experiment-control" type="button" data-experiment="dungeon" aria-pressed="false"><span>03</span><b>Dungeon Reset</b><small>aftermath cycle</small></button>
-              <button class="experiment-control" type="button" data-experiment="brain" aria-pressed="false"><span>04</span><b>Brain in a Jar</b><small>visible behavior</small></button>
-              <button class="experiment-control" type="button" data-experiment="scribble" aria-pressed="false"><span>05</span><b>Scribble Engine</b><small>coupled motion</small></button>
-              <button class="experiment-control" type="button" data-experiment="traffic" aria-pressed="false"><span>06</span><b>Traffic</b><small>cause removed</small></button>
-              <button class="experiment-control" type="button" data-experiment="jelly" aria-pressed="false"><span>07</span><b>Jelly Bench</b><small>soft resistance</small></button>
-              <button class="experiment-control" type="button" data-experiment="mirror" aria-pressed="false"><span>08</span><b>Mirror Mischief</b><small>downstream trouble</small></button>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="moon" aria-pressed="false"><span>01</span><b>Moon Snail</b><small>capture loop</small></button><a class="experiment-route" href="games/moon-snail/index.html" aria-label="Open Moon Snail">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="star" aria-pressed="false"><span>02</span><b>Starfall</b><small>light economy</small></button><a class="experiment-route" href="games/starfall/index.html" aria-label="Open Starfall">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="dungeon" aria-pressed="false"><span>03</span><b>Dungeon Reset</b><small>aftermath cycle</small></button><a class="experiment-route" href="games/dungeon-reset/index.html" aria-label="Open Dungeon Reset">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="brain" aria-pressed="false"><span>04</span><b>Brain in a Jar</b><small>visible behavior</small></button><a class="experiment-route" href="games/brain-in-a-jar/index.html" aria-label="Open Brain in a Jar">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="scribble" aria-pressed="false"><span>05</span><b>Scribble Engine</b><small>coupled motion</small></button><a class="experiment-route" href="games/scribble-engine/index.html" aria-label="Open Scribble Engine">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="traffic" aria-pressed="false"><span>06</span><b>Traffic</b><small>cause removed</small></button><a class="experiment-route" href="games/traffic-with-no-excuse/index.html" aria-label="Open Traffic With No Excuse">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="jelly" aria-pressed="false"><span>07</span><b>Jelly Bench</b><small>soft resistance</small></button><a class="experiment-route" href="games/jelly-bench/index.html" aria-label="Open Jelly Bench">↗</a></div>
+              <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="mirror" aria-pressed="false"><span>08</span><b>Mirror Mischief</b><small>downstream trouble</small></button><a class="experiment-route" href="games/mirror-mischief/index.html" aria-label="Open Mirror Mischief">↗</a></div>
             </div>
             <div class="lever-bay">
-              <button class="unknown-lever" id="surprise-experiment" type="button" aria-label="Pull the unlabelled lever: choose a surprise experiment"><span class="lever"><i></i></span><span>Pull the unlabelled lever<small>It has never helped.</small></span></button>
+              <button class="unknown-lever" id="surprise-experiment" type="button" aria-label="Apply an unknown disturbance to the mounted experiment"><span class="lever"><i></i></span></button>
               <svg class="bench-alien" viewBox="0 0 32 46" aria-hidden="true"><use href="#et-pilot-mark" /></svg>
             </div>
           </section>
@@ -105,34 +105,23 @@
             <p class="bench-status" id="bench-status" role="status" aria-live="polite">Bench idle. No emergency, technically.</p>
           </section>
         </div>
-        <div class="signal-conduit" aria-hidden="true"><span class="signal-packet"></span></div>
+        <div class="trial-ledger" aria-labelledby="trial-ledger-title">
+          <div class="ledger-label"><span>OUTPUT BUFFER</span><strong id="trial-ledger-title">Last trial receipt</strong></div>
+          <div class="signal-conduit" aria-hidden="true"><span class="signal-packet"></span></div>
+          <div class="receiver-readout" id="records-receiver" aria-live="polite"><i></i><span>NO TRIAL RECEIVED</span></div>
+          <div class="trial-record" id="traffic-trial-record" hidden><span>TRAFFIC OBSERVATION</span><dl><div><dt>Cause</dt><dd id="traffic-record-cause">--</dd></div><div><dt>After release</dt><dd id="traffic-record-effect">--</dd></div></dl></div>
+        </div>
         <div class="apparatus-foot"><span>REPRESENTATIVE CAUSAL SKETCHES / FULL MECHANICS LIVE INSIDE EACH EXPERIMENT</span><span id="bench-clock">LOCAL BENCH / READY</span></div>
       </section>
 
-      <section id="work" class="section records-station" aria-labelledby="records-title">
-        <div class="section-head"><div><p class="kicker">RECEIVING CABINET / LAB RECORDS</p><h2 id="records-title">What survived the bench.</h2></div><div class="receiver-readout" id="records-receiver" aria-live="polite"><i></i><span>NO TRIAL RECEIVED</span></div></div>
-        <p class="section-intro">Every specimen below is a complete route, not a painted-shut cabinet.</p>
-        <div class="record-grid">
-          <article data-record="moon"><span class="record-number">001</span><div><h3>Moon Snail</h3><p>Capture, slime, gravity, and an umbrella with inventory problems.</p></div><a href="games/moon-snail/index.html">Open record <span>↗</span></a></article>
-          <article data-record="star"><span class="record-number">002</span><div><h3>Starfall: Last Light</h3><p>Your weapon, health, and panic all spend the same light.</p></div><a href="games/starfall/index.html">Open record <span>↗</span></a></article>
-          <article data-record="dungeon"><span class="record-number">003</span><div><h3>Dungeon Reset</h3><p>Put the dungeon back together before the next heroes improve it.</p></div><a href="games/dungeon-reset/index.html">Open record <span>↗</span></a></article>
-          <article data-record="brain"><span class="record-number">004</span><div><h3>Brain in a Jar</h3><p>Move a light or edit a wire; watch a decision become behavior.</p></div><a href="games/brain-in-a-jar/index.html">Open record <span>↗</span></a></article>
-          <article data-record="scribble"><span class="record-number">005</span><div><h3>Scribble Engine</h3><p>Two rotating arms, one pen, and no agreement about straight lines.</p></div><a href="games/scribble-engine/index.html">Open record <span>↗</span></a></article>
-          <article data-record="traffic"><span class="record-number">006</span><div><h3>Traffic With No Excuse</h3><p>Remove the cause. Observe the jam decline to leave.</p><div class="trial-record" id="traffic-trial-record" hidden><span>LAST BENCH TRIAL</span><dl><div><dt>Cause</dt><dd id="traffic-record-cause">--</dd></div><div><dt>After release</dt><dd id="traffic-record-effect">--</dd></div></dl></div></div><a href="games/traffic-with-no-excuse/index.html">Open record <span>↗</span></a></article>
-          <article data-record="jelly"><span class="record-number">007</span><div><h3>Jelly Bench</h3><p>Change the body until the gap changes its opinion.</p></div><a href="games/jelly-bench/index.html">Open record <span>↗</span></a></article>
-          <article data-record="mirror"><span class="record-number">008</span><div><h3>Mirror Mischief</h3><p>Move one mirror. Make everything downstream reconsider.</p></div><a href="games/mirror-mischief/index.html">Open record <span>↗</span></a></article>
-        </div>
-        <aside class="archive-drawer"><div><span>ARCHIVE 001 / LEGACY C#</span><h3>Shadowcast Depths</h3><p>Procedural dungeons, pathfinding enemies, turn-based combat, and recursive-shadowcasting vision.</p></div><div><a href="https://github.com/ErnestTurner/Shadowcast-Depths/releases/tag/v1.0.0-legacy" target="_blank" rel="noopener">Windows build ↗</a><a href="https://github.com/ErnestTurner/Shadowcast-Depths" target="_blank" rel="noopener">Source ↗</a></div></aside>
-      </section>
-
       <section id="about" class="section personnel-station" aria-labelledby="about-title">
-        <div class="personnel-label"><span>AUTHORIZED PERSONNEL / 01</span><b>ET</b></div>
-        <div><p class="kicker">ABOUT ERNEST TURNER</p><h2 id="about-title">I turn strange ideas into things people can play with.</h2></div>
-        <div class="about-copy"><p class="about-lead">I'm a software developer, game maker, and hands-on experimenter drawn to projects with personality.</p><p>I build small worlds, autonomous characters, browser games, and practical tools—the kinds of projects where something moves, reacts, remembers, or surprises you.</p><p>Trikzik Labs is the working evidence: games, simulations, experiments, and useful things you can run and judge for yourself.</p><a href="https://github.com/ErnestTurner" class="button" target="_blank" rel="noopener">See what I'm building <span>↗</span></a></div>
+        <div class="personnel-label"><span>AUTHORIZED PERSONNEL / 01</span><strong>Ernest Turner</strong><small>BUILDER / OPERATOR</small></div>
+        <div><p class="kicker">ABOUT THE BUILDER</p><h2 id="about-title">Ernest Turner</h2></div>
+        <div class="about-copy"><p class="about-lead">Software developer and game maker.</p><p>I build interactive systems whose rules stay visible long enough to poke.</p><a href="https://github.com/ErnestTurner" class="button" target="_blank" rel="noopener">See what I'm building <span>↗</span></a><div class="legacy-links"><span>SHADOWCAST DEPTHS / LEGACY C#</span><a href="https://github.com/ErnestTurner/Shadowcast-Depths/releases/tag/v1.0.0-legacy" target="_blank" rel="noopener">Windows build ↗</a><a href="https://github.com/ErnestTurner/Shadowcast-Depths" target="_blank" rel="noopener">Source ↗</a></div></div>
       </section>
     </main>
 
-    <footer><div><span>TRIKZIK LABS / ERNEST TURNER / 2026</span><small>Thanks for interfering. Stay curious.</small></div><div class="footer-support"><span>Fund the next questionable experiment.</span><a href="https://ko-fi.com/trikziklabs" target="_blank" rel="noopener noreferrer">Buy me a coffee<span class="visually-hidden"> (opens in a new tab)</span></a></div><a href="#top">Return to entry bench ↑</a></footer>
+    <footer><div><span>TRIKZIK LABS / ERNEST TURNER / 2026</span><small>Thanks for interfering.</small></div><div class="footer-support"><a id="support-link" href="https://ko-fi.com/trikziklabs" target="_blank" rel="noopener noreferrer"><span class="support-phrase">Keep the experiments running</span><span class="visually-hidden"> (opens in a new tab)</span></a></div><a href="#top">Return to entry bench ↑</a></footer>
     <script src="surprise.js?v=signal-bench-1"></script>
   </body>
 </html>

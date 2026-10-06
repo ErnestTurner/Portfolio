@@ -91,14 +91,19 @@ const experiments = {
     route: "games/traffic-with-no-excuse/index.html",
     question: "How long must one driver brake before the reason disappears but the stopping learns to travel?",
     parameter: { label: "Brake duration", min: 5, max: 40, step: 5, initial: 20, low: "a nervous tap", high: "a small betrayal", format: value => `${(value/10).toFixed(1)} s` },
-    readings: value => [`Cause present ${(value/10).toFixed(1)} seconds`, value >= 25 ? "Wave likely to outlive cause" : "Flow may forgive this"],
-    caption: value => value >= 25 ? "The marked car stops braking; the slowdown continues backward anyway." : "A brief intervention creates a smaller disturbance that flow may absorb.",
-    running: "Brake applied. Explanation currently available.",
-    result: value => value >= 25 ? "Trial received: cause gone, effect has declined to comment." : "Trial received: traffic nearly accepted the apology.",
-    trace: value => `M44 215H170C205 215 202 ${215+value*2.6} 245 ${215+value*2.6}S305 ${215-value*2.2} 348 ${215-value*2.2}S420 ${215+value*1.7} 460 ${215+value*1.7}S530 215 596 215`,
+    readings: value => [`Brake scheduled ${(value/10).toFixed(1)} seconds`, "12 cars / uniform flow"],
+    caption: value => `Run the trial to brake the marked car for ${(value/10).toFixed(1)} seconds, release it, and watch the queue travel through other drivers.`,
+    running: "Marked car braking. Following gaps are closing.",
+    result: () => "Traffic trial complete.",
+    trace: () => "",
     art(value) {
-      const cars = Array.from({ length: 12 }, (_, index) => { const angle=index/12*Math.PI*2; const x=320+Math.cos(angle)*170; const y=222+Math.sin(angle)*112; const jam=index>7-Math.round(value/8)&&index<11; return `<rect class="${jam?"hot":"paper"}" x="${x-10}" y="${y-5}" width="20" height="10" rx="3" transform="rotate(${angle*180/Math.PI+90} ${x} ${y})"/>`; }).join("");
-      return `<ellipse class="thin" cx="320" cy="222" rx="190" ry="132"/><ellipse class="line" cx="320" cy="222" rx="155" ry="97"/>${cars}<path class="line" d="M173 288q76 ${52+value} 164 9"/><text x="83" y="70">NO OBSTACLE / NO EXCUSE</text>`;
+      const cars = Array.from({ length: 12 }, (_, index) => {
+        const angle = index / 12 * Math.PI * 2;
+        const x = 320 + Math.cos(angle) * 183;
+        const y = 230 + Math.sin(angle) * 116;
+        return `<rect class="traffic-car${index === 0 ? " is-brake" : ""}" data-car="${index}" x="-13" y="-7" width="26" height="14" rx="4" transform="translate(${x} ${y}) rotate(${angle * 180 / Math.PI + 90})"/>`;
+      }).join("");
+      return `<g class="traffic-sim"><ellipse class="traffic-road-edge" cx="320" cy="230" rx="214" ry="145"/><ellipse class="traffic-road" cx="320" cy="230" rx="183" ry="116"/><ellipse class="traffic-wave" cx="320" cy="230" rx="183" ry="116"/>${cars}<circle class="traffic-brake-lamp" cx="503" cy="230" r="18"/><text class="traffic-phase" x="83" y="63">READY / BRAKE ${(value/10).toFixed(1)} S</text><text class="traffic-clock" x="83" y="88">t = 0.0 s / 0 queued</text><text class="traffic-cause-label" x="442" y="205">MARKED CAR</text></g>`;
     }
   },
   jelly: {
@@ -160,11 +165,17 @@ const receiver = document.querySelector("#records-receiver");
 const receiverText = receiver?.querySelector("span");
 const surpriseButton = document.querySelector("#surprise-experiment");
 const favicon = document.querySelector("#dynamic-favicon");
+const trafficRecord = document.querySelector("#traffic-trial-record");
+const trafficRecordCause = document.querySelector("#traffic-record-cause");
+const trafficRecordEffect = document.querySelector("#traffic-record-effect");
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const keys = Object.keys(experiments);
 let selectedKey = null;
 let trialToken = 0;
 let trialTimer = 0;
+let trafficFrame = 0;
+let deliveryTimer = 0;
+let trafficState = null;
 let apparatusVisible = true;
 let lastControl = null;
 
@@ -202,10 +213,162 @@ function updateDiagram(experiment, value) {
   parameterOutput.textContent = experiment.parameter.format(value);
 }
 
+function createTrafficState(value) {
+  return {
+    brakeDuration: value / 10,
+    endTime: value / 10 + 4,
+    time: 0,
+    released: false,
+    maxQueueAfterRelease: 0,
+    lastJamTime: value / 10,
+    cars: Array.from({ length: 12 }, (_, index) => ({ position: index * (1000 / 12), speed: 55 }))
+  };
+}
+
+function stepTraffic(state, dt) {
+  const positions = state.cars.map(car => car.position);
+  const speeds = state.cars.map(car => car.speed);
+  const braking = state.time < state.brakeDuration;
+  state.cars.forEach((car, index) => {
+    const leader = (index + 1) % state.cars.length;
+    const gap = (positions[leader] - positions[index] + 1000) % 1000;
+    const gapSpeed = Math.max(5, Math.min(55, (gap - 31) * 1.22));
+    const desired = index === 0 && braking ? 5 : gapSpeed;
+    const rate = desired < speeds[index] ? 42 : 11;
+    car.speed += Math.sign(desired - speeds[index]) * Math.min(Math.abs(desired - speeds[index]), rate * dt);
+  });
+  state.cars.forEach(car => { car.position = (car.position + car.speed * dt) % 1000; });
+  state.time += dt;
+  const queued = state.cars.slice(1).filter(car => car.speed < 47).length;
+  if (state.time >= state.brakeDuration) {
+    state.maxQueueAfterRelease = Math.max(state.maxQueueAfterRelease, queued);
+    if (queued > 0) state.lastJamTime = state.time;
+  }
+  return queued;
+}
+
+function trafficSnapshot(state = trafficState) {
+  if (!state) return null;
+  const queued = state.cars.slice(1).filter(car => car.speed < 47).length;
+  return {
+    time: Number(state.time.toFixed(2)),
+    brakeDuration: state.brakeDuration,
+    causeOn: state.time < state.brakeDuration,
+    queued,
+    queuedIndices: state.cars.map((car, index) => index !== 0 && car.speed < 47 ? index : -1).filter(index => index > 0),
+    maxQueueAfterRelease: state.maxQueueAfterRelease,
+    persistence: Number(Math.max(0, state.lastJamTime - state.brakeDuration).toFixed(2)),
+    positions: state.cars.map(car => Number(car.position.toFixed(2))),
+    speeds: state.cars.map(car => Number(car.speed.toFixed(2)))
+  };
+}
+
+function renderTraffic(state) {
+  const sim = scopeArt.querySelector(".traffic-sim");
+  if (!sim) return;
+  const braking = state.time < state.brakeDuration;
+  const queuedCars = [];
+  let markedPoint = null;
+  sim.querySelectorAll(".traffic-car").forEach((node, index) => {
+    const car = state.cars[index];
+    const angle = car.position / 1000 * Math.PI * 2;
+    const x = 320 + Math.cos(angle) * 183;
+    const y = 230 + Math.sin(angle) * 116;
+    node.setAttribute("transform", `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${(angle * 180 / Math.PI + 90).toFixed(2)})`);
+    const queued = index !== 0 && car.speed < 47;
+    node.classList.toggle("is-queued", queued);
+    node.classList.toggle("is-braking", index === 0 && braking);
+    if (index === 0) markedPoint = { x, y };
+    if (queued) queuedCars.push({ index, angle, speed: car.speed });
+  });
+  const lamp = sim.querySelector(".traffic-brake-lamp");
+  lamp?.classList.toggle("is-on", braking);
+  if (lamp && markedPoint) {
+    lamp.setAttribute("cx", markedPoint.x.toFixed(2));
+    lamp.setAttribute("cy", markedPoint.y.toFixed(2));
+  }
+  const wave = sim.querySelector(".traffic-wave");
+  const slowest = queuedCars.sort((a, b) => a.speed - b.speed)[0];
+  wave?.classList.toggle("is-visible", Boolean(slowest));
+  if (wave && slowest) wave.style.transform = `rotate(${slowest.angle * 180 / Math.PI + 30}deg)`;
+  const phase = sim.querySelector(".traffic-phase");
+  const clock = sim.querySelector(".traffic-clock");
+  const causeLabel = sim.querySelector(".traffic-cause-label");
+  if (causeLabel && markedPoint) {
+    const onRight = markedPoint.x > 420;
+    causeLabel.setAttribute("x", (markedPoint.x + (onRight ? -18 : 18)).toFixed(2));
+    causeLabel.setAttribute("y", (markedPoint.y - 19).toFixed(2));
+    causeLabel.setAttribute("text-anchor", onRight ? "end" : "start");
+  }
+  if (phase) phase.textContent = braking ? "BRAKE ON / CAUSE PRESENT" : "BRAKE OFF / CAUSE REMOVED";
+  if (clock) clock.textContent = `t = ${state.time.toFixed(1)} s / ${queuedCars.length} following car${queuedCars.length === 1 ? "" : "s"} queued`;
+  readingPrimary.textContent = braking ? `Marked car braking / ${Math.max(0, state.brakeDuration - state.time).toFixed(1)} s left` : `Marked car released at ${state.brakeDuration.toFixed(1)} s`;
+  readingSecondary.textContent = queuedCars.length ? `${queuedCars.length} following car${queuedCars.length === 1 ? "" : "s"} still below cruising speed` : "Flow currently uniform";
+  scopeCaption.textContent = braking
+    ? "The marked car is the only cause. Following drivers react to shrinking gaps, not to a hidden obstacle."
+    : queuedCars.length
+      ? "The marked car is moving again. The highlighted queue remains behind it and continues traveling backward through traffic."
+      : "The marked car is moving again and the last following driver has recovered cruising speed.";
+}
+
+function finishTrafficTrial(token, experiment, value) {
+  if (token !== trialToken || !trafficState) return;
+  cancelAnimationFrame(trafficFrame);
+  trafficFrame = 0;
+  renderTraffic(trafficState);
+  apparatus?.classList.remove("trial-running");
+  apparatus?.classList.add("traffic-received");
+  runButton?.removeAttribute("aria-busy");
+  if (runButton) runButton.disabled = false;
+  scopeMode.textContent = "COMPLETE";
+  const metrics = trafficSnapshot();
+  const cars = metrics.maxQueueAfterRelease;
+  const result = `Cause ended at ${(value / 10).toFixed(1)} s; ${cars} following car${cars === 1 ? "" : "s"} queued after release; the wave persisted ${metrics.persistence.toFixed(1)} s without it.`;
+  status.textContent = result;
+  setReceiver(`Traffic receipt: ${cars} cars queued after release / ${metrics.persistence.toFixed(1)} s persistence`, "traffic");
+  if (trafficRecord && trafficRecordCause && trafficRecordEffect) {
+    trafficRecord.hidden = false;
+    trafficRecordCause.textContent = `${(value / 10).toFixed(1)} s marked-car brake`;
+    trafficRecordEffect.textContent = `${cars} following cars / ${metrics.persistence.toFixed(1)} s after release`;
+  }
+  clearTimeout(deliveryTimer);
+  deliveryTimer = setTimeout(() => apparatus?.classList.remove("traffic-received"), reduceMotion.matches ? 20 : 900);
+}
+
+function runTrafficTrial(token, experiment, value) {
+  trafficState = createTrafficState(value);
+  renderTraffic(trafficState);
+  if (reduceMotion.matches) {
+    while (trafficState.time < trafficState.endTime) stepTraffic(trafficState, .04);
+    finishTrafficTrial(token, experiment, value);
+    return;
+  }
+  let previous = performance.now();
+  const frame = now => {
+    if (token !== trialToken || !trafficState) return;
+    const elapsed = Math.min(.05, (now - previous) / 1000);
+    previous = now;
+    const wasBraking = trafficState.time < trafficState.brakeDuration;
+    stepTraffic(trafficState, elapsed * 2.15);
+    renderTraffic(trafficState);
+    if (wasBraking && trafficState.time >= trafficState.brakeDuration) {
+      status.textContent = "Brake released. The following gaps now decide what survives.";
+    }
+    if (trafficState.time >= trafficState.endTime) finishTrafficTrial(token, experiment, value);
+    else trafficFrame = requestAnimationFrame(frame);
+  };
+  trafficFrame = requestAnimationFrame(frame);
+}
+
 function cancelTrial(message = "") {
   trialToken += 1;
   clearTimeout(trialTimer);
+  clearTimeout(deliveryTimer);
+  cancelAnimationFrame(trafficFrame);
+  trafficFrame = 0;
+  trafficState = null;
   apparatus?.classList.remove("trial-running");
+  apparatus?.classList.remove("traffic-received");
   runButton?.removeAttribute("aria-busy");
   if (runButton) runButton.disabled = !selectedKey;
   if (selectedKey) scopeMode.textContent = "READY";
@@ -241,6 +404,10 @@ function runTrial() {
   runButton.setAttribute("aria-busy", "true");
   scopeMode.textContent = "RUNNING";
   status.textContent = experiment.running;
+  if (selectedKey === "traffic") {
+    runTrafficTrial(token, experiment, value);
+    return;
+  }
   const duration = reduceMotion.matches ? 40 : 1320;
   trialTimer = setTimeout(() => completeTrial(token, experiment, value), duration);
 }
@@ -385,5 +552,5 @@ window.__trikzikLabTest = Object.freeze({
   select: key => applySelection(key),
   clear: () => clearSelection(),
   run: runTrial,
-  snapshot: () => ({ selectedKey, value: Number(parameter.value), running: apparatus?.classList.contains("trial-running"), title: document.title, url: location.href, receiver: receiverText?.textContent })
+  snapshot: () => ({ selectedKey, value: Number(parameter.value), running: apparatus?.classList.contains("trial-running"), title: document.title, url: location.href, receiver: receiverText?.textContent, traffic: trafficSnapshot() })
 });

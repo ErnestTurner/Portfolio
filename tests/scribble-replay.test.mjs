@@ -6,6 +6,29 @@ import vm from 'node:vm';
 
 const html = await readFile(new URL('../games/scribble-engine/index.html', import.meta.url), 'utf8');
 
+test('mobile workspace keeps the stage and transport visible while controls use one bounded panel', () => {
+  assert.match(html, /height: 100svh/);
+  assert.match(html, /height: 100dvh/);
+  assert.match(html, /grid-template-rows: minmax\(132px, 44dvh\) minmax\(0, 1fr\)/);
+  assert.match(html, /overscroll-behavior: contain/);
+  assert.match(html, /role="tablist" aria-label="Scribble controls"/);
+  assert.equal((html.match(/role="tab"/g) || []).length, 4);
+  assert.equal((html.match(/role="tabpanel"/g) || []).length, 4);
+  assert.match(html, /data-mobile-tab="machine"/);
+  assert.match(html, /data-mobile-tab="ink"/);
+  assert.match(html, /data-mobile-tab="sequence"/);
+  assert.match(html, /data-mobile-tab="project"/);
+  assert.match(html, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(html, /min-height: 44px/);
+  assert.match(html, /\(max-width: 1100px\) and \(hover: none\) and \(pointer: coarse\)/);
+  assert.match(html, /function activateMobileSection/);
+  assert.match(html, /event\.key === 'ArrowRight'/);
+  assert.match(html, /event\.key === 'Home'/);
+  assert.match(html, /document\.createElement\('details'\)/);
+  assert.match(html, /selectedCueIndex = index/);
+  assert.match(html, /\.cue-row\[open\] > \.cue-body/);
+});
+
 test('cue-score replay links are versioned, bounded, and backward compatible', () => {
   assert.match(html, /const REPLAY_SCHEMA = 'trikzik\.scribble-engine\.replay'/);
   assert.match(html, /const REPLAY_VERSION = 2/);

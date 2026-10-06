@@ -1,6 +1,7 @@
 import { requireOwner, sameOriginApiRequest, unavailable } from "../../_shared/access.js";
 
 const RANGES = Object.freeze({ "24h": 86400, "7d": 604800, "30d": 2592000, "90d": 7776000 });
+const RETENTION_SECONDS = 7776000;
 const AGGREGATE_SQL = "SELECT event,experiment,source,format,release,SUM(count) AS total FROM analytics_events WHERE context=? AND bucket_start>=? AND bucket_start<? GROUP BY event,experiment,source,format,release ORDER BY total DESC LIMIT 500";
 const LATEST_SQL = "SELECT MAX(bucket_start) AS latest_bucket FROM analytics_events WHERE context=?";
 
@@ -49,8 +50,12 @@ export async function onRequestGet({ request, env }) {
   const requested = new URL(request.url).searchParams.get("range");
   const range = RANGES[requested] ? requested : "7d";
   const end = Math.floor(Date.now() / 1000);
-  const start = end - RANGES[range];
-  const priorStart = start - RANGES[range];
+  const retentionStart = end - RETENTION_SECONDS;
+  const start = Math.max(end - RANGES[range], retentionStart);
+  const desiredPriorStart = start - RANGES[range];
+  const priorStart = Math.max(desiredPriorStart, retentionStart);
+  const priorSeconds = Math.max(0, start - priorStart);
+  const comparisonStatus = priorSeconds === 0 ? "unavailable" : priorSeconds < RANGES[range] ? "partial" : "complete";
 
   try {
     const currentStatement = env.TRIKZIK_DB.prepare(AGGREGATE_SQL).bind(context, start, end);
@@ -68,7 +73,12 @@ export async function onRequestGet({ request, env }) {
       context,
       generatedAt: new Date().toISOString(),
       current: period(start, end, currentResult?.results),
-      prior: period(priorStart, start, priorResult?.results),
+      prior: period(priorStart, start, comparisonStatus === "unavailable" ? [] : priorResult?.results),
+      comparison: {
+        status: comparisonStatus,
+        requestedSeconds: RANGES[range],
+        availableSeconds: priorSeconds,
+      },
       health: {
         collectionEnabled: env.ANALYTICS_ENABLED === "true",
         queryOk: true,

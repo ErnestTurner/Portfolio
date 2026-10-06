@@ -254,7 +254,7 @@
     }
 
     button:hover { background: #173e59; }
-    button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    button:focus-visible, input:focus-visible, #road:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
     #restart {
       grid-column: 1 / -1;
       border-color: rgba(255, 209, 102, .48);
@@ -298,7 +298,9 @@
       <h1 id="title">Traffic With No Excuse</h1>
       <p class="kicker">One road. One rule. No obvious cause.</p>
       <div class="road-wrap">
-        <canvas id="road" aria-label="Circular road with 24 moving cars. Tap a car to brake it for two simulation seconds."></canvas>
+        <canvas id="road" tabindex="0" role="application" aria-keyshortcuts="ArrowLeft ArrowRight Enter Space" aria-describedby="road-key-help road-key-status" aria-label="Circular road with 24 moving cars"></canvas>
+        <p id="road-key-help" class="visually-hidden">Use the left and right arrow keys to select a car. Press Enter or Space to brake the selected car for two simulation seconds.</p>
+        <p id="road-key-status" class="visually-hidden" role="status" aria-live="polite"></p>
         <div class="case-card" id="caseCard" data-state="idle" aria-live="polite">
           <span class="case-id">Specimen 24-C · Cause status</span>
           <strong id="caseHeadline">No incident currently inventing itself</strong>
@@ -381,6 +383,8 @@
     let simTime = 0;
     let intervention = null;
     let trackedCarId = null;
+    let keyboardCarId = 0;
+    let keyboardMode = false;
 
     function makeUniformCars(p = params) {
       const speed = equilibriumSpeed(p);
@@ -397,11 +401,14 @@
       simTime = 0;
       intervention = null;
       trackedCarId = null;
+      keyboardCarId = 0;
+      keyboardMode = false;
     }
 
     function beginIntervention(carId) {
       intervention = { carId, remaining: 2 };
       trackedCarId = carId;
+      keyboardCarId = carId;
     }
 
     function simulationStep(state = cars, p = params, active = intervention) {
@@ -471,6 +478,7 @@
     const caseCardEl = document.getElementById('caseCard');
     const caseHeadlineEl = document.getElementById('caseHeadline');
     const caseDetailEl = document.getElementById('caseDetail');
+    const keyboardStatusEl = document.getElementById('road-key-status');
     const pauseButton = document.getElementById('pause');
     const sliderConfig = [
       ['timeGap', 'timeGapValue', 'T', value => `${value.toFixed(1)} s`],
@@ -529,7 +537,25 @@
       if (best) beginIntervention(best.id);
     }
 
-    canvas.addEventListener('pointerdown', chooseCar);
+    canvas.addEventListener('pointerdown', event => { keyboardMode = false; chooseCar(event); });
+    canvas.addEventListener('blur', () => { keyboardMode = false; });
+    function selectKeyboardCar(offset) {
+      const current = Math.max(0, cars.findIndex(car => car.id === keyboardCarId));
+      keyboardCarId = cars[mod(current + offset, cars.length)].id;
+      keyboardMode = true;
+      keyboardStatusEl.textContent = `Car ${keyboardCarId + 1} selected. Press Enter or Space to brake it.`;
+    }
+    canvas.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        selectKeyboardCar(event.key === 'ArrowLeft' ? -1 : 1);
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        keyboardMode = true;
+        beginIntervention(keyboardCarId);
+        keyboardStatusEl.textContent = `Car ${keyboardCarId + 1} is braking for two simulation seconds.`;
+      }
+    });
 
     // Rendering reads only current simulation state; resize never touches it.
     function resizeCanvas() {
@@ -654,6 +680,14 @@
           ctx.strokeStyle = active ? '#ffffff' : 'rgba(255,255,255,.58)';
           ctx.lineWidth = active ? size * .005 : size * .0025;
           ctx.strokeRect(-carLength * .68, -carWidth * .82, carLength * 1.36, carWidth * 1.64);
+        }
+
+        if (keyboardMode && document.activeElement === canvas && keyboardCarId === car.id) {
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = Math.max(2, size * .004);
+          ctx.setLineDash([size * .009, size * .006]);
+          ctx.strokeRect(-carLength * .88, -carWidth * 1.08, carLength * 1.76, carWidth * 2.16);
+          ctx.setLineDash([]);
         }
 
         ctx.fillStyle = speedColor(car.speed);

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "builtAt": "2026-09-08T13:49:24.805Z",
   "files": {
-    "assets/dungeon.png": "eebbdc0dfd9db59b14c2d28313ec38d49c10fbc3f3749dd41ec8b19ff0c057e3",
-    "assets/sprites.png": "f8f2ec4d4f0f16248f511d6c072eca222704ec81a5ab4384863da1a1d9168833",
+    "assets/dungeon.png": "75ce40edcab56e183fe804a91a02c37a53369a62f24095905ae1587014554325",
+    "assets/sprites.png": "03b9a0ab16c4b809f3285ed2705b975bdc1042a900de7e08200d9a2ef67763ed",
     "core.js": "dbb442542d082b5b7aabe2fd5b3252330f8d5591ae7ab52e41aa6d5f861df070",
     "CREDITS.md": "abe75f8ef9592603185f60f8015a320fa094f166b6619b6d55eb0bc9801b2936",
     "game.js": "4ba0e1b1af4c7188d2972f7ecf2b7b3f33013089552994832c3e02f201def2af",

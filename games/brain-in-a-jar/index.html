@@ -65,7 +65,7 @@
       padding: 10px 13px; min-height: 42px; font: inherit; font-weight: 650; cursor: pointer; touch-action: manipulation;
     }
     button:hover { border-color: var(--cyan); background: #1b3037; }
-    button:focus-visible, input:focus-visible { outline: 3px solid #62e6dd66; outline-offset: 2px; }
+    button:focus-visible, input:focus-visible, #room:focus-visible { outline: 3px solid #62e6dd66; outline-offset: 2px; }
     button.primary { background: #143a3b; border-color: #3fa9a4; }
     button[aria-pressed="true"] { color: #061012; background: var(--amber); border-color: var(--amber); }
     button:disabled { opacity: .42; cursor: not-allowed; }
@@ -139,7 +139,8 @@
           <h2 id="room-title">Bounded room</h2>
           <span>Click or drag to move the light</span>
         </div>
-        <div class="room-wrap"><canvas id="room" width="720" height="600" aria-label="Simulation room with creature and movable light"></canvas></div>
+        <div class="room-wrap"><canvas id="room" width="720" height="600" tabindex="0" role="application" aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight" aria-describedby="room-key-help" aria-label="Simulation room with creature and movable light"></canvas></div>
+        <p id="room-key-help" class="visually-hidden">Use the arrow keys to move the light. Hold Shift to move it farther.</p>
         <div class="controls">
           <button id="pause" class="primary" type="button">Pause</button>
           <button id="step" type="button" disabled>Step one tick</button>
@@ -374,10 +375,18 @@
     document.querySelector('#zero').addEventListener('click',()=>setSelectedWeight(0));
     function resetEverything(){ state.creature={x:255,y:330,angle:-0.25};state.light={x:535,y:180};state.weights=cloneWeights();state.paused=false;state.swapped=false;state.dragging=false;state.selected={layer:'ih',to:0,from:0};state.tickCount=0;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();syncEditor();renderConnections();refresh(); }
     function pointerPosition(event){const r=canvas.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height};}
-    function moveLight(event){const p=pointerPosition(event);state.light.x=clamp(p.x,12,W-12);state.light.y=clamp(p.y,12,H-12);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));refresh();}
+    function moveLightTo(x,y){state.light.x=clamp(x,12,W-12);state.light.y=clamp(y,12,H-12);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));refresh();}
+    function moveLight(event){const p=pointerPosition(event);moveLightTo(p.x,p.y);}
     canvas.addEventListener('pointerdown',event=>{state.dragging=true;canvas.setPointerCapture(event.pointerId);moveLight(event);});
     canvas.addEventListener('pointermove',event=>{if(state.dragging)moveLight(event);});
     canvas.addEventListener('pointerup',()=>{state.dragging=false;}); canvas.addEventListener('pointercancel',()=>{state.dragging=false;});
+    canvas.addEventListener('keydown',event=>{
+      const directions={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]},direction=directions[event.key];
+      if(!direction)return;
+      event.preventDefault();
+      const distance=event.shiftKey?36:12;
+      moveLightTo(state.light.x+direction[0]*distance,state.light.y+direction[1]*distance);
+    });
 
     function refresh(){drawRoom();drawMobileObserver();updateDiagram();}
     let previous=performance.now(), accumulator=0;

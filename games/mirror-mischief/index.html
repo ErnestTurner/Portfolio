@@ -104,7 +104,7 @@
     }
     button:hover:not(:disabled) { border-color: rgba(104, 244, 239, .62); background: linear-gradient(#15384a, #0b2737); }
     button:active:not(:disabled) { transform: translateY(1px); }
-    button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    button:focus-visible, input:focus-visible, #table:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
     button:disabled { opacity: .38; cursor: not-allowed; }
     .selected-name { font-size: 1.03rem; font-weight: 750; color: #d9ffff; margin-bottom: 12px; }
     .rotation-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
@@ -145,7 +145,9 @@
     <div class="layout">
       <section class="stage-card" aria-label="Optical tabletop">
         <div class="canvas-wrap">
-          <canvas id="table" width="900" height="600" aria-label="Interactive optical tabletop. Click or tap pieces to select and drag them."></canvas>
+          <canvas id="table" width="900" height="600" tabindex="0" role="application" aria-keyshortcuts="PageUp PageDown ArrowUp ArrowDown ArrowLeft ArrowRight" aria-describedby="table-key-help table-key-status" aria-label="Interactive optical tabletop"></canvas>
+          <p id="table-key-help" class="visually-hidden">Use Page Up and Page Down to select a piece. Use the arrow keys to move it. Hold Shift to move it farther. Rotation and delete controls follow the tabletop.</p>
+          <p id="table-key-status" class="visually-hidden" role="status" aria-live="polite"></p>
           <div class="bench-stamp">Trikzik Labs · Optics Dept. (unsupervised)</div>
           <div id="benchWhisper" class="bench-whisper" aria-live="polite">The light is behaving. Suspicious.</div>
           <p class="invitation">Move one mirror a little. Watch everything downstream change.</p>
@@ -207,6 +209,7 @@
       del: document.querySelector('#deletePiece'), reset: document.querySelector('#reset'),
       count: document.querySelector('#pieceCount'), limitNote: document.querySelector('#limitNote'),
       traceLimit: document.querySelector('#traceLimit'), whisper: document.querySelector('#benchWhisper'),
+      keyboardStatus: document.querySelector('#table-key-status'),
       add: [...document.querySelectorAll('[data-add]')]
     };
     let nextId = 7;
@@ -487,6 +490,31 @@
     }, { passive:false });
     function endDrag(e) { if(!drag||e.pointerId!==drag.pointerId)return; drag=null; canvas.style.cursor='grab'; }
     canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
+
+    // ----- Keyboard interaction --------------------------------------------
+    function announceSelected(action='selected') {
+      const p=selected();
+      if(p)ui.keyboardStatus.textContent=`${labels[p.type]} ${action}. Position ${Math.round(p.x)}, ${Math.round(p.y)}.`;
+    }
+    function selectByOffset(offset) {
+      const index=Math.max(0,pieces.findIndex(p=>p.id===selectedId));
+      selectedId=pieces[(index+offset+pieces.length)%pieces.length].id;
+      updateControls();draw();announceSelected();
+    }
+    function moveSelectedBy(dx,dy) {
+      const p=selected();if(!p)return;
+      p.x=Math.max(34,Math.min(W-34,p.x+dx));p.y=Math.max(34,Math.min(H-34,p.y+dy));
+      update();announceSelected('moved');
+    }
+    canvas.addEventListener('keydown',event=>{
+      if(event.key==='PageUp'||event.key==='PageDown'){
+        event.preventDefault();selectByOffset(event.key==='PageUp'?-1:1);return;
+      }
+      const directions={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]},direction=directions[event.key];
+      if(!direction)return;
+      event.preventDefault();const distance=event.shiftKey?30:10;
+      moveSelectedBy(direction[0]*distance,direction[1]*distance);
+    });
 
     // ----- Controls ---------------------------------------------------------
     function updateControls() {

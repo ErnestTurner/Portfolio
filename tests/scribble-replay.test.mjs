@@ -122,17 +122,61 @@ test('cue-score validation is bounded and presets are authored compositions', ()
   assert.match(html, /'solar-weave'/);
   assert.match(html, /'ghost-garden'/);
 
-  const presets = html.slice(html.indexOf('const SCORE_PRESETS'), html.indexOf('function cloneCues'));
+  const presets = html.slice(html.indexOf('const SCORE_PRESETS'), html.indexOf('const RECIPE_SCHEMA'));
   assert.equal((presets.match(/penDown: false/g) || []).length, 6);
   for (const color of ['#b4f7a7', '#a2c8ff', '#ffafcc', '#ffd166', '#ff6b6b', '#fff1d0', '#eff5fa']) {
     assert.match(presets, new RegExp(color));
   }
 });
 
+test('recipe files are versioned, bounded, declarative programs with compiled execution limits', () => {
+  const source = html.slice(html.indexOf("const RECIPE_SCHEMA"), html.indexOf('function cueSeconds'));
+  const context = vm.createContext({});
+  vm.runInContext(`const REPLAY_STEPS_PER_SECOND = 360;\n${source}\nthis.api = { RECIPE_EXAMPLES, cloneRecipe, validateRecipe, compileRecipe, motifSeconds };`, context);
+  const api = context.api;
+  const expectedOperations = { 'orbit-rosette': 8, 'lantern-shift': 48, 'twin-comets': 24 };
+  const signatures = new Set();
+  for (const [key, sourceRecipe] of Object.entries(api.RECIPE_EXAMPLES)) {
+    const recipe = api.validateRecipe(api.cloneRecipe(sourceRecipe));
+    const compiled = api.compileRecipe(recipe);
+    assert.equal(compiled.operations.length, expectedOperations[key]);
+    assert.ok(compiled.totalSteps <= 120000);
+    assert.deepEqual(JSON.parse(JSON.stringify(api.validateRecipe(JSON.parse(JSON.stringify(recipe))))), JSON.parse(JSON.stringify(recipe)));
+    signatures.add(recipe.sections.flatMap(section => section.stages.map(stage => `${stage.length1}/${stage.length2}/${stage.speed1}/${stage.speed2}/${stage.offset}/${stage.mode}`)).join('|'));
+  }
+  assert.equal(signatures.size, 3, 'examples must vary geometry, not only ink');
+  assert.equal(api.motifSeconds({ speed1: 105, speed2: -75, amount: 1 }), 24);
+  assert.equal(api.motifSeconds({ speed1: 0, speed2: 90, amount: 2 }), 8);
+  assert.throws(() => api.motifSeconds({ speed1: 0, speed2: 0, amount: 1 }), /at least one moving arm/);
+
+  const tooMany = api.cloneRecipe(api.RECIPE_EXAMPLES['lantern-shift']);
+  tooMany.sections = Array.from({ length: 2 }, (_, index) => ({ ...api.cloneRecipe(tooMany.sections[0]), name: `Section ${index + 1}`, repeats: 32, stages: Array.from({ length: 12 }, () => ({ ...api.cloneRecipe(tooMany.sections[0].stages[0]), amount: 0.5 })) }));
+  assert.throws(() => api.validateRecipe(tooMany), /expansion exceeds 512 operations/);
+  assert.doesNotMatch(source, /\beval\s*\(|new Function/);
+});
+
+test('recipe playback uses a cursor, breaks transitions, and preserves legacy link versions', () => {
+  assert.match(html, /const RECIPE_VERSION = 1/);
+  assert.match(html, /const MAX_RECIPE_FILE_BYTES = 128 \* 1024/);
+  assert.match(html, /const MAX_RECIPE_LINK_BYTES = 2048/);
+  assert.match(html, /const MAX_RECIPE_OPERATIONS = 512/);
+  assert.match(html, /const MAX_RECIPE_STEPS = 120000/);
+  assert.match(html, /recipeSession\.operationIndex/);
+  assert.match(html, /while \(index \+ 1 < operations\.length/);
+  const boundary = html.slice(html.indexOf('function applyRecipeOperationForStep'), html.indexOf('function recipeStep'));
+  assert.match(boundary, /breakStroke\(\)/);
+  assert.doesNotMatch(boundary, /renderRecipeEditor/);
+  assert.match(html, /operation\.stepSeconds/);
+  assert.match(html, /recipeOriginal\.playbackRate/);
+  assert.match(html, /download the recipe file instead/);
+  assert.match(html, /\[LEGACY_REPLAY_VERSION, REPLAY_VERSION\]/);
+  assert.match(html, /value\.version === LEGACY_REPLAY_VERSION/);
+});
+
 test('fixed-step replay has a stable geometry fixture', () => {
   assert.match(html, /const REPLAY_STEPS_PER_SECOND = 360/);
   assert.match(html, /replaySession\.completedSteps < targetSteps/);
-  assert.match(html, /if \(!replaySession\) breakStroke\(\)/);
+  assert.match(html, /if \(!replaySession && !recipeSession\) breakStroke\(\)/);
 
   let angle1 = 0.25;
   let angle2 = 1.1;

@@ -221,6 +221,27 @@
     #undoCue { border-color: #755c69; }
     .score-status { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
     .score-status.error { color: var(--pink); }
+    .recipe-tools legend { color: var(--mint); }
+    .recipe-presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-bottom: 10px; }
+    .recipe-preset { min-width: 0; padding: 8px 5px; border-color: #557565; font-size: .72rem; }
+    .recipe-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .recipe-grid .wide { grid-column: 1 / -1; }
+    .recipe-grid label { display: grid; gap: 4px; margin: 0; color: var(--muted); font-size: .65rem; letter-spacing: .05em; text-transform: uppercase; }
+    .recipe-grid input, .recipe-grid select { width: 100%; min-width: 0; min-height: 38px; border: 1px solid #40566d; border-radius: 6px; padding: 6px 8px; background: #14243a; color: var(--ink); font: inherit; }
+    .recipe-outline { display: grid; gap: 5px; margin: 10px 0; }
+    .recipe-section-row { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 9px; color: var(--muted); text-align: left; }
+    .recipe-section-row[aria-pressed="true"] { border-color: var(--mint); color: var(--ink); box-shadow: inset 3px 0 var(--mint); }
+    .recipe-section-row span { color: var(--blue); font: 700 .65rem/1.2 "Courier New", monospace; text-align: right; }
+    .recipe-inspector { margin-top: 8px; padding: 9px; border: 1px solid #30445a; border-radius: 8px; background: #0b1627; }
+    .recipe-inspector h3 { margin: 0 0 8px; color: var(--pink); font: 800 .72rem/1.2 "Courier New", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .recipe-button-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin: 8px 0; }
+    .recipe-button-row button { min-width: 0; padding: 6px 4px; font-size: .67rem; }
+    .recipe-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 10px; }
+    .recipe-actions button { min-width: 0; font-size: .72rem; }
+    #playRecipe { border-color: var(--mint); color: var(--mint); }
+    #copyRecipeLink { border-color: #6687a7; color: var(--blue); }
+    .recipe-status { min-height: 1.45em; margin: 9px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
+    .recipe-status.error { color: var(--pink); }
     .mobile-quick { display: none; }
     .mobile-tabs { display: none; }
     .control-section { margin: 0; padding: 0; border: 0; }
@@ -365,6 +386,7 @@
       .replay-grid, .replay-actions { grid-template-columns: 1fr; }
       .score-presets, .score-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .score-preset, .score-actions button { min-width: 0; padding-inline: 5px; font-size: .7rem; }
+      .recipe-button-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
 
     @media (max-height: 520px) and (max-width: 900px), (max-height: 520px) and (max-width: 1100px) and (hover: none) and (pointer: coarse) {
@@ -514,6 +536,65 @@
         <p class="score-status" id="scoreStatus" role="status" aria-live="polite">4 phases / 24 seconds scored</p>
       </fieldset>
 
+      <fieldset class="recipe-tools">
+        <legend>Recipe Bench</legend>
+        <p class="setup-note">Build repeated drawing instructions without turning the bench into a wall of controls. Geometry time and playback speed stay separate.</p>
+        <div class="recipe-presets" aria-label="Recipe examples">
+          <button class="recipe-preset" type="button" data-recipe-preset="orbit-rosette">Orbit Rosette</button>
+          <button class="recipe-preset" type="button" data-recipe-preset="lantern-shift">Lantern Shift</button>
+          <button class="recipe-preset" type="button" data-recipe-preset="twin-comets">Twin Comets</button>
+        </div>
+        <div class="recipe-grid">
+          <label class="wide">Recipe name<input id="recipeName" type="text" maxlength="60" value="Orbit Rosette"></label>
+          <label>Playback speed<select id="recipePlayback"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+          <label>Section<select id="recipeSection"></select></label>
+        </div>
+        <div class="recipe-outline" id="recipeOutline" aria-label="Recipe section outline"></div>
+        <div class="recipe-inspector">
+          <h3>Selected instruction</h3>
+          <div class="recipe-grid">
+            <label>Section name<input id="recipeSectionName" type="text" maxlength="40"></label>
+            <label>Repeat section<input id="recipeRepeats" type="number" min="1" max="32" step="1" inputmode="numeric"></label>
+            <label class="wide">Stage<select id="recipeStage"></select></label>
+            <label class="wide">Stage name<input id="recipeStageName" type="text" maxlength="40"></label>
+            <label>Draw by<select id="recipeMode"><option value="seconds">Seconds</option><option value="motif">Complete motif</option></select></label>
+            <label>Amount<input id="recipeAmount" type="number" min="0.5" max="120" step="0.5" inputmode="decimal"></label>
+            <label>Arm 1 length<input id="recipeLength1" type="number" min="20" max="140" step="1" inputmode="numeric"></label>
+            <label>Arm 2 length<input id="recipeLength2" type="number" min="20" max="140" step="1" inputmode="numeric"></label>
+            <label>Arm 1 signed °/s<input id="recipeSpeed1" type="number" min="-360" max="360" step="1" inputmode="numeric"></label>
+            <label>Arm 2 signed °/s<input id="recipeSpeed2" type="number" min="-360" max="360" step="1" inputmode="numeric"></label>
+            <label>Angle offset °<input id="recipeOffset" type="number" min="-360" max="360" step="1" inputmode="numeric"></label>
+            <label>Ink width<input id="recipeWidth" type="number" min="0.5" max="8" step="0.5" inputmode="decimal"></label>
+            <label>Ink color<input id="recipeColor" type="color" value="#b4f7a7"></label>
+            <button id="recipePen" type="button" aria-pressed="true">Pen down</button>
+          </div>
+          <div class="recipe-button-row" aria-label="Stage actions">
+            <button id="recipeStageUp" type="button" aria-label="Move stage earlier">Earlier</button>
+            <button id="recipeStageDown" type="button" aria-label="Move stage later">Later</button>
+            <button id="recipeStageDuplicate" type="button">Duplicate</button>
+            <button id="recipeStageRemove" type="button">Remove</button>
+          </div>
+          <div class="recipe-button-row" aria-label="Section actions">
+            <button id="recipeSectionUp" type="button" aria-label="Move section earlier">Section ↑</button>
+            <button id="recipeSectionDown" type="button" aria-label="Move section later">Section ↓</button>
+            <button id="recipeSectionDuplicate" type="button">Copy section</button>
+            <button id="recipeSectionAdd" type="button">Add section</button>
+          </div>
+        </div>
+        <div class="recipe-actions">
+          <button id="playRecipe" type="button">Play recipe</button>
+          <button id="copyRecipeLink" type="button">Copy compact link</button>
+          <button id="downloadRecipe" type="button">Download recipe</button>
+          <button id="loadRecipe" type="button">Load recipe file</button>
+          <input id="recipeFile" type="file" accept="application/json,.json,.scribble-recipe.json" hidden>
+        </div>
+        <label class="replay-link-wrap" id="recipeLinkWrap" for="recipeLink" hidden>
+          <span>Recipe link — copy manually if needed</span>
+          <input id="recipeLink" type="text" readonly spellcheck="false">
+        </label>
+        <p class="recipe-status" id="recipeStatus" role="status" aria-live="polite">8 repeated motifs · ready to compile</p>
+      </fieldset>
+
       <fieldset class="replay-tools">
         <legend>Replay Link</legend>
         <p class="setup-note">Shares this starting setup, cue score, and finite run — never your artwork or project history.</p>
@@ -656,6 +737,7 @@
     let pendingCheckpointAction = null;
     let pendingSetup = null;
     let pendingReplay = null;
+    let pendingRecipe = null;
     let previewDirty = true;
     let previousTime = performance.now();
     let vectorStrokes = [];
@@ -669,6 +751,11 @@
     let cueScore = [];
     let cueHistory = [];
     let selectedCueIndex = 0;
+    let recipeProgram = null;
+    let recipeOriginal = null;
+    let recipeSession = null;
+    let selectedRecipeSection = 0;
+    let selectedRecipeStage = 0;
 
     // Kinematics: both angles are absolute page angles, exactly as shown here.
     function positions(source = state) {
@@ -934,8 +1021,137 @@
       })
     });
 
+    const RECIPE_SCHEMA = 'trikzik.scribble-engine.recipe';
+    const RECIPE_VERSION = 1;
+    const RECIPE_PARAMETER = 'recipe';
+    const MAX_RECIPE_FILE_BYTES = 128 * 1024;
+    const MAX_RECIPE_LINK_BYTES = 2048;
+    const MAX_RECIPE_LINK_TOKEN = 2800;
+    const MAX_RECIPE_URL_LENGTH = 4096;
+    const MAX_RECIPE_SECTIONS = 16;
+    const MAX_RECIPE_STAGES = 12;
+    const MAX_RECIPE_REPEATS = 32;
+    const MAX_RECIPE_OPERATIONS = 512;
+    const MAX_RECIPE_STEPS = 120000;
+    const MAX_RECIPE_STAGE_SECONDS = 120;
+    const MAX_RECIPE_MOTIFS = 8;
+    const RECIPE_PLAYBACK_RATES = Object.freeze([0.25, 0.5, 1, 2, 4]);
+    const RECIPE_EXAMPLES = Object.freeze({
+      'orbit-rosette': {
+        schema: RECIPE_SCHEMA, version: RECIPE_VERSION, name: 'Orbit Rosette', playbackRate: 4,
+        paper: { color: '#08101e', transparent: false }, start: { angle1: 0, angle2: 120, strokeStyle: 'solid' },
+        sections: [{ name: 'Eight turned petals', repeats: 8, stages: [
+          { name: 'Close one petal', mode: 'motif', amount: 1, length1: 110, length2: 58, speed1: 105, speed2: -75, offset: 45, penDown: true, color: '#b4f7a7', width: 1.5 }
+        ] }]
+      },
+      'lantern-shift': {
+        schema: RECIPE_SCHEMA, version: RECIPE_VERSION, name: 'Lantern Shift', playbackRate: 2,
+        paper: { color: '#160d1c', transparent: false }, start: { angle1: 20, angle2: 210, strokeStyle: 'solid' },
+        sections: [{ name: 'Twenty-four shifted sparks', repeats: 24, stages: [
+          { name: 'Draw a spark', mode: 'seconds', amount: 1.5, length1: 86, length2: 94, speed1: 140, speed2: -96, offset: 15, penDown: true, color: '#ffd166', width: 2 },
+          { name: 'Lift and reposition', mode: 'seconds', amount: 0.5, length1: 70, length2: 112, speed1: -48, speed2: 132, offset: 0, penDown: false, color: '#ffafcc', width: 1 }
+        ] }]
+      },
+      'twin-comets': {
+        schema: RECIPE_SCHEMA, version: RECIPE_VERSION, name: 'Twin Comets', playbackRate: 4,
+        paper: { color: '#06131a', transparent: false }, start: { angle1: 10, angle2: 190, strokeStyle: 'dotted' },
+        sections: [
+          { name: 'Mint comet field', repeats: 12, stages: [
+            { name: 'Mint complete motif', mode: 'motif', amount: 1, length1: 118, length2: 42, speed1: 144, speed2: -96, offset: 30, penDown: true, color: '#b4f7a7', width: 1.5 }
+          ] },
+          { name: 'Blue counter-field', repeats: 12, stages: [
+            { name: 'Blue complete motif', mode: 'motif', amount: 1, length1: 72, length2: 124, speed1: -120, speed2: 72, offset: -30, penDown: true, color: '#a2c8ff', width: 1 }
+          ] }
+        ]
+      }
+    });
+
     function cloneCues(cues) {
       return cues.map(cue => ({ ...cue }));
+    }
+
+    function cloneRecipe(recipe) {
+      return JSON.parse(JSON.stringify(recipe));
+    }
+
+    function greatestCommonDivisor(left, right) {
+      let a = Math.abs(left);
+      let b = Math.abs(right);
+      while (b) [a, b] = [b, a % b];
+      return a;
+    }
+
+    function motifSeconds(stage) {
+      const divisor = greatestCommonDivisor(stage.speed1, stage.speed2);
+      if (!divisor) throw new Error('Recipe rejected: a complete motif needs at least one moving arm.');
+      return 360 / divisor * stage.amount;
+    }
+
+    function recipeStageSeconds(stage) {
+      return stage.mode === 'motif' ? motifSeconds(stage) : stage.amount;
+    }
+
+    function compileRecipe(recipe) {
+      const operations = [];
+      let totalSteps = 0;
+      let geometrySeconds = 0;
+      recipe.sections.forEach((section, sectionIndex) => {
+        for (let repeatIndex = 0; repeatIndex < section.repeats; repeatIndex += 1) {
+          section.stages.forEach((stage, stageIndex) => {
+            if (operations.length >= MAX_RECIPE_OPERATIONS) throw new Error(`Recipe rejected: expansion exceeds ${MAX_RECIPE_OPERATIONS} operations.`);
+            const seconds = recipeStageSeconds(stage);
+            if (seconds > MAX_RECIPE_STAGE_SECONDS) throw new Error(`Recipe rejected: "${stage.name}" exceeds ${MAX_RECIPE_STAGE_SECONDS} geometric seconds.`);
+            const steps = Math.max(1, Math.ceil(seconds * REPLAY_STEPS_PER_SECOND));
+            if (totalSteps + steps > MAX_RECIPE_STEPS) throw new Error(`Recipe rejected: execution exceeds ${MAX_RECIPE_STEPS.toLocaleString()} fixed samples.`);
+            totalSteps += steps;
+            geometrySeconds += seconds;
+            operations.push({ ...stage, sectionIndex, stageIndex, repeatIndex, seconds, steps, stepSeconds: seconds / steps, endStep: totalSteps });
+          });
+        }
+      });
+      return { operations, totalSteps, geometrySeconds, wallSeconds: geometrySeconds / recipe.playbackRate };
+    }
+
+    function validateRecipe(value) {
+      const fail = message => { throw new Error(`Recipe rejected: ${message}`); };
+      const record = item => item !== null && typeof item === 'object' && !Array.isArray(item);
+      const exact = (item, keys) => record(item) && Object.keys(item).length === keys.length && keys.every(key => Object.prototype.hasOwnProperty.call(item, key));
+      const boundedName = (item, maximum) => typeof item === 'string' && item.trim().length >= 1 && item.trim().length <= maximum && !/[\u0000-\u001f\u007f]/.test(item);
+      const integerIn = (item, minimum, maximum) => Number.isInteger(item) && item >= minimum && item <= maximum;
+      const color = item => typeof item === 'string' && /^#[0-9a-f]{6}$/i.test(item);
+      if (!exact(value, ['schema', 'version', 'name', 'playbackRate', 'paper', 'start', 'sections'])) fail('unexpected or missing top-level fields.');
+      if (value.schema !== RECIPE_SCHEMA || value.version !== RECIPE_VERSION) fail('unsupported recipe schema or version.');
+      if (!boundedName(value.name, 60)) fail('name must contain 1-60 printable characters.');
+      if (!RECIPE_PLAYBACK_RATES.includes(value.playbackRate)) fail('playback speed is not supported.');
+      if (!exact(value.paper, ['color', 'transparent']) || !color(value.paper.color) || typeof value.paper.transparent !== 'boolean') fail('paper settings are malformed.');
+      if (!exact(value.start, ['angle1', 'angle2', 'strokeStyle']) || !Number.isFinite(value.start.angle1) || Math.abs(value.start.angle1) > 360 || !Number.isFinite(value.start.angle2) || Math.abs(value.start.angle2) > 360 || !['solid', 'dashed', 'dotted'].includes(value.start.strokeStyle)) fail('starting settings are malformed.');
+      if (!Array.isArray(value.sections) || value.sections.length < 1 || value.sections.length > MAX_RECIPE_SECTIONS) fail(`use 1-${MAX_RECIPE_SECTIONS} sections.`);
+      const recipe = {
+        schema: RECIPE_SCHEMA, version: RECIPE_VERSION, name: value.name.trim(), playbackRate: value.playbackRate,
+        paper: { color: value.paper.color.toLowerCase(), transparent: value.paper.transparent },
+        start: { angle1: value.start.angle1, angle2: value.start.angle2, strokeStyle: value.start.strokeStyle }, sections: []
+      };
+      recipe.sections = value.sections.map((section, sectionIndex) => {
+        if (!exact(section, ['name', 'repeats', 'stages']) || !boundedName(section.name, 40)) fail(`section ${sectionIndex + 1} is malformed.`);
+        if (!integerIn(section.repeats, 1, MAX_RECIPE_REPEATS)) fail(`section ${sectionIndex + 1} repeats must be 1-${MAX_RECIPE_REPEATS}.`);
+        if (!Array.isArray(section.stages) || section.stages.length < 1 || section.stages.length > MAX_RECIPE_STAGES) fail(`section ${sectionIndex + 1} must contain 1-${MAX_RECIPE_STAGES} stages.`);
+        return { name: section.name.trim(), repeats: section.repeats, stages: section.stages.map((stage, stageIndex) => {
+          if (!exact(stage, ['name', 'mode', 'amount', 'length1', 'length2', 'speed1', 'speed2', 'offset', 'penDown', 'color', 'width'])) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} has unexpected or missing fields.`);
+          if (!boundedName(stage.name, 40)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} needs a printable name.`);
+          if (!['seconds', 'motif'].includes(stage.mode)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} has an unsupported timing mode.`);
+          if (stage.mode === 'seconds' && (typeof stage.amount !== 'number' || stage.amount < 0.5 || stage.amount > MAX_RECIPE_STAGE_SECONDS || !Number.isInteger(stage.amount * 2))) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} seconds must be a half-step from 0.5-${MAX_RECIPE_STAGE_SECONDS}.`);
+          if (stage.mode === 'motif' && !integerIn(stage.amount, 1, MAX_RECIPE_MOTIFS)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} motif count must be 1-${MAX_RECIPE_MOTIFS}.`);
+          if (!integerIn(stage.length1, 20, 140) || !integerIn(stage.length2, 20, 140)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} arm lengths are outside 20-140.`);
+          if (!integerIn(stage.speed1, -360, 360) || !integerIn(stage.speed2, -360, 360)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} signed speeds are outside -360-360.`);
+          if (!integerIn(stage.offset, -360, 360)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} angle offset is outside -360-360.`);
+          if (typeof stage.penDown !== 'boolean' || !color(stage.color) || typeof stage.width !== 'number' || stage.width < 0.5 || stage.width > 8 || !Number.isInteger(stage.width * 2)) fail(`section ${sectionIndex + 1}, stage ${stageIndex + 1} ink settings are malformed.`);
+          const normalized = { ...stage, name: stage.name.trim(), color: stage.color.toLowerCase() };
+          if (normalized.mode === 'motif') motifSeconds(normalized);
+          return normalized;
+        }) };
+      });
+      compileRecipe(recipe);
+      return recipe;
     }
 
     function cueSeconds(cues) {
@@ -1352,6 +1568,7 @@
       // This uses the existing one-step clear recovery and never touches checkpoint.
       clearInk(true);
       replaySession = null;
+      recipeSession = null;
       Object.assign(state, setup.state, { running: false });
       hasInk = false;
       previewDirty = true;
@@ -1380,6 +1597,7 @@
 
     function applyReplay(replay, { autoplay = true, source = 'link' } = {}) {
       clearInk(true);
+      recipeSession = null;
       replayOriginal = cloneReplay(replay);
       replaySession = {
         elapsed: 0,
@@ -1412,6 +1630,7 @@
         return;
       }
       pendingSetup = null;
+      pendingRecipe = null;
       pendingReplay = { replay: cloneReplay(replay), options };
       document.querySelector('#setupDialogTitle').textContent = 'Start replay?';
       document.querySelector('#setupDialogMessage').textContent =
@@ -1421,9 +1640,11 @@
     }
 
     function leaveReplayForRemix() {
-      if (!replaySession) return;
+      if (!replaySession && !recipeSession) return;
       replaySession = null;
+      recipeSession = null;
       setReplayStatus('Remix mode - current changes are not part of the original replay. Make a new link to share this starting setup.');
+      setRecipeStatus('Remix mode · recipe playback stopped; edits remain available');
       syncControls();
     }
 
@@ -1483,6 +1704,7 @@
         return;
       }
       pendingReplay = null;
+      pendingRecipe = null;
       pendingSetup = setup;
       document.querySelector('#setupDialogTitle').textContent = 'Load setup?';
       document.querySelector('#setupDialogMessage').textContent =
@@ -1548,8 +1770,257 @@
       }
     }
 
+    function encodeRecipePayload(recipe) {
+      const bytes = new TextEncoder().encode(JSON.stringify(recipe));
+      if (bytes.byteLength > MAX_RECIPE_LINK_BYTES) throw new Error(`Recipe link is too large; download the recipe file instead (${bytes.byteLength.toLocaleString()} / ${MAX_RECIPE_LINK_BYTES.toLocaleString()} bytes).`);
+      let binary = '';
+      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      const token = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+      if (token.length > MAX_RECIPE_LINK_TOKEN) throw new Error('Recipe link is too large; download the recipe file instead.');
+      return token;
+    }
+
+    function decodeRecipeToken(token) {
+      if (!token || token.length > MAX_RECIPE_LINK_TOKEN || !/^[A-Za-z0-9_-]+$/.test(token)) throw new Error('Recipe rejected: link payload is missing or malformed.');
+      const padding = '='.repeat((4 - token.length % 4) % 4);
+      let binary;
+      try { binary = atob(token.replace(/-/g, '+').replace(/_/g, '/') + padding); }
+      catch { throw new Error('Recipe rejected: link payload is not valid.'); }
+      if (binary.length > MAX_RECIPE_LINK_BYTES) throw new Error('Recipe rejected: link payload is too large.');
+      try { return validateRecipe(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(binary, character => character.charCodeAt(0))))); }
+      catch (error) { if (error instanceof Error && error.message.startsWith('Recipe rejected:')) throw error; throw new Error('Recipe rejected: link payload is not valid JSON.'); }
+    }
+
+    function recipeUrlFor(recipe) {
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.hash = '';
+      url.searchParams.set(RECIPE_PARAMETER, encodeRecipePayload(recipe));
+      if (url.href.length > MAX_RECIPE_URL_LENGTH) throw new Error('Recipe link is too long; download the recipe file instead.');
+      return url;
+    }
+
+    function setRecipeStatus(message, isError = false) {
+      const status = document.querySelector('#recipeStatus');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function recipeFilename(name) {
+      const safe = name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 48).toLowerCase();
+      return `${safe || 'scribble-engine'}.scribble-recipe.json`;
+    }
+
+    function downloadRecipe() {
+      try {
+        const recipe = validateRecipe(recipeProgram);
+        downloadBlob(new Blob([`${JSON.stringify(recipe, null, 2)}\n`], { type: 'application/json' }), recipeFilename(recipe.name));
+        setRecipeStatus(`Downloaded "${recipe.name}" · version ${RECIPE_VERSION} recipe file`);
+      } catch (error) { setRecipeStatus(error instanceof Error ? error.message : 'Recipe could not be downloaded.', true); }
+    }
+
+    async function importRecipe(file) {
+      try {
+        if (!file) return;
+        if (file.size > MAX_RECIPE_FILE_BYTES) throw new Error(`Recipe rejected: file is larger than ${MAX_RECIPE_FILE_BYTES / 1024} KiB.`);
+        const text = await file.text();
+        if (new Blob([text]).size > MAX_RECIPE_FILE_BYTES) throw new Error(`Recipe rejected: file is larger than ${MAX_RECIPE_FILE_BYTES / 1024} KiB.`);
+        let parsed;
+        try { parsed = JSON.parse(text); } catch { throw new Error('Recipe rejected: the file is not valid JSON.'); }
+        recipeProgram = validateRecipe(parsed);
+        selectedRecipeSection = 0;
+        selectedRecipeStage = 0;
+        renderRecipeEditor(`Loaded "${recipeProgram.name}" from file`);
+      } catch (error) { setRecipeStatus(error instanceof Error ? error.message : 'Recipe rejected.', true); }
+      finally { controls.recipeFile.value = ''; }
+    }
+
+    async function copyRecipeLink() {
+      try {
+        const recipe = validateRecipe(recipeProgram);
+        const url = recipeUrlFor(recipe);
+        controls.recipeLink.value = url.href;
+        document.querySelector('#recipeLinkWrap').hidden = false;
+        history.pushState({ scribbleRecipe: url.searchParams.get(RECIPE_PARAMETER) }, '', url);
+        try {
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') throw new Error('Clipboard unavailable');
+          await navigator.clipboard.writeText(url.href);
+          setRecipeStatus(`Compact recipe link copied · ${compileRecipe(recipe).operations.length} operations`);
+        } catch {
+          controls.recipeLink.focus(); controls.recipeLink.select();
+          setRecipeStatus('Recipe link ready · copy it manually from the selected field');
+        }
+      } catch (error) { setRecipeStatus(error instanceof Error ? error.message : 'Recipe link could not be created.', true); }
+    }
+
+    function commitRecipe(next, message, sectionIndex = selectedRecipeSection, stageIndex = selectedRecipeStage) {
+      try {
+        recipeProgram = validateRecipe(next);
+        selectedRecipeSection = Math.max(0, Math.min(sectionIndex, recipeProgram.sections.length - 1));
+        selectedRecipeStage = Math.max(0, Math.min(stageIndex, recipeProgram.sections[selectedRecipeSection].stages.length - 1));
+        leaveReplayForRemix();
+        renderRecipeEditor(message);
+        return true;
+      } catch (error) {
+        renderRecipeEditor();
+        setRecipeStatus(error instanceof Error ? error.message : 'Recipe edit was rejected.', true);
+        return false;
+      }
+    }
+
+    function editSelectedRecipe(mutator, message) {
+      const next = cloneRecipe(recipeProgram);
+      const section = next.sections[selectedRecipeSection];
+      const stage = section.stages[selectedRecipeStage];
+      mutator({ next, section, stage });
+      return commitRecipe(next, message);
+    }
+
+    function renderRecipeEditor(message = '') {
+      selectedRecipeSection = Math.max(0, Math.min(selectedRecipeSection, recipeProgram.sections.length - 1));
+      const section = recipeProgram.sections[selectedRecipeSection];
+      selectedRecipeStage = Math.max(0, Math.min(selectedRecipeStage, section.stages.length - 1));
+      const stage = section.stages[selectedRecipeStage];
+      controls.recipeName.value = recipeProgram.name;
+      controls.recipePlayback.value = String(recipeProgram.playbackRate);
+      controls.recipeSection.replaceChildren(...recipeProgram.sections.map((item, index) => new Option(`${index + 1}. ${item.name}`, String(index), false, index === selectedRecipeSection)));
+      controls.recipeStage.replaceChildren(...section.stages.map((item, index) => new Option(`${index + 1}. ${item.name}`, String(index), false, index === selectedRecipeStage)));
+      controls.recipeSectionName.value = section.name;
+      controls.recipeRepeats.value = String(section.repeats);
+      controls.recipeStageName.value = stage.name;
+      controls.recipeMode.value = stage.mode;
+      controls.recipeAmount.value = String(stage.amount);
+      controls.recipeAmount.min = stage.mode === 'motif' ? '1' : '0.5';
+      controls.recipeAmount.max = stage.mode === 'motif' ? String(MAX_RECIPE_MOTIFS) : String(MAX_RECIPE_STAGE_SECONDS);
+      controls.recipeAmount.step = stage.mode === 'motif' ? '1' : '0.5';
+      controls.recipeLength1.value = String(stage.length1);
+      controls.recipeLength2.value = String(stage.length2);
+      controls.recipeSpeed1.value = String(stage.speed1);
+      controls.recipeSpeed2.value = String(stage.speed2);
+      controls.recipeOffset.value = String(stage.offset);
+      controls.recipeWidth.value = String(stage.width);
+      controls.recipeColor.value = stage.color;
+      controls.recipePen.setAttribute('aria-pressed', String(stage.penDown));
+      controls.recipePen.textContent = stage.penDown ? 'Pen down' : 'Pen up';
+      controls.recipeOutline.replaceChildren(...recipeProgram.sections.map((item, index) => {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'recipe-section-row'; button.setAttribute('aria-pressed', String(index === selectedRecipeSection));
+        button.append(document.createTextNode(`${index + 1}. ${item.name}`));
+        const detail = document.createElement('span'); detail.textContent = `${item.stages.length} stage${item.stages.length === 1 ? '' : 's'} × ${item.repeats}`; button.append(detail);
+        button.addEventListener('click', () => { selectedRecipeSection = index; selectedRecipeStage = 0; renderRecipeEditor(); });
+        return button;
+      }));
+      controls.recipeStageUp.disabled = selectedRecipeStage === 0;
+      controls.recipeStageDown.disabled = selectedRecipeStage === section.stages.length - 1;
+      controls.recipeStageRemove.disabled = section.stages.length === 1;
+      controls.recipeStageDuplicate.disabled = section.stages.length >= MAX_RECIPE_STAGES;
+      controls.recipeSectionUp.disabled = selectedRecipeSection === 0;
+      controls.recipeSectionDown.disabled = selectedRecipeSection === recipeProgram.sections.length - 1;
+      controls.recipeSectionDuplicate.disabled = recipeProgram.sections.length >= MAX_RECIPE_SECTIONS;
+      controls.recipeSectionAdd.disabled = recipeProgram.sections.length >= MAX_RECIPE_SECTIONS;
+      const compiled = compileRecipe(recipeProgram);
+      setRecipeStatus(`${message ? `${message} · ` : ''}${compiled.operations.length} operations · ${compiled.totalSteps.toLocaleString()} samples · ${compiled.geometrySeconds.toFixed(1)} geometry seconds · ${compiled.wallSeconds.toFixed(1)} playback seconds`);
+    }
+
+    function applyRecipeOperationForStep() {
+      if (!recipeSession || !recipeOriginal) return null;
+      const operations = recipeSession.compiled.operations;
+      let index = recipeSession.operationIndex;
+      while (index + 1 < operations.length && recipeSession.completedSteps >= operations[index + 1].endStep - operations[index + 1].steps) index += 1;
+      if (index === recipeSession.operationIndex) return operations[index];
+      recipeSession.operationIndex = index;
+      const operation = operations[index];
+      state.length1 = operation.length1;
+      state.length2 = operation.length2;
+      state.speed1 = Math.abs(operation.speed1);
+      state.speed2 = Math.abs(operation.speed2);
+      state.direction1 = operation.speed1 < 0 ? -1 : 1;
+      state.direction2 = operation.speed2 < 0 ? -1 : 1;
+      const offset = operation.offset * Math.PI / 180;
+      state.angle1 = (state.angle1 + offset) % (Math.PI * 2);
+      state.angle2 = (state.angle2 + offset) % (Math.PI * 2);
+      state.inkColor = operation.color;
+      state.lineWidth = operation.width;
+      state.penDown = operation.penDown;
+      breakStroke();
+      syncControls();
+      return operation;
+    }
+
+    function recipeStep() {
+      const operation = applyRecipeOperationForStep();
+      if (!operation) return;
+      state.angle1 = (state.angle1 + operation.speed1 * Math.PI / 180 * operation.stepSeconds) % (Math.PI * 2);
+      state.angle2 = (state.angle2 + operation.speed2 * Math.PI / 180 * operation.stepSeconds) % (Math.PI * 2);
+      addInk(positions());
+    }
+
+    function advanceRecipe(elapsedSeconds) {
+      if (!recipeSession) return;
+      recipeSession.sampleCarry += elapsedSeconds * recipeOriginal.playbackRate * REPLAY_STEPS_PER_SECOND;
+      const available = Math.floor(recipeSession.sampleCarry);
+      recipeSession.sampleCarry -= available;
+      const target = Math.min(recipeSession.compiled.totalSteps, recipeSession.completedSteps + available);
+      while (recipeSession.completedSteps < target && state.running) {
+        recipeStep();
+        recipeSession.completedSteps += 1;
+      }
+      if (recipeSession.completedSteps >= recipeSession.compiled.totalSteps) {
+        state.running = false;
+        breakStroke();
+        setRecipeStatus(`Recipe complete · ${recipeSession.compiled.operations.length} operations · ${recipeSession.completedSteps.toLocaleString()} deterministic samples`);
+        syncControls();
+      }
+    }
+
+    function applyRecipe(recipe, { autoplay = true, source = 'recipe' } = {}) {
+      clearInk(true);
+      recipeOriginal = validateRecipe(cloneRecipe(recipe));
+      const compiled = compileRecipe(recipeOriginal);
+      recipeSession = { compiled, completedSteps: 0, operationIndex: -1, sampleCarry: 0 };
+      replaySession = null;
+      recipeProgram = cloneRecipe(recipeOriginal);
+      selectedRecipeSection = 0;
+      selectedRecipeStage = 0;
+      Object.assign(state, {
+        angle1: recipeOriginal.start.angle1 * Math.PI / 180,
+        angle2: recipeOriginal.start.angle2 * Math.PI / 180,
+        strokeStyle: recipeOriginal.start.strokeStyle,
+        paperColor: recipeOriginal.paper.color,
+        transparentPaper: recipeOriginal.paper.transparent,
+        penDown: false,
+        running: autoplay && !reducedMotionPreferred()
+      });
+      hasInk = false; previewDirty = true; previousPen = null; strokeDistance = 0; previousTime = performance.now();
+      applyRecipeOperationForStep();
+      renderRecipeEditor();
+      syncControls();
+      setRecipeStatus(`${source === 'link' ? 'Shared recipe' : source === 'file' ? 'Recipe file' : 'Recipe'} ${state.running ? 'running' : 'ready'} · ${compiled.operations.length} operations · ${compiled.wallSeconds.toFixed(1)} playback seconds`);
+    }
+
+    function requestRecipeStart(recipe, options = {}) {
+      if (!hasInk) { applyRecipe(recipe, options); return; }
+      pendingSetup = null;
+      pendingReplay = null;
+      pendingRecipe = { recipe: cloneRecipe(recipe), options };
+      document.querySelector('#setupDialogTitle').textContent = 'Start recipe?';
+      document.querySelector('#setupDialogMessage').textContent = `"${recipe.name}" starts on fresh paper. Restore Clear can recover the displaced artwork; your checkpoint will not change.`;
+      document.querySelector('#confirmSetupLoad').textContent = 'Start Fresh Recipe';
+      setupDialog.showModal();
+    }
+
     function replayFromLocation({ initial = false } = {}) {
       const url = new URL(window.location.href);
+      const recipeToken = url.searchParams.get(RECIPE_PARAMETER);
+      if (recipeToken) {
+        try {
+          const recipe = decodeRecipeToken(recipeToken);
+          controls.recipeLink.value = url.href;
+          document.querySelector('#recipeLinkWrap').hidden = false;
+          requestRecipeStart(recipe, { autoplay: true, source: 'link' });
+        } catch (error) { setRecipeStatus(`${error instanceof Error ? error.message : 'Recipe rejected.'} Current drawing unchanged.`, true); }
+        return;
+      }
       const token = url.searchParams.get(REPLAY_PARAMETER);
       if (!token) {
         if (!initial) setReplayStatus('No replay in this history entry - current drawing unchanged');
@@ -1814,7 +2285,8 @@
       const elapsed = Math.min((now - previousTime) / 1000, 0.05);
       previousTime = now;
       if (state.running) {
-        if (replaySession) advanceReplay(elapsed);
+        if (recipeSession) advanceRecipe(elapsed);
+        else if (replaySession) advanceReplay(elapsed);
         else advance(elapsed);
       }
       drawMechanism(positions());
@@ -1850,6 +2322,34 @@
       mobilePlayScore: document.querySelector('#mobilePlayScore'),
       mobileReplayOriginal: document.querySelector('#mobileReplayOriginal'),
       mobileCopyReplay: document.querySelector('#mobileCopyReplay'),
+      recipeName: document.querySelector('#recipeName'),
+      recipePlayback: document.querySelector('#recipePlayback'),
+      recipeSection: document.querySelector('#recipeSection'),
+      recipeOutline: document.querySelector('#recipeOutline'),
+      recipeSectionName: document.querySelector('#recipeSectionName'),
+      recipeRepeats: document.querySelector('#recipeRepeats'),
+      recipeStage: document.querySelector('#recipeStage'),
+      recipeStageName: document.querySelector('#recipeStageName'),
+      recipeMode: document.querySelector('#recipeMode'),
+      recipeAmount: document.querySelector('#recipeAmount'),
+      recipeLength1: document.querySelector('#recipeLength1'),
+      recipeLength2: document.querySelector('#recipeLength2'),
+      recipeSpeed1: document.querySelector('#recipeSpeed1'),
+      recipeSpeed2: document.querySelector('#recipeSpeed2'),
+      recipeOffset: document.querySelector('#recipeOffset'),
+      recipeWidth: document.querySelector('#recipeWidth'),
+      recipeColor: document.querySelector('#recipeColor'),
+      recipePen: document.querySelector('#recipePen'),
+      recipeStageUp: document.querySelector('#recipeStageUp'),
+      recipeStageDown: document.querySelector('#recipeStageDown'),
+      recipeStageDuplicate: document.querySelector('#recipeStageDuplicate'),
+      recipeStageRemove: document.querySelector('#recipeStageRemove'),
+      recipeSectionUp: document.querySelector('#recipeSectionUp'),
+      recipeSectionDown: document.querySelector('#recipeSectionDown'),
+      recipeSectionDuplicate: document.querySelector('#recipeSectionDuplicate'),
+      recipeSectionAdd: document.querySelector('#recipeSectionAdd'),
+      recipeFile: document.querySelector('#recipeFile'),
+      recipeLink: document.querySelector('#recipeLink'),
       replayDuration: document.querySelector('#replayDuration'),
       replayOriginal: document.querySelector('#replayOriginal'),
       replayLink: document.querySelector('#replayLink'),
@@ -1943,10 +2443,12 @@
         ? `Saved ${checkpoint.savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · current session only`
         : 'Empty · current page session only';
       controls.replayOriginal.disabled = !replayOriginal;
-      controls.pause.textContent = replaySession
-        ? (state.running ? 'Pause Replay' : replaySession.completedSteps >= replaySession.totalSteps ? 'Replay Complete' : 'Resume Replay')
-        : (state.running ? 'Pause' : 'Resume');
-      controls.pause.disabled = Boolean(replaySession && replaySession.completedSteps >= replaySession.totalSteps);
+      controls.pause.textContent = recipeSession
+        ? (state.running ? 'Pause Recipe' : recipeSession.completedSteps >= recipeSession.compiled.totalSteps ? 'Recipe Complete' : 'Resume Recipe')
+        : replaySession
+          ? (state.running ? 'Pause Replay' : replaySession.completedSteps >= replaySession.totalSteps ? 'Replay Complete' : 'Resume Replay')
+          : (state.running ? 'Pause' : 'Resume');
+      controls.pause.disabled = Boolean((replaySession && replaySession.completedSteps >= replaySession.totalSteps) || (recipeSession && recipeSession.completedSteps >= recipeSession.compiled.totalSteps));
       controls.mobilePause.textContent = controls.pause.textContent;
       controls.mobilePause.disabled = controls.pause.disabled;
       controls.mobilePlayScore.disabled = controls.playScore.disabled;
@@ -2037,7 +2539,7 @@
       state.running = !state.running;
       // Replay time is frozen while paused, so reconnecting the same deterministic
       // path is safe. Free drawing still breaks to avoid bridging wall-clock gaps.
-      if (!replaySession) breakStroke();
+      if (!replaySession && !recipeSession) breakStroke();
       previousTime = performance.now();
       syncControls();
     });
@@ -2094,6 +2596,81 @@
       leaveReplayForRemix();
       renderCueEditor('Run time changed');
     });
+    document.querySelectorAll('[data-recipe-preset]').forEach(button => {
+      button.addEventListener('click', () => {
+        recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES[button.dataset.recipePreset]));
+        selectedRecipeSection = 0;
+        selectedRecipeStage = 0;
+        leaveReplayForRemix();
+        renderRecipeEditor(`${recipeProgram.name} loaded`);
+      });
+    });
+    controls.recipeName.addEventListener('change', () => editSelectedRecipe(({ next }) => { next.name = controls.recipeName.value; }, 'Recipe renamed'));
+    controls.recipePlayback.addEventListener('change', () => editSelectedRecipe(({ next }) => { next.playbackRate = Number(controls.recipePlayback.value); }, 'Playback speed changed'));
+    controls.recipeSection.addEventListener('change', () => { selectedRecipeSection = Number(controls.recipeSection.value); selectedRecipeStage = 0; renderRecipeEditor(); });
+    controls.recipeStage.addEventListener('change', () => { selectedRecipeStage = Number(controls.recipeStage.value); renderRecipeEditor(); });
+    controls.recipeSectionName.addEventListener('change', () => editSelectedRecipe(({ section }) => { section.name = controls.recipeSectionName.value; }, 'Section renamed'));
+    controls.recipeRepeats.addEventListener('change', () => editSelectedRecipe(({ section }) => { section.repeats = Number(controls.recipeRepeats.value); }, 'Section repeats changed'));
+    controls.recipeStageName.addEventListener('change', () => editSelectedRecipe(({ stage }) => { stage.name = controls.recipeStageName.value; }, 'Stage renamed'));
+    controls.recipeMode.addEventListener('change', () => editSelectedRecipe(({ stage }) => { stage.mode = controls.recipeMode.value; stage.amount = stage.mode === 'motif' ? 1 : Math.max(0.5, Math.min(MAX_RECIPE_STAGE_SECONDS, stage.amount)); }, 'Timing mode changed'));
+    controls.recipeAmount.addEventListener('change', () => editSelectedRecipe(({ stage }) => { stage.amount = Number(controls.recipeAmount.value); }, 'Stage amount changed'));
+    for (const [control, key] of [[controls.recipeLength1, 'length1'], [controls.recipeLength2, 'length2'], [controls.recipeSpeed1, 'speed1'], [controls.recipeSpeed2, 'speed2'], [controls.recipeOffset, 'offset'], [controls.recipeWidth, 'width']]) {
+      control.addEventListener('change', () => editSelectedRecipe(({ stage }) => { stage[key] = Number(control.value); }, `${key} changed`));
+    }
+    controls.recipeColor.addEventListener('change', () => editSelectedRecipe(({ stage }) => { stage.color = controls.recipeColor.value; }, 'Stage color changed'));
+    controls.recipePen.addEventListener('click', () => editSelectedRecipe(({ stage }) => { stage.penDown = !stage.penDown; }, 'Pen state changed'));
+    controls.recipeStageUp.addEventListener('click', () => {
+      if (selectedRecipeStage < 1) return;
+      const next = cloneRecipe(recipeProgram); const stages = next.sections[selectedRecipeSection].stages;
+      [stages[selectedRecipeStage - 1], stages[selectedRecipeStage]] = [stages[selectedRecipeStage], stages[selectedRecipeStage - 1]];
+      commitRecipe(next, 'Stage moved earlier', selectedRecipeSection, selectedRecipeStage - 1);
+    });
+    controls.recipeStageDown.addEventListener('click', () => {
+      const stages = recipeProgram.sections[selectedRecipeSection].stages;
+      if (selectedRecipeStage >= stages.length - 1) return;
+      const next = cloneRecipe(recipeProgram); const nextStages = next.sections[selectedRecipeSection].stages;
+      [nextStages[selectedRecipeStage], nextStages[selectedRecipeStage + 1]] = [nextStages[selectedRecipeStage + 1], nextStages[selectedRecipeStage]];
+      commitRecipe(next, 'Stage moved later', selectedRecipeSection, selectedRecipeStage + 1);
+    });
+    controls.recipeStageDuplicate.addEventListener('click', () => {
+      const next = cloneRecipe(recipeProgram); const stages = next.sections[selectedRecipeSection].stages;
+      stages.splice(selectedRecipeStage + 1, 0, { ...stages[selectedRecipeStage], name: `${stages[selectedRecipeStage].name} copy`.slice(0, 40) });
+      commitRecipe(next, 'Stage duplicated', selectedRecipeSection, selectedRecipeStage + 1);
+    });
+    controls.recipeStageRemove.addEventListener('click', () => {
+      const next = cloneRecipe(recipeProgram); next.sections[selectedRecipeSection].stages.splice(selectedRecipeStage, 1);
+      commitRecipe(next, 'Stage removed', selectedRecipeSection, Math.max(0, selectedRecipeStage - 1));
+    });
+    controls.recipeSectionUp.addEventListener('click', () => {
+      if (selectedRecipeSection < 1) return;
+      const next = cloneRecipe(recipeProgram);
+      [next.sections[selectedRecipeSection - 1], next.sections[selectedRecipeSection]] = [next.sections[selectedRecipeSection], next.sections[selectedRecipeSection - 1]];
+      commitRecipe(next, 'Section moved earlier', selectedRecipeSection - 1, selectedRecipeStage);
+    });
+    controls.recipeSectionDown.addEventListener('click', () => {
+      if (selectedRecipeSection >= recipeProgram.sections.length - 1) return;
+      const next = cloneRecipe(recipeProgram);
+      [next.sections[selectedRecipeSection], next.sections[selectedRecipeSection + 1]] = [next.sections[selectedRecipeSection + 1], next.sections[selectedRecipeSection]];
+      commitRecipe(next, 'Section moved later', selectedRecipeSection + 1, selectedRecipeStage);
+    });
+    controls.recipeSectionDuplicate.addEventListener('click', () => {
+      const next = cloneRecipe(recipeProgram); const copy = cloneRecipe(next.sections[selectedRecipeSection]); copy.name = `${copy.name} copy`.slice(0, 40);
+      next.sections.splice(selectedRecipeSection + 1, 0, copy);
+      commitRecipe(next, 'Section duplicated', selectedRecipeSection + 1, 0);
+    });
+    controls.recipeSectionAdd.addEventListener('click', () => {
+      const next = cloneRecipe(recipeProgram); const stage = { ...next.sections[selectedRecipeSection].stages[selectedRecipeStage], name: 'New stage' };
+      next.sections.push({ name: `Section ${next.sections.length + 1}`, repeats: 1, stages: [stage] });
+      commitRecipe(next, 'Section added', next.sections.length - 1, 0);
+    });
+    document.querySelector('#playRecipe').addEventListener('click', () => {
+      try { requestRecipeStart(validateRecipe(recipeProgram), { autoplay: true, source: 'recipe' }); }
+      catch (error) { setRecipeStatus(error instanceof Error ? error.message : 'Recipe could not start.', true); }
+    });
+    document.querySelector('#copyRecipeLink').addEventListener('click', copyRecipeLink);
+    document.querySelector('#downloadRecipe').addEventListener('click', downloadRecipe);
+    document.querySelector('#loadRecipe').addEventListener('click', () => controls.recipeFile.click());
+    controls.recipeFile.addEventListener('change', event => importRecipe(event.target.files[0]));
     document.querySelector('#copyReplay').addEventListener('click', copyReplayLink);
     controls.replayOriginal.addEventListener('click', () => {
       if (replayOriginal) requestReplayStart(replayOriginal, { autoplay: true, source: 'original' });
@@ -2118,6 +2695,7 @@
     document.querySelector('#cancelSetupLoad').addEventListener('click', () => {
       pendingSetup = null;
       pendingReplay = null;
+      pendingRecipe = null;
       setupDialog.close();
       setSetupStatus('Load canceled · current drawing unchanged');
     });
@@ -2125,23 +2703,29 @@
     document.querySelector('#confirmSetupLoad').addEventListener('click', () => {
       const setup = pendingSetup;
       const replayRequest = pendingReplay;
+      const recipeRequest = pendingRecipe;
       pendingSetup = null;
       pendingReplay = null;
+      pendingRecipe = null;
       setupDialog.close();
       if (setup) applySetup(setup);
       else if (replayRequest) applyReplay(replayRequest.replay, replayRequest.options);
+      else if (recipeRequest) applyRecipe(recipeRequest.recipe, recipeRequest.options);
     });
 
     setupDialog.addEventListener('close', () => {
       if (!setupDialog.returnValue) {
         pendingSetup = null;
         pendingReplay = null;
+        pendingRecipe = null;
       }
     });
 
     document.querySelector('#reset').addEventListener('click', () => {
       replaySession = null;
       replayOriginal = null;
+      recipeSession = null;
+      recipeOriginal = null;
       cueScore = cloneCues(DEFAULT_CUES);
       cueHistory = [];
       selectedCueIndex = 0;
@@ -2150,6 +2734,10 @@
       clearInk(false);
       previousTime = performance.now();
       renderCueEditor('Default score restored');
+      recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES['orbit-rosette']));
+      selectedRecipeSection = 0;
+      selectedRecipeStage = 0;
+      renderRecipeEditor('Default recipe restored');
       syncControls();
     });
 
@@ -2179,12 +2767,14 @@
 
     document.addEventListener('visibilitychange', () => {
       previousTime = performance.now();
-      if (!replaySession) breakStroke();
+      if (!replaySession && !recipeSession) breakStroke();
     });
 
     window.addEventListener('popstate', () => replayFromLocation());
 
+    recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES['orbit-rosette']));
     renderCueEditor();
+    renderRecipeEditor();
     syncControls();
     replayFromLocation({ initial: true });
     drawMechanism(positions());

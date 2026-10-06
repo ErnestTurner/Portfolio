@@ -1,394 +1,389 @@
-const treatments = {
+const BASE_TITLE = "Trikzik Labs - Games & Experiments by Ernest Turner";
+const STORAGE_KEY = "trikzik:selected-experiment";
+
+const experiments = {
   moon: {
     name: "Moon Snail",
+    short: "MS",
     route: "games/moon-snail/index.html",
-    action: "Catch & bubble",
-    running: "Umbrella open",
-    summary: "Slide, leave slowing slime, catch marshmallows with an umbrella, and send them moonward in bubbles.",
-    innerArt: `<circle class="inner-accent" cx="314" cy="262" r="6"/><path d="M311 262c0-5 7-5 7 0 0 4-6 5-8 1M307 272h13"/>`,
-    art: `<g class="treatment-moon">
-      <circle class="mini-moon" cx="92" cy="104" r="18" />
-      <path class="mini-trail" d="M286 333c25-17 43 12 71-5" />
-      <g class="mini-snail"><path d="M306 316c0-9 12-13 22-7 8 4 20 1 27 11-4 9-18 9-30 8-12 0-19-4-19-12z"/><circle cx="324" cy="307" r="12"/><path d="M324 313c-11-1-8-16 1-12 7 3 3 12-2 8"/></g>
-      <g class="mini-umbrella"><path d="M301 285q27-29 54 0z"/><path d="M328 285v31"/></g>
-      <circle class="mini-marshmallow" cx="377" cy="305" r="8" />
-      <g class="mini-bubble"><circle cx="340" cy="286" r="12"/><circle cx="340" cy="286" r="4"/></g>
-      <text class="treatment-label" x="62" y="78">MOON DELIVERY</text>
-    </g>`,
+    question: "How much umbrella charge should become somebody else's moon problem?",
+    parameter: { label: "Umbrella charge", min: 10, max: 100, step: 5, initial: 55, low: "one cautious bubble", high: "orbital paperwork", format: value => `${value}%` },
+    readings: value => [`${Math.max(1, Math.round(value / 18))} marshmallow${value < 28 ? "" : "s"} captured`, value > 76 ? "Local moon gains a snack ring" : "Snail remains professionally damp"],
+    caption: value => value > 70 ? "More charge makes more bubbles; the moon has begun asking about zoning." : "Umbrella charge controls how many captures become upward deliveries.",
+    running: "Umbrella open. Marshmallows reconsidering gravity.",
+    result: value => value > 70 ? "Trial received: moon now has a catering problem." : "Trial received: capture loop behaved suspiciously well.",
+    trace: value => `M44 282C126 ${310-value} 156 ${112+value} 236 220S374 ${310-value} 430 176S520 ${122+value} 596 148`,
+    art(value) {
+      const count = Math.max(1, Math.round(value / 20));
+      const bubbles = Array.from({ length: count }, (_, index) => `<circle class="thin" cx="${310 + index * 33}" cy="${225 - index * 26}" r="${10 + index}"/>`).join("");
+      return `<circle class="solid" cx="500" cy="105" r="48"/><path class="thin" d="M476 86c26 5 30 30 3 39M520 91c-17 8-12 28 8 31"/><path class="solid" d="M119 287c0-28 40-41 70-20 20 14 49 5 67 30-13 23-49 24-82 21-34-3-55-13-55-31Z"/><circle class="line" cx="168" cy="273" r="29"/><path class="thin" d="M168 289c-28-4-20-39 4-29 18 8 9 30-6 20M203 255q48-55 98 0M252 255v55"/>${bubbles}<text x="83" y="92">CAPTURE → BUBBLE → MOON</text>`;
+    }
   },
   star: {
     name: "Starfall: Last Light",
+    short: "SL",
     route: "games/starfall/index.html",
-    action: "Fire a flare",
-    running: "Light spent · fragment returning",
-    summary: "Move and fire, spend the same light that keeps you alive, then recover fragments before the eclipse closes in.",
-    innerArt: `<path class="inner-accent" d="M314 254l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>`,
-    art: `<g class="treatment-star">
-      <path class="eclipse-veil" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C275 344 286 146 220 103Z" />
-      <g class="mini-ship"><path d="M330 188l27-14-8 14 8 14z"/><circle cx="343" cy="188" r="4"/></g>
-      <circle class="flare-ring" cx="342" cy="187" r="8" />
-      <path class="light-fragment" d="M330 149l5 8 9 2-7 6 1 9-8-4-8 4 2-9-7-6 9-2z" />
-      <text class="treatment-label" x="82" y="87">LAST LIGHT</text>
-    </g>`,
+    question: "How much of the light keeping you alive are you willing to fire at something else?",
+    parameter: { label: "Light committed", min: 10, max: 90, step: 5, initial: 40, low: "stay alive", high: "excellent flare", format: value => `${value}%` },
+    readings: value => [`Flare intensity ${value}`, `${100-value}% remains between you and darkness`],
+    caption: value => value > 65 ? "The flare is magnificent. The life-support readout has filed a concern." : "Weapon power and survival draw from the same reserve.",
+    running: "Light leaving the ship. Darkness taking notes.",
+    result: value => value > 65 ? "Trial received: flare excellent, survival negotiable." : "Trial received: fragment recovery recommended.",
+    trace: value => `M44 258L150 258L205 ${280-value}L258 258L320 ${132+value}L378 258L470 ${310-value}L596 258`,
+    art(value) {
+      const eclipse = 38 + value * .75;
+      return `<circle class="solid" cx="474" cy="210" r="86"/><circle class="dark" cx="${474+eclipse}" cy="190" r="93"/><path class="paper" d="m126 214 91-43-27 43 27 43Z"/><circle class="hot" cx="190" cy="214" r="${8+value*.12}"/><path class="line" d="M216 214h${75+value*1.2}"/><path class="thin" d="m310 180 11 19 22 4-16 15 3 22-20-10-19 10 3-22-16-15 22-4Z"/><text x="82" y="92">ONE RESERVE / THREE BAD IDEAS</text>`;
+    }
   },
   dungeon: {
     name: "Dungeon Reset",
+    short: "DR",
     route: "games/dungeon-reset/index.html",
-    action: "Reset the bench",
-    running: "Caretaker at work",
-    summary: "Return the staff, reset traps, repair the door, restock treasure, and clean up before the next hero party arrives.",
-    innerArt: `<path d="M321 260a9 9 0 1 0 0 10M321 260v7h-7"/><circle class="inner-accent" cx="312" cy="265" r="2"/>`,
-    art: `<g class="treatment-dungeon">
-      <g class="mess-mark"><path d="M144 183l18 18m0-18-18 18"/><path d="M211 289h20v18h-20z"/><path d="M282 190l16 28h-32z"/></g>
-      <g class="reset-mark"><path d="M139 176l-7-7m7 7-10 2M207 282l-7-7m7 7-10 2M302 181l7-7m-7 7 10 2"/></g>
-      <g class="mini-caretaker"><circle cx="92" cy="335" r="9"/><path d="M92 344v27m0-18-14 11m14-11 16 9m-16 9-11 17m11-17 13 17"/></g>
-      <g class="mini-party"><path d="M371 205h-20m10-10v20M381 226h-18"/></g>
-      <text class="treatment-label" x="74" y="102">POST-RAID RESET</text>
-    </g>`,
+    question: "How ready does a dungeon need to look before the next heroes make readiness theoretical?",
+    parameter: { label: "Reset readiness", min: 0, max: 100, step: 5, initial: 62, low: "still smoking", high: "implausibly tidy", format: value => `${value}%` },
+    readings: value => [`${Math.round(value/14)} of 7 jobs signed off`, value > 82 ? "Heroes suspicious of cleanliness" : "Caretaker requesting more caretaker"],
+    caption: value => value > 78 ? "Everything is ready. This has historically attracted heroes." : "Repair effort raises readiness while the next party remains inconsiderate.",
+    running: "Checklist moving left to right. Heroes moving the other way.",
+    result: value => value > 78 ? "Trial received: dungeon ready enough to be ruined." : "Trial received: mop still structurally important.",
+    trace: value => `M44 300L130 300L130 ${320-value*1.7}L210 ${320-value*1.7}L210 ${285-value}L300 ${285-value}L300 ${250-value*.45}L596 ${250-value*.45}`,
+    art(value) {
+      const door = Math.max(8, 84-value*.72);
+      return `<path class="solid" d="M104 320V137h148v183M135 320V178h86v142"/><path class="thin" d="M84 320h190M126 137q52-62 104 0"/><rect class="paper" x="328" y="131" width="185" height="190" rx="6"/><path class="thin" d="M350 172h139M350 212h139M350 252h139M350 292h139"/><path class="line" d="m350 166 9 9 17-22m-26 53 9 9 17-22m-26 53 9 9 17-22"/><path class="line" d="M350 286h${140-door}"/><text x="86" y="92">POST-RAID MAINTENANCE WINDOW</text>`;
+    }
   },
   brain: {
     name: "Brain in a Jar",
+    short: "BJ",
     route: "games/brain-in-a-jar/index.html",
-    action: "Move the light",
-    running: "Signal crossing the controller",
-    summary: "Move the light, swap the creature's eyes, or edit one real connection in its hand-wired neural controller.",
-    innerArt: `<path d="M307 257l12 13m0-13-12 13"/><circle class="inner-accent" cx="307" cy="257" r="3"/><circle cx="319" cy="257" r="3"/><circle cx="307" cy="270" r="3"/><circle class="inner-accent" cx="319" cy="270" r="3"/>`,
-    art: `<g class="treatment-brain">
-      <circle class="stimulus" cx="73" cy="173" r="13" />
-      <path class="sensor-rays" d="M86 177l89 44M86 168l91 34" />
-      <g class="network-lines"><path d="M175 202l42 24-42 26 42 25M217 226l43-25m-43 25 43 26m-43 25 43-25"/></g>
-      <g class="network-nodes"><circle cx="175" cy="202" r="6"/><circle cx="175" cy="252" r="6"/><circle cx="217" cy="226" r="6"/><circle cx="217" cy="277" r="6"/><circle cx="260" cy="201" r="6"/><circle cx="260" cy="252" r="6"/></g>
-      <circle class="network-pulse" cx="175" cy="202" r="5" />
-      <text class="treatment-label" x="76" y="146">VISIBLE CONTROLLER</text>
-    </g>`,
+    question: "Where should the light go if a creature's whole opinion is four inputs and some wires?",
+    parameter: { label: "Light position", min: 0, max: 100, step: 2, initial: 72, low: "hard left", high: "hard right", format: value => `${value < 48 ? "L" : value > 52 ? "R" : "CENTER"} ${Math.abs(value-50)*2}%` },
+    readings: value => [value < 45 ? "Left sensor dominates" : value > 55 ? "Right sensor dominates" : "Sensors politely disagree", Math.abs(value-50) > 37 ? "Wall input preparing rebuttal" : "Motor decision still reversible"],
+    caption: value => `Moving the stimulus changes real sensor values; the visible controller turns that into a ${value < 50 ? "left" : "right"} motor bias.`,
+    running: "Signal crossing the hand-wired controller.",
+    result: value => `Trial received: creature committed ${Math.abs(value-50) > 28 ? "with confidence" : "with reservations"}.`,
+    trace: value => `M44 ${130+value*1.7}C140 ${130+value} 164 ${350-value} 246 214S366 ${110+value*1.8} 430 214S510 ${320-value} 596 ${320-value}`,
+    art(value) {
+      const lightX = 86 + value * 4.4;
+      const activeLeft = value < 50 ? "hot" : "solid";
+      const activeRight = value >= 50 ? "hot" : "solid";
+      return `<circle class="hot" cx="${lightX}" cy="115" r="19"/><path class="thin" d="M${lightX} 134 225 194M${lightX} 134 225 278"/><path class="solid" d="M197 235c0-45 43-78 89-65 43-26 97 8 93 55 32 34 2 91-43 82-32 36-92 20-94-27-31-2-48-22-45-45Z"/><g class="thin"><path d="M225 194 301 216 369 185M225 194 301 260 369 289M225 278 301 216 369 289M225 278 301 260 369 185"/></g><circle class="${activeLeft}" cx="225" cy="194" r="10"/><circle class="${activeRight}" cx="225" cy="278" r="10"/><circle class="solid" cx="301" cy="216" r="10"/><circle class="solid" cx="301" cy="260" r="10"/><circle class="${activeRight}" cx="369" cy="185" r="11"/><circle class="${activeLeft}" cx="369" cy="289" r="11"/><text x="82" y="72">STIMULUS → SENSOR → OPINION</text>`;
+    }
   },
   scribble: {
     name: "Scribble Engine",
+    short: "SE",
     route: "games/scribble-engine/index.html",
-    action: "Trace a loop",
-    running: "Two arms · one pen",
-    summary: "Two rotating arms share one pen. Change their lengths, speeds, and directions to alter the drawing.",
-    innerArt: `<path d="M304 268c4-15 8 11 13-3s7 12 9-4"/><circle class="inner-accent" cx="304" cy="268" r="2"/>`,
-    art: `<g class="treatment-scribble">
-      <path class="drawing-arm arm-one" d="M68 361L176 254" />
-      <path class="drawing-arm arm-two" d="M372 361L176 254" />
-      <circle class="arm-joint" cx="68" cy="361" r="8"/><circle class="arm-joint" cx="372" cy="361" r="8"/><circle class="arm-joint" cx="176" cy="254" r="7"/>
-      <path class="trace-path" d="M112 267c34-95 69 77 105-21s67 85 103-17c-9 77-64 88-104 37s-69 47-104 1z" />
-      <text class="treatment-label" x="139" y="105">DUAL-ARM TRACE</text>
-    </g>`,
+    question: "What line appears when two arms rotate independently and neither knows what straight means?",
+    parameter: { label: "Arm 2 speed ratio", min: 20, max: 180, step: 5, initial: 90, low: "slow orbit", high: "urgent orbit", format: value => `${value}%` },
+    readings: value => [`Ratio 1 : ${(value/100).toFixed(2)}`, Math.abs(value-100) < 12 ? "Near-repeat likely" : "Pattern postponing repetition"],
+    caption: value => `Changing one arm's speed ratio reshapes the trace without moving either pivot. Current ratio: 1:${(value/100).toFixed(2)}.`,
+    running: "Two arms moving. One pen documenting the disagreement.",
+    result: value => Math.abs(value-100) < 12 ? "Trial received: almost a circle, technically a negotiation." : "Trial received: repetition postponed successfully.",
+    trace: value => `M44 250C120 ${70+value} 180 ${350-value} 248 220S370 ${60+value*1.2} 438 ${315-value*.7}S528 ${120+value} 596 218`,
+    art(value) {
+      const elbowY = 145 + value * .65;
+      return `<circle class="solid" cx="112" cy="318" r="13"/><circle class="solid" cx="518" cy="318" r="13"/><path class="line" d="M112 318 287 ${elbowY} 518 318"/><circle class="hot" cx="287" cy="${elbowY}" r="12"/><path class="thin" d="M83 247c68-156 128 145 204-35s132 157 248-13c-32 118-134 139-238 52S154 355 83 247Z"/><text x="83" y="82">COUPLED MOTION / UNCOUPLED INTENT</text>`;
+    }
   },
   traffic: {
     name: "Traffic With No Excuse",
+    short: "TX",
     route: "games/traffic-with-no-excuse/index.html",
-    action: "Tap a car",
-    running: "Brake wave traveling backward",
-    summary: "Brake one identical driver on an obstacle-free ring, remove the cause, and watch the slowdown keep traveling.",
-    innerArt: `<rect x="307" y="253" width="11" height="23" rx="5"/><circle class="inner-accent" cx="312.5" cy="258" r="2.5"/><circle cx="312.5" cy="265" r="2.5"/><circle cx="312.5" cy="272" r="2.5"/>`,
-    art: `<g class="treatment-traffic">
-      <ellipse class="traffic-ring" cx="220" cy="245" rx="142" ry="42" />
-      <g class="traffic-cars"><rect x="212" y="198" width="16" height="8" rx="3"/><rect x="284" y="207" width="16" height="8" rx="3"/><rect x="346" y="240" width="16" height="8" rx="3"/><rect x="286" y="277" width="16" height="8" rx="3"/><rect x="212" y="284" width="16" height="8" rx="3"/><rect x="139" y="276" width="16" height="8" rx="3"/><rect x="79" y="241" width="16" height="8" rx="3"/><rect x="140" y="207" width="16" height="8" rx="3"/></g>
-      <path class="jam-wave" d="M91 262q53 42 114 22" />
-      <text class="treatment-label" x="154" y="184">FLOW TEST</text>
-    </g>`,
+    question: "How long must one driver brake before the reason disappears but the stopping learns to travel?",
+    parameter: { label: "Brake duration", min: 5, max: 40, step: 5, initial: 20, low: "a nervous tap", high: "a small betrayal", format: value => `${(value/10).toFixed(1)} s` },
+    readings: value => [`Cause present ${(value/10).toFixed(1)} seconds`, value >= 25 ? "Wave likely to outlive cause" : "Flow may forgive this"],
+    caption: value => value >= 25 ? "The marked car stops braking; the slowdown continues backward anyway." : "A brief intervention creates a smaller disturbance that flow may absorb.",
+    running: "Brake applied. Explanation currently available.",
+    result: value => value >= 25 ? "Trial received: cause gone, effect has declined to comment." : "Trial received: traffic nearly accepted the apology.",
+    trace: value => `M44 215H170C205 215 202 ${215+value*2.6} 245 ${215+value*2.6}S305 ${215-value*2.2} 348 ${215-value*2.2}S420 ${215+value*1.7} 460 ${215+value*1.7}S530 215 596 215`,
+    art(value) {
+      const cars = Array.from({ length: 12 }, (_, index) => { const angle=index/12*Math.PI*2; const x=320+Math.cos(angle)*170; const y=222+Math.sin(angle)*112; const jam=index>7-Math.round(value/8)&&index<11; return `<rect class="${jam?"hot":"paper"}" x="${x-10}" y="${y-5}" width="20" height="10" rx="3" transform="rotate(${angle*180/Math.PI+90} ${x} ${y})"/>`; }).join("");
+      return `<ellipse class="thin" cx="320" cy="222" rx="190" ry="132"/><ellipse class="line" cx="320" cy="222" rx="155" ry="97"/>${cars}<path class="line" d="M173 288q76 ${52+value} 164 9"/><text x="83" y="70">NO OBSTACLE / NO EXCUSE</text>`;
+    }
   },
   jelly: {
     name: "Jelly Bench",
+    short: "JB",
     route: "games/jelly-bench/index.html",
-    action: "Press the planet",
-    running: "Pressure applied · spring recovery",
-    summary: "Tune stiffness, damping, pressure, and rest length, then see whether one soft body can squeeze through the gap.",
-    innerArt: `<path class="inner-accent" d="M305 266c0-8 5-12 11-10 7 2 9 13 3 18-5 5-14 1-14-8z"/><path d="M301 253v25m23-25v25"/>`,
-    art: `<g class="treatment-jelly">
-      <path class="pressure-lines" d="M365 221l-12 8m14 16h-16m14 25-12-8" />
-      <g class="counter-probe">
-        <circle cx="335" cy="268" r="7" />
-        <path d="M341 268L365 258H391" />
-        <rect x="390" y="249" width="8" height="18" rx="4" />
-      </g>
-      <text class="peer-review-caption" x="289" y="304">PEER REVIEW.</text>
-      <text class="treatment-label" x="267" y="201">SOFT-BODY TEST</text>
-    </g>`,
+    question: "How much pressure makes a soft body fit through a gap before recovery becomes a personal matter?",
+    parameter: { label: "Internal pressure", min: 20, max: 100, step: 5, initial: 60, low: "puddle-adjacent", high: "strong opinions", format: value => `${value} kPa-ish` },
+    readings: value => [`Compression ${Math.round(100-value*.58)}%`, value > 72 ? "Gap has become negotiable" : "Body considering another route"],
+    caption: value => value > 72 ? "Pressure stiffens the body enough to push through; getting back remains a separate grant proposal." : "Low pressure deforms easily but cannot push decisively through the gap.",
+    running: "Pressure applied. Blob composing formal response.",
+    result: value => value > 72 ? "Trial received: passage achieved, return trip disputed." : "Trial received: blob has chosen structural ambiguity.",
+    trace: value => `M44 215C112 ${330-value} 168 ${330-value} 225 215S340 ${100+value} 405 215S520 ${330-value*1.2} 596 215`,
+    art(value) {
+      const width=165-value*.62, height=76+value*.3, x=320-width/2;
+      return `<path class="thin" d="M86 108v225h176V254M554 108v225H378V254"/><path class="solid" d="M${x} 250c0-${height*.7} ${width*.2}-${height} ${width*.5}-${height}s${width*.5} ${height*.3} ${width*.5} ${height}c0 ${height*.72}-${width*.19} ${height}-${width*.5} ${height}s-${width*.5}-${height*.28}-${width*.5}-${height}Z"/><path class="line" d="M272 214h-48m144 0h48"/><text x="83" y="74">PROPERTY CHANGE / SAME BODY</text>`;
+    }
   },
   mirror: {
     name: "Mirror Mischief",
+    short: "MM",
     route: "games/mirror-mischief/index.html",
-    action: "Tilt the mirror",
-    running: "Downstream path changed",
-    summary: "Move or rotate mirrors, splitters, blockers, and receivers; one small adjustment changes everything downstream.",
-    innerArt: `<path d="M304 270l9-15 10 15"/><rect class="inner-accent" x="313" y="253" width="4" height="23" rx="2" transform="rotate(25 315 264)"/>`,
-    art: `<g class="treatment-mirror">
-      <circle class="mini-source" cx="66" cy="245" r="12" />
-      <path class="beam beam-source" d="M79 245h267" />
-      <rect class="mini-mirror" x="347" y="216" width="10" height="58" rx="4" />
-      <path class="beam beam-one" d="M352 245L303 129" />
-      <path class="beam beam-two" d="M352 245L300 354" />
-      <g class="mini-receiver"><rect x="284" y="111" width="38" height="28" rx="4"/><circle cx="303" cy="125" r="7"/></g>
-      <text class="treatment-label" x="83" y="224">OPTICS PATH</text>
-    </g>`,
-  },
-};
-
-const REST_PATH = "M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z";
-const treatmentList = Object.values(treatments);
-const surpriseButton = document.querySelector("#surprise-experiment");
-const preview = document.querySelector("#bench-preview");
-const previewTitle = document.querySelector("#preview-title");
-const previewSummary = document.querySelector("#preview-summary");
-const previewOpen = document.querySelector("#preview-open");
-const previewClose = document.querySelector("#preview-close");
-const markers = [...document.querySelectorAll(".globe-marker[data-experiment]")];
-const workbench = document.querySelector(".workbench");
-const globeZone = document.querySelector(".globe-zone");
-const globeStage = document.querySelector(".globe-stage");
-const planetTreatment = document.querySelector("#planet-treatment");
-const innerTreatment = document.querySelector("#inner-treatment");
-const planetSystem = document.querySelector("#planet-system");
-const planetShell = document.querySelector("#planet-shell");
-const planetClip = document.querySelector("#planet-clip-shape");
-const planetSurface = document.querySelector("#planet-surface");
-const probeMoving = document.querySelector("#planet-probe-moving");
-const treatmentButton = document.querySelector("#poke-planet");
-const planetStatus = document.querySelector("#planet-status");
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const defaultInnerArt = innerTreatment?.innerHTML || "";
-let selectedKey = null;
-let lastMarker = null;
-let runToken = 0;
-let runTimer = 0;
-let runFrame = 0;
-let apparatusInView = !("IntersectionObserver" in window);
-let jellyCompletions = 0;
-let peerReviewShown = false;
-let openingStarted = false;
-let openingFinished = reduceMotion.matches;
-let openingVisibilityTimer = 0;
-
-function easeInOut(value) {
-  return value < 0.5 ? 2 * value * value : 1 - ((-2 * value + 2) ** 2) / 2;
-}
-
-function dentPath(amount) {
-  const edge = 362 - 18 * amount;
-  const shoulder = 362 - 9 * amount;
-  return `M220 103C298 103 362 166 362 218C${shoulder} 225 ${edge} 237 ${edge} 245C${edge} 253 ${shoulder} 265 362 272C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z`;
-}
-
-function applyPlanet({ dent = 0, wobble = 0, probe = 0 } = {}) {
-  const path = dent ? dentPath(dent) : REST_PATH;
-  planetShell?.setAttribute("d", path);
-  planetClip?.setAttribute("d", path);
-  if (planetSystem) {
-    planetSystem.style.transform = wobble ? `translateX(${wobble}px) rotate(${wobble * 0.32}deg)` : "";
-  }
-  if (probeMoving) probeMoving.style.transform = probe ? `translateX(${-18 * probe}px)` : "";
-}
-
-function finishOpening() {
-  if (openingFinished) return;
-  openingFinished = true;
-  window.clearTimeout(openingVisibilityTimer);
-  openingVisibilityTimer = 0;
-  globeZone?.classList.remove("opening-running", "opening-paused");
-  planetSystem?.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
-}
-
-function syncOpeningVisibility() {
-  if (openingFinished || reduceMotion.matches) return;
-  const paused = document.hidden || !apparatusInView;
-  globeZone?.classList.toggle("opening-paused", paused);
-  if (paused) {
-    window.clearTimeout(openingVisibilityTimer);
-    openingVisibilityTimer = 0;
-  } else if (!openingStarted && !openingVisibilityTimer) {
-    openingVisibilityTimer = window.setTimeout(() => {
-      openingVisibilityTimer = 0;
-      if (openingFinished || document.hidden || !apparatusInView) return;
-      openingStarted = true;
-      requestAnimationFrame(() => {
-        if (!openingFinished) globeZone?.classList.add("opening-running");
-      });
-    }, 320);
-  }
-}
-
-function setTreatmentBusy(busy) {
-  if (!treatmentButton) return;
-  treatmentButton.disabled = busy || !selectedKey;
-  if (busy) treatmentButton.setAttribute("aria-busy", "true");
-  else treatmentButton.removeAttribute("aria-busy");
-}
-
-function clearPeerReview() {
-  globeZone?.classList.remove("peer-review-running", "peer-review-static");
-  workbench?.classList.remove("peer-review-active");
-}
-
-function cancelTreatment({ announce = false } = {}) {
-  runToken += 1;
-  window.clearTimeout(runTimer);
-  cancelAnimationFrame(runFrame);
-  globeZone?.classList.remove("treatment-running", "reduced-result");
-  clearPeerReview();
-  applyPlanet();
-  setTreatmentBusy(false);
-  if (announce && selectedKey) planetStatus.textContent = "Test canceled · Earth at rest";
-}
-
-function runPeerReview(token) {
-  if (token !== runToken) return;
-  peerReviewShown = true;
-  globeZone?.classList.remove("treatment-running", "reduced-result");
-  globeZone?.classList.add(reduceMotion.matches ? "peer-review-static" : "peer-review-running");
-  workbench?.classList.add("peer-review-active");
-  applyPlanet();
-  planetStatus.textContent = "Peer review.";
-  runTimer = window.setTimeout(() => {
-    if (token !== runToken) return;
-    clearPeerReview();
-    applyPlanet();
-    setTreatmentBusy(false);
-    planetStatus.textContent = "Earth returned to rest";
-  }, reduceMotion.matches ? 650 : 1250);
-}
-
-function finishTreatment(token) {
-  if (token !== runToken) return;
-  globeZone?.classList.remove("treatment-running", "reduced-result");
-  applyPlanet();
-  if (selectedKey === "jelly") {
-    jellyCompletions += 1;
-    if (jellyCompletions === 3 && !peerReviewShown) {
-      runPeerReview(token);
-      return;
+    question: "How far can one mirror turn before every receiver downstream gets a different version of the story?",
+    parameter: { label: "Mirror angle", min: -60, max: 60, step: 5, initial: 15, low: "−60°", high: "+60°", format: value => `${value > 0 ? "+" : ""}${value}°` },
+    readings: value => [`Beam deflection ${Math.abs(value*2)}°`, Math.abs(value) > 38 ? "Receiver B has left the conversation" : "Both receivers still arguing"],
+    caption: value => `A ${value > 0 ? "clockwise" : "counterclockwise"} adjustment changes every segment after the selected mirror, not before it.`,
+    running: "Light path recalculating downstream consequences.",
+    result: value => Math.abs(value) > 38 ? "Trial received: one receiver dramatically uninvolved." : "Trial received: light divided into competing testimony.",
+    trace: value => `M44 215H280L390 ${215-value*2.2}L486 ${215+value*1.35}L596 ${215-value*.8}`,
+    art(value) {
+      const y1=215-value*2.2, y2=215+value*1.35;
+      return `<circle class="hot" cx="89" cy="215" r="20"/><path class="line" d="M110 215H280L390 ${y1}M280 215 390 ${y2}"/><rect class="solid" x="272" y="161" width="16" height="108" rx="7" transform="rotate(${value} 280 215)"/><rect class="dark" x="390" y="${y1-28}" width="68" height="56" rx="8"/><rect class="dark" x="390" y="${y2-28}" width="68" height="56" rx="8"/><circle class="hot" cx="424" cy="${y1}" r="10"/><circle class="solid" cx="424" cy="${y2}" r="10"/><text x="83" y="78">ONE MOVE / EVERYTHING AFTER</text>`;
     }
   }
-  setTreatmentBusy(false);
-  planetStatus.textContent = "Earth returned to rest";
+};
+
+const apparatus = document.querySelector(".apparatus-shell");
+const controls = [...document.querySelectorAll(".experiment-control")];
+const selectionCount = document.querySelector("#selection-count");
+const scopeTitle = document.querySelector("#scope-title");
+const scopeMode = document.querySelector("#scope-mode");
+const scopeArt = document.querySelector("#scope-art");
+const scopeTrace = document.querySelector("#scope-trace");
+const scopeCaption = document.querySelector("#scope-caption");
+const controlTitle = document.querySelector("#control-title");
+const question = document.querySelector("#specimen-question");
+const parameter = document.querySelector("#interference");
+const parameterLabel = document.querySelector("#parameter-label");
+const parameterOutput = document.querySelector("#parameter-output");
+const rangeLow = document.querySelector("#range-low");
+const rangeHigh = document.querySelector("#range-high");
+const readingPrimary = document.querySelector("#reading-primary");
+const readingSecondary = document.querySelector("#reading-secondary");
+const runButton = document.querySelector("#run-trial");
+const openLink = document.querySelector("#open-experiment");
+const clearButton = document.querySelector("#clear-selection");
+const status = document.querySelector("#bench-status");
+const receiver = document.querySelector("#records-receiver");
+const receiverText = receiver?.querySelector("span");
+const surpriseButton = document.querySelector("#surprise-experiment");
+const favicon = document.querySelector("#dynamic-favicon");
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const keys = Object.keys(experiments);
+let selectedKey = null;
+let trialToken = 0;
+let trialTimer = 0;
+let apparatusVisible = true;
+let lastControl = null;
+
+function safeStorage(method, value) {
+  try { return value === undefined ? localStorage[method](STORAGE_KEY) : localStorage[method](STORAGE_KEY, value); }
+  catch { return null; }
 }
 
-function runJellyTreatment(token, startTime) {
-  const elapsed = performance.now() - startTime;
-  if (token !== runToken) return;
-  if (elapsed >= 1500) {
-    finishTreatment(token);
-    return;
-  }
-  const extend = elapsed < 180
-    ? easeInOut(elapsed / 180)
-    : elapsed < 410
-      ? 1
-      : elapsed < 650
-        ? 1 - easeInOut((elapsed - 410) / 240)
-        : 0;
-  const dent = elapsed < 170
-    ? 0
-    : elapsed < 310
-      ? 0.84 * easeInOut((elapsed - 170) / 140)
-      : Math.max(0, 0.84 * Math.exp(-(elapsed - 310) / 410) * (0.7 + 0.3 * Math.cos((elapsed - 310) / 72)));
-  const wobble = elapsed < 280 ? 0 : 4.2 * Math.sin((elapsed - 280) / 72) * Math.exp(-(elapsed - 280) / 380);
-  applyPlanet({ dent, wobble, probe: extend });
-  runFrame = requestAnimationFrame(() => runJellyTreatment(token, startTime));
+function selectionUrl(key) {
+  const url = new URL(location.href);
+  if (key) url.searchParams.set("experiment", key);
+  else url.searchParams.delete("experiment");
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
-function runTreatment() {
-  const treatment = treatments[selectedKey];
-  if (!treatment || treatmentButton.disabled) return;
-  cancelTreatment();
-  const token = runToken;
-  setTreatmentBusy(true);
-  planetStatus.textContent = treatment.running;
-
-  if (reduceMotion.matches) {
-    globeZone.classList.add("reduced-result");
-    if (selectedKey === "jelly") applyPlanet({ dent: 0.62, probe: 1 });
-    runTimer = window.setTimeout(() => finishTreatment(token), 280);
-    return;
-  }
-
-  globeZone.classList.add("treatment-running");
-  if (selectedKey === "jelly") {
-    runFrame = requestAnimationFrame(timestamp => runJellyTreatment(token, timestamp));
-  } else {
-    runTimer = window.setTimeout(() => finishTreatment(token), 1520);
-  }
+function faviconMarkup(experiment) {
+  const color = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#45e182";
+  const letters = experiment?.short || "TL";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#07131b"/><path d="M9 47h46M14 41V18h36v23" fill="none" stroke="${color}" stroke-width="4"/><text x="32" y="36" text-anchor="middle" font-family="monospace" font-weight="700" font-size="16" fill="#eff5fa">${letters}</text></svg>`;
 }
 
-function selectExperiment(key) {
-  const treatment = treatments[key];
-  if (!treatment || !preview) return;
-  finishOpening();
-  cancelTreatment();
+function updateBoundaryCue(experiment) {
+  document.title = experiment ? `${experiment.name} on the bench | Trikzik Labs` : BASE_TITLE;
+  if (favicon) favicon.href = experiment ? `data:image/svg+xml,${encodeURIComponent(faviconMarkup(experiment))}` : "/favicon.ico";
+}
+
+function updateDiagram(experiment, value) {
+  scopeArt.innerHTML = experiment.art(value);
+  scopeTrace.setAttribute("d", experiment.trace(value));
+  scopeCaption.textContent = experiment.caption(value);
+  const [primary, secondary] = experiment.readings(value);
+  readingPrimary.textContent = primary;
+  readingSecondary.textContent = secondary;
+  parameterOutput.value = experiment.parameter.format(value);
+  parameterOutput.textContent = experiment.parameter.format(value);
+}
+
+function cancelTrial(message = "") {
+  trialToken += 1;
+  clearTimeout(trialTimer);
+  apparatus?.classList.remove("trial-running");
+  runButton?.removeAttribute("aria-busy");
+  if (runButton) runButton.disabled = !selectedKey;
+  if (selectedKey) scopeMode.textContent = "READY";
+  if (message && selectedKey) status.textContent = message;
+}
+
+function setReceiver(message, key = selectedKey) {
+  if (!receiver || !receiverText) return;
+  receiver.classList.add("received");
+  receiverText.textContent = message.toUpperCase();
+  document.querySelectorAll("[data-record]").forEach(record => record.classList.toggle("is-active", record.dataset.record === key));
+}
+
+function completeTrial(token, experiment, value) {
+  if (token !== trialToken) return;
+  apparatus?.classList.remove("trial-running");
+  runButton?.removeAttribute("aria-busy");
+  if (runButton) runButton.disabled = false;
+  scopeMode.textContent = "COMPLETE";
+  const result = experiment.result(value);
+  status.textContent = result;
+  setReceiver(result);
+}
+
+function runTrial() {
+  const experiment = experiments[selectedKey];
+  if (!experiment || !apparatusVisible || runButton.disabled) return;
+  cancelTrial();
+  const token = trialToken;
+  const value = Number(parameter.value);
+  apparatus.classList.add("trial-running");
+  runButton.disabled = true;
+  runButton.setAttribute("aria-busy", "true");
+  scopeMode.textContent = "RUNNING";
+  status.textContent = experiment.running;
+  const duration = reduceMotion.matches ? 40 : 1320;
+  trialTimer = setTimeout(() => completeTrial(token, experiment, value), duration);
+}
+
+function applySelection(key, { history = "none", focus = false, announce = true } = {}) {
+  const experiment = experiments[key];
+  if (!experiment) return clearSelection({ history, focus });
+  cancelTrial();
   selectedKey = key;
-  markers.forEach(marker => marker.setAttribute("aria-pressed", String(marker.dataset.experiment === key)));
-  lastMarker = document.querySelector(`.globe-marker[data-experiment="${key}"]`);
-  preview.dataset.experiment = key;
-  globeZone.dataset.experiment = key;
-  previewTitle.textContent = treatment.name;
-  previewSummary.textContent = treatment.summary;
-  previewOpen.href = treatment.route;
-  previewOpen.hidden = false;
-  previewClose.hidden = false;
-  planetTreatment.innerHTML = treatment.art;
-  if (innerTreatment) innerTreatment.innerHTML = treatment.innerArt;
-  treatmentButton.innerHTML = `${treatment.action} <span aria-hidden="true">→</span>`;
-  setTreatmentBusy(false);
-  planetStatus.textContent = `${treatment.name} ready`;
+  lastControl = document.querySelector(`.experiment-control[data-experiment="${key}"]`);
+  document.body.dataset.labState = "active";
+  document.body.dataset.experiment = key;
+  controls.forEach(control => control.setAttribute("aria-pressed", String(control.dataset.experiment === key)));
+  selectionCount.value = `${keys.indexOf(key) + 1} / ${keys.length}`;
+  selectionCount.textContent = `${keys.indexOf(key) + 1} / ${keys.length}`;
+  scopeTitle.textContent = experiment.name;
+  scopeMode.textContent = "READY";
+  controlTitle.textContent = experiment.name;
+  question.textContent = experiment.question;
+  parameter.min = experiment.parameter.min;
+  parameter.max = experiment.parameter.max;
+  parameter.step = experiment.parameter.step;
+  parameter.value = experiment.parameter.initial;
+  parameter.disabled = false;
+  parameterLabel.textContent = experiment.parameter.label;
+  rangeLow.textContent = experiment.parameter.low;
+  rangeHigh.textContent = experiment.parameter.high;
+  runButton.disabled = false;
+  clearButton.disabled = false;
+  openLink.href = experiment.route;
+  openLink.classList.remove("is-disabled");
+  openLink.removeAttribute("aria-disabled");
+  updateDiagram(experiment, experiment.parameter.initial);
+  updateBoundaryCue(experiment);
+  receiver?.classList.remove("received");
+  if (receiverText) receiverText.textContent = "TRIAL SELECTED / AWAITING SIGNAL";
+  document.querySelectorAll("[data-record]").forEach(record => record.classList.toggle("is-active", record.dataset.record === key));
+  if (announce) status.textContent = `${experiment.name} mounted. ${experiment.parameter.label} ready.`;
+  safeStorage("setItem", key);
+  if (history === "push") historyPush(key);
+  if (history === "replace") historyReplace(key);
+  if (focus) lastControl?.focus();
 }
 
-function closePreview({ restoreFocus = false } = {}) {
-  cancelTreatment();
-  markers.forEach(marker => marker.setAttribute("aria-pressed", "false"));
+function clearSelection({ history = "none", focus = false } = {}) {
+  cancelTrial();
   selectedKey = null;
-  delete preview.dataset.experiment;
-  delete globeZone.dataset.experiment;
-  previewTitle.textContent = "Choose a bench control";
-  previewSummary.textContent = "Use a labeled control below Earth to wake one small machine.";
-  previewOpen.hidden = true;
-  previewClose.hidden = true;
-  planetTreatment.innerHTML = "";
-  if (innerTreatment) innerTreatment.innerHTML = defaultInnerArt;
-  treatmentButton.innerHTML = 'Select an experiment <span aria-hidden="true">→</span>';
-  treatmentButton.disabled = true;
-  planetStatus.textContent = "Earth ready for a test";
-  if (restoreFocus) lastMarker?.focus();
+  delete document.body.dataset.experiment;
+  document.body.dataset.labState = "idle";
+  controls.forEach(control => control.setAttribute("aria-pressed", "false"));
+  selectionCount.value = `0 / ${keys.length}`;
+  selectionCount.textContent = `0 / ${keys.length}`;
+  scopeTitle.textContent = "Nothing mounted";
+  scopeMode.textContent = "STANDBY";
+  controlTitle.textContent = "No specimen selected";
+  question.textContent = "Select a specimen to expose the one control most likely to make it interesting.";
+  parameter.disabled = true;
+  parameter.value = 50;
+  parameterLabel.textContent = "Interference";
+  parameterOutput.value = "--";
+  parameterOutput.textContent = "--";
+  rangeLow.textContent = "less";
+  rangeHigh.textContent = "more";
+  readingPrimary.textContent = "No activity";
+  readingSecondary.textContent = "Bench remains innocent";
+  scopeArt.innerHTML = "";
+  scopeTrace.setAttribute("d", "");
+  scopeCaption.textContent = "The bench is honest about not knowing what you want.";
+  runButton.disabled = true;
+  clearButton.disabled = true;
+  openLink.href = "#experiments";
+  openLink.classList.add("is-disabled");
+  openLink.setAttribute("aria-disabled", "true");
+  status.textContent = "Bench idle. No emergency, technically.";
+  receiver?.classList.remove("received");
+  if (receiverText) receiverText.textContent = "NO TRIAL RECEIVED";
+  document.querySelectorAll("[data-record]").forEach(record => record.classList.remove("is-active"));
+  updateBoundaryCue(null);
+  safeStorage("removeItem");
+  if (history === "push") historyPush(null);
+  if (history === "replace") historyReplace(null);
+  if (focus) lastControl?.focus();
 }
 
-markers.forEach(marker => marker.addEventListener("click", () => selectExperiment(marker.dataset.experiment)));
-treatmentButton?.addEventListener("click", runTreatment);
-previewClose?.addEventListener("click", () => closePreview({ restoreFocus: true }));
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && selectedKey) closePreview({ restoreFocus: true });
-});
-
-if (globeStage && "IntersectionObserver" in window) {
-  const observer = new IntersectionObserver(entries => {
-    const entry = entries[0];
-    const requiredRatio = window.matchMedia("(max-width: 760px)").matches ? 0.64 : 0.48;
-    apparatusInView = Boolean(entry?.isIntersecting && entry.intersectionRatio >= requiredRatio);
-    if (!apparatusInView) cancelTreatment();
-    syncOpeningVisibility();
-  }, { threshold: [0, 0.48, 0.64, 0.8, 1] });
-  observer.observe(globeStage);
+function historyPush(key) {
+  const url = selectionUrl(key);
+  if (`${location.pathname}${location.search}${location.hash}` !== url) history.pushState({ experiment: key }, "", url);
 }
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden || !apparatusInView) cancelTreatment({ announce: true });
-  syncOpeningVisibility();
-});
+function historyReplace(key) { history.replaceState({ experiment: key }, "", selectionUrl(key)); }
 
-planetSystem?.addEventListener("animationend", event => {
-  if (event.animationName === "impossible-outer-reaction") finishOpening();
+controls.forEach(control => control.addEventListener("click", () => {
+  const key = control.dataset.experiment;
+  if (key === selectedKey) { control.focus(); return; }
+  applySelection(key, { history: "push" });
+}));
+
+parameter?.addEventListener("input", () => {
+  const experiment = experiments[selectedKey];
+  if (!experiment) return;
+  cancelTrial("Control changed. Trial ready again.");
+  updateDiagram(experiment, Number(parameter.value));
 });
-reduceMotion.addEventListener?.("change", event => {
-  if (event.matches) finishOpening();
-  else syncOpeningVisibility();
-});
-syncOpeningVisibility();
+runButton?.addEventListener("click", runTrial);
+clearButton?.addEventListener("click", () => clearSelection({ history: "push", focus: true }));
+openLink?.addEventListener("click", event => { if (openLink.getAttribute("aria-disabled") === "true") event.preventDefault(); });
 
 surpriseButton?.addEventListener("click", () => {
-  const destination = treatmentList[Math.floor(Math.random() * treatmentList.length)].route;
-  const reduced = reduceMotion.matches;
-  surpriseButton.disabled = true;
-  surpriseButton.setAttribute("aria-busy", "true");
-  surpriseButton.classList.add("launched");
-  window.setTimeout(() => window.location.assign(destination), reduced ? 0 : 550);
+  const choices = keys.filter(key => key !== selectedKey);
+  const key = choices[Math.floor(Math.random() * choices.length)];
+  surpriseButton.classList.remove("lever-pulled");
+  requestAnimationFrame(() => surpriseButton.classList.add("lever-pulled"));
+  applySelection(key, { history: "push" });
+  setTimeout(() => surpriseButton.classList.remove("lever-pulled"), reduceMotion.matches ? 20 : 520);
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && selectedKey && !event.defaultPrevented) clearSelection({ history: "push", focus: true });
+});
+window.addEventListener("popstate", () => {
+  const key = new URL(location.href).searchParams.get("experiment");
+  if (experiments[key]) applySelection(key, { history: "none", announce: false });
+  else clearSelection({ history: "none" });
+});
+document.addEventListener("visibilitychange", () => { if (document.hidden) cancelTrial("Trial interrupted. Bench safely returned to ready."); });
+
+if (apparatus && "IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(entries => {
+    apparatusVisible = Boolean(entries[0]?.isIntersecting && entries[0].intersectionRatio > .08);
+    if (!apparatusVisible) cancelTrial();
+  }, { threshold: [0, .08, .25] });
+  observer.observe(apparatus);
+}
+
+const urlKey = new URL(location.href).searchParams.get("experiment");
+const storedKey = safeStorage("getItem");
+if (experiments[urlKey]) applySelection(urlKey, { history: "none", announce: false });
+else if (experiments[storedKey]) applySelection(storedKey, { history: "replace", announce: false });
+else clearSelection();
+
+window.__trikzikLabTest = Object.freeze({
+  keys: [...keys],
+  select: key => applySelection(key),
+  clear: () => clearSelection(),
+  run: runTrial,
+  snapshot: () => ({ selectedKey, value: Number(parameter.value), running: apparatus?.classList.contains("trial-running"), title: document.title, url: location.href, receiver: receiverText?.textContent })
 });

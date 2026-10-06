@@ -3,371 +3,136 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta
-      name="description"
-      content="Play browser games, explore curious interactive toys, and try useful tools by Ernest Turner at Trikzik Labs. Come scratch your tinker itch."
-    />
-    <title>Trikzik Labs — Games &amp; Experiments by Ernest Turner</title>
+    <meta name="description" content="Play browser games, explore curious interactive toys, and try useful tools by Ernest Turner at Trikzik Labs. Come scratch your tinker itch." />
+    <title>Trikzik Labs - Games &amp; Experiments by Ernest Turner</title>
     <link rel="canonical" href="https://trikzik.com/" />
-    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link id="dynamic-favicon" rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Trikzik Labs" />
-    <meta property="og:title" content="Trikzik Labs — Games &amp; Experiments by Ernest Turner" />
+    <meta property="og:title" content="Trikzik Labs - Games &amp; Experiments by Ernest Turner" />
     <meta property="og:description" content="Play browser games, explore curious interactive toys, and try useful tools by Ernest Turner at Trikzik Labs. Come scratch your tinker itch." />
     <meta property="og:url" content="https://trikzik.com/" />
     <meta property="og:image" content="https://trikzik.com/assets/trikzik-labs-social.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Trikzik Labs Earth workbench — games and experiments by Ernest Turner" />
+    <meta property="og:image:alt" content="Trikzik Labs Earth workbench - games and experiments by Ernest Turner" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Trikzik Labs — Games &amp; Experiments by Ernest Turner" />
+    <meta name="twitter:title" content="Trikzik Labs - Games &amp; Experiments by Ernest Turner" />
     <meta name="twitter:description" content="Play browser games, explore curious interactive toys, and try useful tools by Ernest Turner at Trikzik Labs. Come scratch your tinker itch." />
     <meta name="twitter:image" content="https://trikzik.com/assets/trikzik-labs-social.png" />
-    <meta name="twitter:image:alt" content="Trikzik Labs Earth workbench — games and experiments by Ernest Turner" />
+    <meta name="twitter:image:alt" content="Trikzik Labs Earth workbench - games and experiments by Ernest Turner" />
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Person",
-            "@id": "https://trikzik.com/#ernest-turner",
-            "name": "Ernest Turner",
-            "url": "https://trikzik.com/",
-            "sameAs": ["https://github.com/ErnestTurner"]
-          },
-          {
-            "@type": "WebSite",
-            "@id": "https://trikzik.com/#website",
-            "name": "Trikzik Labs",
-            "url": "https://trikzik.com/",
-            "creator": { "@id": "https://trikzik.com/#ernest-turner" }
-          }
-        ]
-      }
+      {"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://trikzik.com/#ernest-turner","name":"Ernest Turner","url":"https://trikzik.com/","sameAs":["https://github.com/ErnestTurner"]},{"@type":"WebSite","@id":"https://trikzik.com/#website","name":"Trikzik Labs","url":"https://trikzik.com/","creator":{"@id":"https://trikzik.com/#ernest-turner"}}]}
     </script>
-    <link rel="stylesheet" href="playground.css?v=drawn-pilot-1" />
+    <link rel="stylesheet" href="playground.css?v=signal-bench-1" />
   </head>
-  <body>
+  <body data-lab-state="idle">
     <svg class="site-symbols" aria-hidden="true">
       <defs>
         <symbol id="et-pilot-mark" viewBox="0 0 32 46">
-          <path class="et-pilot-shape inner-alien-head" d="M15 2l-4 1-3 3-2 4v5l2 4 4 3v4l-3 2-3-1-2-3-3 3 2 4 3 2 4 2h2l-1 7 2 2 6 .2 2-2.2-1-7 3-1 4-3 4-4-3-3-3 3-3 1-2-2v-4l3-3 3-4v-5l-2-4-3-3-4-1Z" />
-          <path class="et-pilot-eye et-pilot-eye-left" d="M9 10l2-1 3 2-1 3-3-1-1-3Z" />
-          <path class="et-pilot-eye et-pilot-eye-right" d="M18 11l3-2 3 1-1 3-3 1-2-3Z" />
-          <path class="et-pilot-fold" d="M11.8 26.5l4.2 4 4.2-4M11.4 34.6l4.5-3.9 4.7 3.8" />
+          <path class="et-pilot-shape" d="M15 2l-4 1-3 3-2 4v5l2 4 4 3v4l-3 2-3-1-2-3-3 3 2 4 3 2 4 2h2l-1 7 2 2 6 .2 2-2.2-1-7 3-1 4-3 4-4-3-3-3 3-3 1-2-2v-4l3-3 3-4v-5l-2-4-3-3-4-1Z" />
+          <path class="et-pilot-eye" d="M9 10l2-1 3 2-1 3-3-1-1-3Zm9 1 3-2 3 1-1 3-3 1-2-3Z" />
+          <path class="et-pilot-fold" d="m11.8 26.5 4.2 4 4.2-4m-8.8 8.1 4.5-3.9 4.7 3.8" />
         </symbol>
       </defs>
     </svg>
-    <a class="skip" href="#experiments">Skip to experiments</a>
-    <header>
-      <a class="brand" href="#top">TRIKZIK<span> / </span>LABS</a>
+    <a class="skip" href="#experiments">Skip to experiment controls</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Trikzik Labs home">TRIKZIK <span>/</span> LABS</a>
       <nav aria-label="Main navigation">
-        <a href="#experiments">Experiments</a><a href="#work">Records</a><a href="#about">Ernest</a
-        ><a href="https://github.com/ErnestTurner" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="#experiments">Bench</a><a href="#work">Records</a><a href="#about">Ernest</a><a href="https://github.com/ErnestTurner" target="_blank" rel="noopener">GitHub ↗</a>
       </nav>
     </header>
+
     <main id="top">
-      <section class="hero workbench-hero" aria-labelledby="workbench-title">
-        <div class="intro">
-          <p class="kicker"><span class="live-dot"></span> CREATED BY ERNEST TURNER</p>
-          <h1 id="workbench-title">Trikzik<br /><em>Labs.</em></h1>
-          <p class="lead">
-            Games, curious little machines, and useful tools by Ernest Turner.<br />Come scratch your
-            tinker itch.
-          </p>
-          <div class="actions">
-            <a class="button primary" href="#experiments">Choose an experiment <span>↘</span></a
-            ><a class="text-link" href="#work">Read the lab notes ↓</a>
-          </div>
-          <p class="small">No downloads. No sign-up. Just a little curiosity.</p>
+      <section class="apparatus-shell" aria-labelledby="lab-title">
+        <div class="apparatus-topbar">
+          <span>ENTRY BENCH 01 / PUBLIC INTERFERENCE PERMITTED</span>
+          <span class="power-readout"><i></i> LAB POWER: MOSTLY STABLE</span>
         </div>
-        <div class="workbench" aria-label="Earth experiment bench with eight selectable previews">
-          <div class="workbench-tools">
-            <p>CHOOSE AN EXPERIMENT</p>
-            <button class="ufo-button" id="surprise-experiment" type="button">
-              <span class="ufo" aria-hidden="true">
-                <svg class="alien-pilot" viewBox="0 0 32 46"><use href="#et-pilot-mark" /></svg>
-              </span>
-              <span>Surprise experiment ↗</span>
-            </button>
-          </div>
-          <div class="bench-display">
-          <div class="globe-zone">
-            <div class="globe-stage" role="group" aria-label="An opened Earth on a laboratory bench reveals an alien testing a smaller Earth, paired with eight labeled experiment controls">
-              <svg class="globe-machine" viewBox="0 0 440 470" aria-hidden="true">
-                <defs>
-                  <clipPath id="planet-clip"><path id="planet-clip-shape" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z" /></clipPath>
-                </defs>
-                <g class="stand-lines" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M77 419H363M114 446H326M137 419L125 446M303 419L315 446" />
-                  <path class="cradle-arm" d="M137 419L112 333M303 419l25-86M220 419v-31" />
-                  <circle class="cradle-pad" cx="112" cy="333" r="9" />
-                  <circle class="cradle-pad" cx="328" cy="333" r="9" />
-                  <circle class="cradle-pad" cx="220" cy="388" r="9" />
-                </g>
-                <g class="planet-system" id="planet-system">
-                  <g class="globe-surface" id="planet-surface">
-                    <path class="ocean" id="planet-shell" d="M220 103C298 103 362 166 362 245C362 324 298 387 220 387C142 387 78 324 78 245C78 166 142 103 220 103Z" />
-                    <g class="planet-map" clip-path="url(#planet-clip)">
-                      <path class="continent" d="M101 154l25-32 35-13 27 9 11 20 24 9-8 18-25 6-10 23-24 5-15 27-18-8-5-24-20-17z" />
-                      <path class="continent" d="M181 226l28 2 23 20 2 31-13 24-3 29-17 34-14-18 3-28-13-29 5-25-10-20z" />
-                      <path class="continent" d="M223 150l18-13 19 3 10 12-9 12-20-2zM239 170l24-3 22 21-4 24 16 22-14 49-23 38-14-13 3-27-17-24 8-26-14-21z" />
-                      <path class="continent" d="M266 145l28-24 35 5 11 18 21 8-7 23-25 2-11 18-28-4-16 12-13-21 15-16z" />
-                      <path class="continent" d="M317 296l27-8 18 15-3 25-29 10-20-18z" />
-                      <path class="continent" d="M174 112l16-18 21 5 3 20-19 14z" />
-                      <path class="globe-line" d="M86 245h276M99 196c75 25 167 25 263 9M99 294c75-25 167-25 263-9M220 103c-45 42-58 94-58 142s13 100 58 142M220 103c45 42 58 94 58 142s-13 100-58 142" />
-                    </g>
-                  </g>
-                  <g class="impossible-lab" aria-hidden="true">
-                    <path class="cutaway-shadow" d="M119 166L145 136H302l24 29 9 35v105l-22 31H132l-23-31V201z" />
-                    <path class="cutaway-chamber" d="M126 173l24-27h147l22 27 8 30v98l-19 25H138l-20-25v-98z" />
-                    <path class="cutaway-rim" d="M119 166l31-30h152l28 34M109 201l9 104 20 31h170l22-31 5-104" />
-                    <g class="lab-plumbing">
-                      <path d="M141 174h30v18h-17v29M314 173h-25v24h13v24M144 300h27v-16h17M312 300h-20v17" />
-                      <circle cx="154" cy="221" r="4" /><circle cx="302" cy="221" r="4" />
-                    </g>
-                    <ellipse class="lab-lamp" cx="225" cy="164" rx="42" ry="9" />
-                    <path class="lab-light" d="M184 169h82l30 120H154z" />
-                    <g class="inner-ufo">
-                      <path class="inner-ufo-dome" d="M142 220c2-25 42-25 45 0z" />
-                      <ellipse class="inner-ufo-body" cx="165" cy="222" rx="42" ry="10" />
-                      <path class="inner-ufo-legs" d="M143 229l-9 23m55-23 9 23M130 252h11m51 0h11" />
-                      <g class="inner-pilot"><use href="#et-pilot-mark" x="151" y="185" width="28" height="40" /></g>
-                    </g>
-                    <g class="inner-arm-assembly">
-                      <path class="inner-arm" d="M196 214l24-12 15 17 19-6" />
-                      <circle class="inner-arm-joint" cx="196" cy="214" r="5" />
-                      <circle class="inner-arm-joint" cx="220" cy="202" r="6" />
-                      <circle class="inner-arm-joint" cx="235" cy="219" r="7" />
-                      <circle class="inner-probe-tip" cx="254" cy="213" r="6" />
-                    </g>
-                    <g class="inner-earth">
-                      <circle class="inner-ocean" cx="270" cy="257" r="45" />
-                      <path class="inner-land" d="M244 225l13-9 13 5 4 10 13 3 7 11-11 10-3 17-12-4-7-13-12-5-9-12zM278 270l12-7 15 7 6 13-9 13-18-3-10-10z" />
-                      <path class="inner-grid" d="M226 257h88M270 212c-15 13-20 29-20 45s5 32 20 45M270 212c15 13 20 29 20 45s-5 32-20 45" />
-                    </g>
-                    <g class="inner-brace">
-                      <path d="M229 315l9-38m73 38-10-38M229 315h82" />
-                      <circle cx="238" cy="277" r="5" /><circle cx="301" cy="277" r="5" />
-                    </g>
-                    <g class="inner-console">
-                      <path d="M307 225h14v68h-20" />
-                      <rect x="305" y="250" width="18" height="30" rx="3" />
-                      <g class="inner-treatment" id="inner-treatment">
-                        <circle cx="311" cy="260" r="2" /><circle cx="318" cy="260" r="2" />
-                        <circle cx="311" cy="268" r="2" /><circle cx="318" cy="268" r="2" />
-                      </g>
-                    </g>
-                    <g class="contact-lines"><path d="M251 204q12-8 19 5M250 197q18-12 29 8" /></g>
-                    <text class="inner-lab-label" x="137" y="318">LAB INSIDE / WORLD 02</text>
-                  </g>
-                  <g class="planet-treatment" id="planet-treatment"></g>
-                </g>
-                <g class="planet-probe-frame">
-                  <path d="M405 419V245M388 419h34M394 245h22" />
-                  <circle cx="405" cy="245" r="8" />
-                  <circle class="probe-bolt" cx="396" cy="419" r="3" />
-                  <circle class="probe-bolt" cx="414" cy="419" r="3" />
-                </g>
-                <g class="planet-probe-moving" id="planet-probe-moving">
-                  <path class="probe-arm" d="M405 245H380" />
-                  <rect class="probe-pad" x="368" y="225" width="12" height="40" rx="6" />
-                </g>
-              </svg>
+        <div class="lab-intro">
+          <div><p class="kicker">CREATED BY ERNEST TURNER</p><h1 id="lab-title">Trikzik Labs <em>unresolved significance.</em></h1></div>
+          <div class="intro-copy"><p>Games, curious little machines, and useful tools by Ernest Turner. Come scratch your tinker itch.</p><p class="small">Choose a specimen. Change one thing. See what else objects.</p></div>
+        </div>
+
+        <div class="bench-grid">
+          <section class="station specimen-selector" id="experiments" aria-labelledby="selector-title">
+            <header class="station-head"><div><span>INPUT BANK</span><h2 id="selector-title">Mount a specimen</h2></div><output id="selection-count">0 / 8</output></header>
+            <div class="selector-grid" role="group" aria-label="Choose an experiment to inspect">
+              <button class="experiment-control" type="button" data-experiment="moon" aria-pressed="false"><span>01</span><b>Moon Snail</b><small>capture loop</small></button>
+              <button class="experiment-control" type="button" data-experiment="star" aria-pressed="false"><span>02</span><b>Starfall</b><small>light economy</small></button>
+              <button class="experiment-control" type="button" data-experiment="dungeon" aria-pressed="false"><span>03</span><b>Dungeon Reset</b><small>aftermath cycle</small></button>
+              <button class="experiment-control" type="button" data-experiment="brain" aria-pressed="false"><span>04</span><b>Brain in a Jar</b><small>visible behavior</small></button>
+              <button class="experiment-control" type="button" data-experiment="scribble" aria-pressed="false"><span>05</span><b>Scribble Engine</b><small>coupled motion</small></button>
+              <button class="experiment-control" type="button" data-experiment="traffic" aria-pressed="false"><span>06</span><b>Traffic</b><small>cause removed</small></button>
+              <button class="experiment-control" type="button" data-experiment="jelly" aria-pressed="false"><span>07</span><b>Jelly Bench</b><small>soft resistance</small></button>
+              <button class="experiment-control" type="button" data-experiment="mirror" aria-pressed="false"><span>08</span><b>Mirror Mischief</b><small>downstream trouble</small></button>
             </div>
-            <div class="experiment-console" role="group" aria-label="Experiment preview controls">
-              <button class="globe-marker experiment-control" type="button" data-experiment="moon" aria-label="Preview Moon Snail" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5"/><path d="M8 12c0-4 5-4 5 0 0 3-4 4-6 2M14 16h7M18 16l2-4"/></svg><span>Moon Snail</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="star" aria-label="Preview Starfall" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 5.8L21 9.5l-4.8 4.3 1.4 6.2-5.6-3.2L6.4 20l1.4-6.2L3 9.5l6.5-.7z"/></svg><span>Starfall</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="dungeon" aria-label="Preview Dungeon Reset" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V10a7 7 0 0 1 14 0v11M9 21V10a3 3 0 0 1 6 0v11M3 21h18"/></svg><span>Dungeon</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="brain" aria-label="Preview Brain in a Jar" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 18c-3 0-4-4-2-6-2-3 1-7 4-6 1-4 6-3 6 0 4-1 6 4 3 6 2 2 1 7-3 7H8zM12 6v12M8 10h4m0 4h5"/></svg><span>Brain Jar</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="scribble" aria-label="Preview Scribble Engine" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 15c4-11 5 7 10-2s5 9 10-3"/></svg><span>Scribble</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="traffic" aria-label="Preview Traffic With No Excuse" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="4"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="17" r="2"/></svg><span>Traffic</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="jelly" aria-label="Preview Jelly Bench" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15c0-7 3-11 8-11s8 4 8 11c0 4-3 6-8 6s-8-2-8-6zM8 17v3m4-3v4m4-4v3"/></svg><span>Jelly</span></button>
-              <button class="globe-marker experiment-control" type="button" data-experiment="mirror" aria-label="Preview Mirror Mischief" aria-controls="bench-preview" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="10" transform="rotate(18 12 12)"/><path d="M12 5v14"/></svg><span>Mirror</span></button>
+            <div class="lever-bay">
+              <button class="unknown-lever" id="surprise-experiment" type="button"><span class="lever"><i></i></span><span>Pull the unlabelled lever<small>It has never helped.</small></span></button>
+              <svg class="bench-alien" viewBox="0 0 32 46" aria-hidden="true"><use href="#et-pilot-mark" /></svg>
             </div>
-            <div class="planet-actions">
-              <button class="button planet-poke" id="poke-planet" type="button" disabled>Select an experiment <span aria-hidden="true">→</span></button>
-              <span class="planet-status" id="planet-status" role="status" aria-live="polite">Earth ready for a test</span>
-            </div>
-            <p class="planet-teaser-label">Representative Earth treatment · not gameplay footage</p>
-          </div>
-          <section class="bench-preview" id="bench-preview" aria-labelledby="preview-title">
-            <div class="preview-head">
-              <p class="station-kicker">BENCH PREVIEW</p>
-              <button class="preview-close" id="preview-close" type="button" aria-label="Close experiment preview" hidden>×</button>
-            </div>
-            <div class="preview-copy" role="status" aria-live="polite" aria-atomic="true">
-              <h2 id="preview-title">Choose a bench control</h2>
-              <p class="preview-summary" id="preview-summary">Use a labeled control below Earth to wake one small machine.</p>
-            </div>
-            <a class="button preview-open" id="preview-open" href="#experiments" hidden>Open experiment <span>↗</span></a>
           </section>
-          </div>
-          <nav class="experiment-clipboard" id="experiments" aria-label="All experiments">
-            <h2>All experiments <span>(8)</span></h2>
-            <div class="clipboard-list">
-              <a href="games/moon-snail/index.html"><span>01</span>Moon Snail</a>
-              <a href="games/starfall/index.html"><span>02</span>Starfall</a>
-              <a href="games/dungeon-reset/index.html"><span>03</span>Dungeon Reset</a>
-              <a href="games/brain-in-a-jar/index.html"><span>04</span>Brain in a Jar</a>
-              <a href="games/scribble-engine/index.html"><span>05</span>Scribble Engine</a>
-              <a href="games/traffic-with-no-excuse/index.html"><span>06</span>Traffic With No Excuse</a>
-              <a href="games/jelly-bench/index.html"><span>07</span>Jelly Bench</a>
-              <a href="games/mirror-mischief/index.html"><span>08</span>Mirror Mischief</a>
+
+          <section class="station scope-station" aria-labelledby="scope-title">
+            <header class="station-head"><div><span>CONSEQUENCE SCOPE</span><h2 id="scope-title">Nothing mounted</h2></div><span class="scope-mode" id="scope-mode">STANDBY</span></header>
+            <div class="scope-frame">
+              <svg class="signal-scope" viewBox="0 0 640 430" role="img" aria-labelledby="scope-svg-title scope-svg-desc">
+                <title id="scope-svg-title">Experiment consequence scope</title>
+                <desc id="scope-svg-desc">Choose an experiment and adjust its interference control to see a representative causal diagram.</desc>
+                <defs><pattern id="scope-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" /></pattern><filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                <rect class="scope-bed" x="1" y="1" width="638" height="428" rx="18" />
+                <rect class="scope-grid" x="18" y="18" width="604" height="394" rx="11" fill="url(#scope-grid)" />
+                <path class="scope-axis" d="M42 215h556M320 45v340" />
+                <path class="idle-trace" d="M44 216c36 0 38-44 74-44s39 88 75 88 40-88 76-88 40 88 76 88 40-88 76-88 38 44 75 44 39 0 100 0" />
+                <g id="scope-art" class="scope-art" aria-hidden="true"></g><path id="scope-trace" class="scope-trace" d="" /><circle id="scope-pulse" class="scope-pulse" cx="42" cy="215" r="7" />
+                <g class="scope-labels"><text x="38" y="46">INPUT / USER</text><text x="488" y="392">OUTPUT / CONSEQUENCE</text></g>
+              </svg>
+              <div class="scope-empty" id="scope-empty" aria-hidden="true"><b>?</b><span>Awaiting a questionable premise</span></div><div class="signal-port signal-port-in" aria-hidden="true"></div><div class="signal-port signal-port-out" aria-hidden="true"></div>
             </div>
-          </nav>
-          <div class="bench-edge" aria-hidden="true">
-            <span>MADE WITH CURIOSITY</span><span>EIGHT EXPERIMENTS · EIGHT DIRECT ROUTES</span>
-          </div>
+            <p class="scope-caption" id="scope-caption">The bench is honest about not knowing what you want.</p>
+          </section>
+
+          <section class="station control-station" aria-labelledby="control-title">
+            <header class="station-head"><div><span>INTERFERENCE PANEL</span><h2 id="control-title">No specimen selected</h2></div><button class="clear-selection" id="clear-selection" type="button" disabled>Clear</button></header>
+            <p class="specimen-question" id="specimen-question">Select a specimen to expose the one control most likely to make it interesting.</p>
+            <div class="dial-control"><label for="interference"><span id="parameter-label">Interference</span><output id="parameter-output" for="interference">--</output></label><input id="interference" type="range" min="0" max="100" value="50" disabled /><div class="range-ends"><span id="range-low">less</span><span id="range-high">more</span></div></div>
+            <dl class="instrument-readings"><div><dt>Observed</dt><dd id="reading-primary">No activity</dd></div><div><dt>Side effect</dt><dd id="reading-secondary">Bench remains innocent</dd></div></dl>
+            <div class="control-actions"><button class="button run-trial" id="run-trial" type="button" disabled>Run this trial <span>→</span></button><a class="button open-experiment is-disabled" id="open-experiment" href="#experiments" aria-disabled="true">Open full experiment <span>↗</span></a></div>
+            <p class="bench-status" id="bench-status" role="status" aria-live="polite">Bench idle. No emergency, technically.</p>
+          </section>
         </div>
+        <div class="signal-conduit" aria-hidden="true"><span class="signal-packet"></span></div>
+        <div class="apparatus-foot"><span>REPRESENTATIVE CAUSAL SKETCHES / FULL MECHANICS LIVE INSIDE EACH EXPERIMENT</span><span id="bench-clock">LOCAL BENCH / READY</span></div>
       </section>
-      <section id="work" class="section">
-        <div class="section-head">
-          <div>
-            <p class="kicker">LAB RECORDS</p>
-            <h2>What survived the bench.</h2>
-          </div>
-          <p>The question, the mechanism,<br />and something you can test yourself.</p>
+
+      <section id="work" class="section records-station" aria-labelledby="records-title">
+        <div class="section-head"><div><p class="kicker">RECEIVING CABINET / LAB RECORDS</p><h2 id="records-title">What survived the bench.</h2></div><div class="receiver-readout" id="records-receiver" aria-live="polite"><i></i><span>NO TRIAL RECEIVED</span></div></div>
+        <p class="section-intro">Every specimen below is a complete route, not a painted-shut cabinet.</p>
+        <div class="record-grid">
+          <article data-record="moon"><span class="record-number">001</span><div><h3>Moon Snail</h3><p>Capture, slime, gravity, and an umbrella with inventory problems.</p></div><a href="games/moon-snail/index.html">Open record <span>↗</span></a></article>
+          <article data-record="star"><span class="record-number">002</span><div><h3>Starfall: Last Light</h3><p>Your weapon, health, and panic all spend the same light.</p></div><a href="games/starfall/index.html">Open record <span>↗</span></a></article>
+          <article data-record="dungeon"><span class="record-number">003</span><div><h3>Dungeon Reset</h3><p>Put the dungeon back together before the next heroes improve it.</p></div><a href="games/dungeon-reset/index.html">Open record <span>↗</span></a></article>
+          <article data-record="brain"><span class="record-number">004</span><div><h3>Brain in a Jar</h3><p>Move a light or edit a wire; watch a decision become behavior.</p></div><a href="games/brain-in-a-jar/index.html">Open record <span>↗</span></a></article>
+          <article data-record="scribble"><span class="record-number">005</span><div><h3>Scribble Engine</h3><p>Two rotating arms, one pen, and no agreement about straight lines.</p></div><a href="games/scribble-engine/index.html">Open record <span>↗</span></a></article>
+          <article data-record="traffic"><span class="record-number">006</span><div><h3>Traffic With No Excuse</h3><p>Remove the cause. Observe the jam decline to leave.</p></div><a href="games/traffic-with-no-excuse/index.html">Open record <span>↗</span></a></article>
+          <article data-record="jelly"><span class="record-number">007</span><div><h3>Jelly Bench</h3><p>Change the body until the gap changes its opinion.</p></div><a href="games/jelly-bench/index.html">Open record <span>↗</span></a></article>
+          <article data-record="mirror"><span class="record-number">008</span><div><h3>Mirror Mischief</h3><p>Move one mirror. Make everything downstream reconsider.</p></div><a href="games/mirror-mischief/index.html">Open record <span>↗</span></a></article>
         </div>
-        <div class="projects">
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 001 <span>INGREDIENT COLLISION TEST</span></div>
-            <h3>Moon Snail</h3>
-            <p>
-              Umbrella, snail, moon, soap bubble, and marshmallow became one connected system:
-              pursuit, slime, capture, gravity, and an umbrella that needs a refill.
-            </p>
-            <a href="games/moon-snail/index.html" class="text-link" data-select="moon">Play & inspect →</a>
-          </article>
-          <article>
-            <div class="project-num">ARCHIVE 001 <span>LEGACY / C#</span></div>
-            <h3>Shadowcast Depths</h3>
-            <p>
-              My original console roguelike: procedural dungeons, pathfinding enemies, turn-based
-              combat, and recursive-shadowcasting vision.
-            </p>
-            <a
-              href="https://github.com/ErnestTurner/Shadowcast-Depths/releases/tag/v1.0.0-legacy"
-              class="text-link"
-              target="_blank"
-              rel="noopener"
-              >Download Windows build ↗</a
-            ><a
-              href="https://github.com/ErnestTurner/Shadowcast-Depths"
-              class="secondary-link"
-              target="_blank"
-              rel="noopener"
-              >Explore the source ↗</a
-            >
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 002 <span>SURVIVAL PRESSURE TEST</span></div>
-            <h3>Starfall: Last Light</h3>
-            <p>
-              One reserve powers survival, weapons, and panic. Spend light to fire, recover it from
-              broken drones, and keep enough to face the eclipse.
-            </p>
-            <a href="games/starfall/index.html" class="text-link" data-select="star">Take a run →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 003 <span>MAINTENANCE LOOP TEST</span></div>
-            <h3>Dungeon Reset</h3>
-            <p>
-              A finished five-raid caretaker game about restoring the dungeon after the heroes
-              leave—and watching the next party test every shortcut.
-            </p>
-            <a href="games/dungeon-reset/index.html" class="text-link" data-select="dungeon">Clock in →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 004 <span>NEURAL CONTROL TEST</span></div>
-            <h3>Brain in a Jar</h3>
-            <p>
-              A tiny creature steered by a visible neural network. Move the light, change a wire,
-              and watch a small decision become different behavior.
-            </p>
-            <a href="games/brain-in-a-jar/index.html" class="text-link" data-select="brain">Change a mind →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 005 <span>KINETIC DRAWING TEST</span></div>
-            <h3>Scribble Engine</h3>
-            <p>
-              Two independently rotating arms share one pen. Tune the motion, preview the clean
-              result, export it, and recover the paper after an ill-advised clearing.
-            </p>
-            <a href="games/scribble-engine/index.html" class="text-link" data-select="scribble">Start drawing →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 006 <span>EMERGENT TRAFFIC TEST</span></div>
-            <h3>Traffic With No Excuse</h3>
-            <p>
-              Twenty-four identical drivers circle one obstacle-free road. Brake one car, remove the
-              cause, and watch whether the disturbance disappears or learns to travel.
-            </p>
-            <a href="games/traffic-with-no-excuse/index.html" class="text-link" data-select="traffic">Start an incident →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 007 <span>SOFT-BODY PROPERTY TEST</span></div>
-            <h3>Jelly Bench</h3>
-            <p>
-              A soft-body workbench where stiffness, damping, pressure, and rest length change what
-              one blob can squeeze through—and whether it can get back.
-            </p>
-            <a href="games/jelly-bench/index.html" class="text-link" data-select="jelly">Test the blob →</a>
-          </article>
-          <article class="playable-project">
-            <div class="project-num">SPECIMEN 008 <span>DOWNSTREAM OPTICS TEST</span></div>
-            <h3>Mirror Mischief</h3>
-            <p>
-              An optical tabletop where mirrors, splitters, blockers, and receivers turn one small
-              adjustment into a completely different path for the light.
-            </p>
-            <a href="games/mirror-mischief/index.html" class="text-link" data-select="mirror">Redirect the light →</a>
-          </article>
-        </div>
+        <aside class="archive-drawer"><div><span>ARCHIVE 001 / LEGACY C#</span><h3>Shadowcast Depths</h3><p>Procedural dungeons, pathfinding enemies, turn-based combat, and recursive-shadowcasting vision.</p></div><div><a href="https://github.com/ErnestTurner/Shadowcast-Depths/releases/tag/v1.0.0-legacy" target="_blank" rel="noopener">Windows build ↗</a><a href="https://github.com/ErnestTurner/Shadowcast-Depths" target="_blank" rel="noopener">Source ↗</a></div></aside>
       </section>
-      <section id="about" class="section about">
-        <div>
-          <p class="kicker">ABOUT ERNEST TURNER</p>
-          <h2>I turn strange ideas into things people can play with.</h2>
-        </div>
-        <div>
-          <p class="about-lead">
-            I'm a software developer, game maker, and hands-on experimenter drawn to projects with
-            personality.
-          </p>
-          <p>
-            I build small worlds, autonomous characters, browser games, and practical tools—the
-            kinds of projects where something moves, reacts, remembers, or surprises you. I enjoy
-            taking an unusual premise, finding the rules that make it work, and turning it into a
-            finished experience you can explore for yourself.
-          </p>
-          <p>
-            Trikzik's Lab is where I keep the working evidence: games, simulations, experiments,
-            and useful things you can run and judge for yourself.
-          </p>
-          <a href="https://github.com/ErnestTurner" class="button" target="_blank" rel="noopener"
-            >See what I'm building ↗</a
-          >
-        </div>
+
+      <section id="about" class="section personnel-station" aria-labelledby="about-title">
+        <div class="personnel-label"><span>AUTHORIZED PERSONNEL / 01</span><b>ET</b></div>
+        <div><p class="kicker">ABOUT ERNEST TURNER</p><h2 id="about-title">I turn strange ideas into things people can play with.</h2></div>
+        <div class="about-copy"><p class="about-lead">I'm a software developer, game maker, and hands-on experimenter drawn to projects with personality.</p><p>I build small worlds, autonomous characters, browser games, and practical tools—the kinds of projects where something moves, reacts, remembers, or surprises you.</p><p>Trikzik Labs is the working evidence: games, simulations, experiments, and useful things you can run and judge for yourself.</p><a href="https://github.com/ErnestTurner" class="button" target="_blank" rel="noopener">See what I'm building <span>↗</span></a></div>
       </section>
     </main>
-    <footer>
-      <span>© 2026 Ernest Turner</span><span>Thanks for playing. Stay curious.</span
-      ><div class="footer-support">
-        <span>Help fund the next questionable experiment.</span>
-        <a
-          class="support-link"
-          href="https://ko-fi.com/trikziklabs"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Buy me a coffee<span class="visually-hidden"> (opens in a new tab)</span></a
-        >
-      </div>
-      <a href="#top">Back to the lab ↑</a>
-    </footer>
-    <script src="surprise.js?v=bench-console-1"></script>
+
+    <footer><div><span>TRIKZIK LABS / ERNEST TURNER / 2026</span><small>Thanks for interfering. Stay curious.</small></div><div class="footer-support"><span>Fund the next questionable experiment.</span><a href="https://ko-fi.com/trikziklabs" target="_blank" rel="noopener noreferrer">Buy me a coffee<span class="visually-hidden"> (opens in a new tab)</span></a></div><a href="#top">Return to entry bench ↑</a></footer>
+    <script src="surprise.js?v=signal-bench-1"></script>
   </body>
 </html>

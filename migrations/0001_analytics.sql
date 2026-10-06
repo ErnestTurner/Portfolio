@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS analytics_events_context_time
 
 CREATE TABLE IF NOT EXISTS ingest_windows (
   window_start INTEGER PRIMARY KEY,
-  count INTEGER NOT NULL CHECK (count >= 0 AND count <= 300)
+  count INTEGER NOT NULL CHECK (count >= 0 AND count <= 12)
 ) WITHOUT ROWID;
 
 CREATE TRIGGER IF NOT EXISTS analytics_retention

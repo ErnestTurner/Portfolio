@@ -3,7 +3,7 @@ const EXPERIMENTS=new Set(["site","moon","star","dungeon","brain","scribble","tr
 const SOURCES=new Set(["globe","bench","clipboard","record","game","footer","unknown"]);
 const FORMATS=new Set(["none","png","svg","setup"]);
 const RELEASE=/^[a-z0-9._-]{1,32}$/;
-const MAX_BODY_BYTES=1024,WINDOW_SECONDS=60,GLOBAL_LIMIT=300;
+const MAX_BODY_BYTES=1024,WINDOW_SECONDS=60,GLOBAL_LIMIT=12;
 function response(status){return new Response(status===204?null:status===404?"Not found":"Request rejected",{status,headers:{"cache-control":"no-store","content-type":"text/plain; charset=utf-8","x-content-type-options":"nosniff"}});}
 function origins(env){return new Set(String(env.ANALYTICS_ALLOWED_ORIGINS||"").split(",").map(v=>v.trim()).filter(Boolean));}
 function valid(v,context){if(!v||typeof v!=="object"||Array.isArray(v))return false;const expected=["context","event","experiment","format","release","source"];if(Object.keys(v).sort().join()!==expected.join())return false;if(!EVENT_NAMES.has(v.event)||!EXPERIMENTS.has(v.experiment)||!SOURCES.has(v.source)||!FORMATS.has(v.format)||v.context!==context||!RELEASE.test(v.release))return false;if((v.event==="export")!==(v.format!=="none"))return false;if(v.event==="support_click"&&v.experiment!=="site")return false;return true;}

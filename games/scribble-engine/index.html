@@ -1795,8 +1795,9 @@
 
     for (const key of ['length1', 'length2']) {
       controls[key].addEventListener('input', event => {
+        const value = Number(event.target.value);
         leaveReplayForRemix();
-        state[key] = Number(event.target.value);
+        state[key] = value;
         breakStroke();
         syncControls();
       });
@@ -1804,8 +1805,9 @@
 
     for (const key of ['speed1', 'speed2']) {
       controls[key].addEventListener('input', event => {
+        const value = Number(event.target.value);
         leaveReplayForRemix();
-        state[key] = Number(event.target.value);
+        state[key] = value;
         syncControls();
       });
     }
@@ -1819,8 +1821,10 @@
     }
 
     controls.inkColor.addEventListener('input', event => {
+      const value = event.target.value;
       leaveReplayForRemix();
-      state.inkColor = event.target.value;
+      state.inkColor = value;
+      syncControls();
     });
 
     document.querySelectorAll('.swatch').forEach(swatch => {
@@ -1832,28 +1836,35 @@
     });
 
     controls.lineWidth.addEventListener('input', event => {
+      const value = Number(event.target.value);
       leaveReplayForRemix();
-      state.lineWidth = Number(event.target.value);
+      state.lineWidth = value;
       syncControls();
     });
 
     controls.strokeStyle.addEventListener('change', event => {
+      const value = event.target.value;
       leaveReplayForRemix();
-      state.strokeStyle = event.target.value;
+      state.strokeStyle = value;
       strokeDistance = 0;
       activeVectorStroke = null;
+      syncControls();
     });
 
     controls.paperColor.addEventListener('input', event => {
+      const value = event.target.value;
       leaveReplayForRemix();
-      state.paperColor = event.target.value;
+      state.paperColor = value;
       previewDirty = true;
+      syncControls();
     });
 
     controls.transparentPaper.addEventListener('change', event => {
+      const checked = event.target.checked;
       leaveReplayForRemix();
-      state.transparentPaper = event.target.checked;
+      state.transparentPaper = checked;
       previewDirty = true;
+      syncControls();
     });
 
     controls.penToggle.addEventListener('click', () => {

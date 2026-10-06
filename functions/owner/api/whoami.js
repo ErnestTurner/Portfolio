@@ -1,0 +1,4 @@
+import{requireOwner,sameOriginApiRequest,unavailable}from"../../_shared/access.js";
+function json(status,payload){return new Response(JSON.stringify(payload),{status,headers:{"cache-control":"private, no-store","content-type":"application/json; charset=utf-8","referrer-policy":"no-referrer","x-content-type-options":"nosniff","vary":"Authorization"}});}
+export async function onRequestGet({request,env}){if(env.ANALYTICS_DASHBOARD_ENABLED!=="true")return unavailable();if(!sameOriginApiRequest(request,env))return json(403,{error:"Request rejected"});const access=await requireOwner(request,env,{allowUnpinned:true});if(!access.ok)return access.response;return json(200,{uid:access.claims.sub,pinned:access.claims.sub===String(env.FIREBASE_OWNER_UID||"")});}
+export function onRequest(){return json(405,{error:"Method not allowed"});}

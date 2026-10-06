@@ -173,6 +173,177 @@ test('recipe playback uses a cursor, breaks transitions, and preserves legacy li
   assert.match(html, /value\.version === LEGACY_REPLAY_VERSION/);
 });
 
+test('complete motifs include t=0 and recipe transitions never bridge discontinuities', () => {
+  const execution = html.slice(html.indexOf('function applyRecipeOperationForStep'), html.indexOf('function advanceRecipe'));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    const CENTER = { x: 300, y: 300 };
+    let state = { length1: 0, length2: 0, speed1: 0, speed2: 0, direction1: 1, direction2: 1, angle1: 0, angle2: 0, inkColor: '#fff', lineWidth: .5, penDown: false };
+    let previousPen = null;
+    let activeStroke = false;
+    const strokes = [];
+    function positions(source = state) {
+      const elbowX = CENTER.x + source.length1 * Math.cos(source.angle1);
+      const elbowY = CENTER.y + source.length1 * Math.sin(source.angle1);
+      return { elbowX, elbowY, penX: elbowX + source.length2 * Math.cos(source.angle2), penY: elbowY + source.length2 * Math.sin(source.angle2) };
+    }
+    function breakStroke() { previousPen = null; activeStroke = false; }
+    function syncControls() {}
+    function addInk(point) {
+      if (!state.penDown) { breakStroke(); return; }
+      if (previousPen) {
+        if (!activeStroke) { strokes.push([]); activeStroke = true; }
+        strokes.at(-1).push([previousPen.x, previousPen.y, point.penX, point.penY]);
+      }
+      previousPen = { x: point.penX, y: point.penY };
+    }
+    let recipeOriginal = { playbackRate: 1 };
+    const motif = { name:'Closed', mode:'motif', amount:1, length1:140, length2:140, speed1:360, speed2:360, offset:0, penDown:true, color:'#ffffff', width:.5, seconds:1, steps:360, stepSeconds:1/360, endStep:360 };
+    let recipeSession = { compiled:{ operations:[motif], totalSteps:360 }, completedSteps:0, operationIndex:-1, geometryCarry:0 };
+    ${execution}
+    while (recipeSession.completedSteps < recipeSession.compiled.totalSteps) { recipeStep(); recipeSession.completedSteps += 1; }
+    const first = strokes[0][0];
+    const last = strokes[0].at(-1);
+    const closedGap = Math.hypot(first[0] - last[2], first[1] - last[3]);
+
+    state.angle1 = 0; state.angle2 = 0; previousPen = null; activeStroke = false; strokes.length = 0;
+    const drawA = { ...motif, name:'A', speed1:180, speed2:-90, seconds:.5, steps:180, stepSeconds:.5/180, endStep:180 };
+    const move = { ...motif, name:'Move', speed1:0, speed2:0, offset:90, penDown:false, seconds:.5, steps:180, stepSeconds:.5/180, endStep:360 };
+    const drawB = { ...motif, name:'B', speed1:-180, speed2:90, offset:90, seconds:.5, steps:180, stepSeconds:.5/180, endStep:540 };
+    recipeSession = { compiled:{ operations:[drawA, move, drawB], totalSteps:540 }, completedSteps:0, operationIndex:-1, geometryCarry:0 };
+    while (recipeSession.completedSteps < recipeSession.compiled.totalSteps) { recipeStep(); recipeSession.completedSteps += 1; }
+    const jump = Math.hypot(strokes[0].at(-1)[2] - strokes[1][0][0], strokes[0].at(-1)[3] - strokes[1][0][1]);
+    this.result = { closedGap, strokeCount:strokes.length, jump };
+  `, context);
+  assert.ok(context.result.closedGap < 1e-9, `closed motif gap was ${context.result.closedGap}`);
+  assert.equal(context.result.strokeCount, 2);
+  assert.ok(context.result.jump > 1, 'pen-up geometry jump must not be connected');
+});
+
+test('recipe import stops running, paused, and completed sessions before sharing the imported recipe', async () => {
+  const leave = html.slice(html.indexOf('function leaveReplayForRemix'), html.indexOf('function replayCueIndexForStep'));
+  const imported = html.slice(html.indexOf('async function importRecipe'), html.indexOf('async function copyRecipeLink'));
+  const copied = html.slice(html.indexOf('async function copyRecipeLink'), html.indexOf('function commitRecipe'));
+  const context = vm.createContext({ Blob, URL });
+  const result = await vm.runInContext(`
+    let replaySession = null;
+    let recipeSession = null;
+    let recipeProgram = { name: 'Orbit Rosette' };
+    let selectedRecipeSection = 4;
+    let selectedRecipeStage = 3;
+    const state = { running: false };
+    const controls = {
+      recipeFile: { value: 'chosen.json' },
+      recipeLink: { value: '', focus() {}, select() {} }
+    };
+    const shared = [];
+    const statuses = [];
+    const navigator = { clipboard: { async writeText(value) { shared.push(value); } } };
+    const history = { pushState() {} };
+    const document = { querySelector() { return { hidden: true }; } };
+    const MAX_RECIPE_FILE_BYTES = 131072;
+    const RECIPE_PARAMETER = 'recipe';
+    function validateRecipe(value) { return JSON.parse(JSON.stringify(value)); }
+    function renderRecipeEditor() {}
+    function setReplayStatus(message) { statuses.push(message); }
+    function setRecipeStatus(message) { statuses.push(message); }
+    function syncControls() {}
+    function breakStroke() {}
+    function recipeUrlFor(recipe) { return new URL('https://example.test/?recipe=' + encodeURIComponent(recipe.name)); }
+    function compileRecipe() { return { operations: [1] }; }
+    ${leave}
+    ${imported}
+    ${copied}
+    (async () => {
+      const outcomes = [];
+      for (const mode of ['running', 'paused', 'completed']) {
+        recipeProgram = { name: 'Orbit Rosette' };
+        recipeSession = { completedSteps: mode === 'completed' ? 10 : 2, compiled: { totalSteps: 10 } };
+        state.running = mode === 'running';
+        controls.recipeFile.value = 'chosen.json';
+        const file = { size: 24, async text() { return JSON.stringify({ name: 'Twin Comets', sections: [] }); } };
+        await importRecipe(file);
+        await copyRecipeLink();
+        outcomes.push({ mode, stopped: recipeSession === null && state.running === false, name: recipeProgram.name, section: selectedRecipeSection, stage: selectedRecipeStage, fileValue: controls.recipeFile.value, shared: shared.at(-1) });
+      }
+      return outcomes;
+    })();
+  `, context);
+  for (const outcome of result) {
+    assert.equal(outcome.stopped, true, `${outcome.mode} import did not stop the prior session`);
+    assert.equal(outcome.name, 'Twin Comets');
+    assert.equal(outcome.section, 0);
+    assert.equal(outcome.stage, 0);
+    assert.equal(outcome.fileValue, '');
+    assert.match(outcome.shared, /Twin%20Comets/);
+    assert.doesNotMatch(outcome.shared, /Orbit/);
+  }
+});
+
+test('fractional motifs finish at their advertised duration at every playback rate', () => {
+  const compiler = html.slice(html.indexOf('function greatestCommonDivisor'), html.indexOf('function validateRecipe'));
+  const execution = html.slice(html.indexOf('function applyRecipeOperationForStep'), html.indexOf('function applyRecipe('));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    const REPLAY_STEPS_PER_SECOND = 360;
+    const MAX_RECIPE_OPERATIONS = 512;
+    const MAX_RECIPE_STAGE_SECONDS = 3600;
+    const MAX_RECIPE_STEPS = 120000;
+    const CENTER = { x: 300, y: 300 };
+    let state;
+    let recipeOriginal;
+    let recipeSession;
+    let previousPen;
+    let samples;
+    function positions(source = state) {
+      const elbowX = CENTER.x + source.length1 * Math.cos(source.angle1);
+      const elbowY = CENTER.y + source.length1 * Math.sin(source.angle1);
+      return { penX: elbowX + source.length2 * Math.cos(source.angle2), penY: elbowY + source.length2 * Math.sin(source.angle2) };
+    }
+    function breakStroke() { previousPen = null; }
+    function syncControls() {}
+    function setRecipeStatus() {}
+    function addInk(point) { previousPen = { x: point.penX, y: point.penY }; samples += 1; }
+    ${compiler}
+    ${execution}
+    const stage = { name:'Fractional motif', mode:'motif', amount:1, length1:140, length2:140, speed1:359, speed2:359, offset:0, penDown:true, color:'#fff', width:.5 };
+    const base = { sections:[{ name:'Many', repeats:30, stages:Array.from({ length:10 }, () => ({ ...stage })) }] };
+    function run(rate, chunked = false) {
+      recipeOriginal = { ...base, playbackRate:rate };
+      const compiled = compileRecipe(recipeOriginal);
+      recipeSession = { compiled, completedSteps:0, operationIndex:-1, geometryCarry:0 };
+      state = { length1:0, length2:0, speed1:0, speed2:0, direction1:1, direction2:1, angle1:0, angle2:0, inkColor:'#fff', lineWidth:.5, penDown:false, running:true };
+      previousPen = null;
+      samples = 0;
+      if (chunked) {
+        let remaining = compiled.wallSeconds;
+        while (remaining > 0) {
+          const elapsed = Math.min(.05, remaining);
+          advanceRecipe(elapsed);
+          remaining -= elapsed;
+        }
+      } else {
+        advanceRecipe(compiled.wallSeconds);
+      }
+      return { completed:recipeSession.completedSteps, total:compiled.totalSteps, samples, wall:compiled.wallSeconds, angle1:state.angle1, angle2:state.angle2 };
+    }
+    this.result = { slow:run(.25), slowChunked:run(.25, true), fast:run(4) };
+  `, context);
+  const { slow, slowChunked, fast } = context.result;
+  assert.equal(slow.completed, slow.total);
+  assert.equal(slowChunked.completed, slowChunked.total);
+  assert.equal(fast.completed, fast.total);
+  assert.equal(slow.samples, slow.total);
+  assert.equal(slowChunked.samples, slowChunked.total);
+  assert.equal(fast.samples, fast.total);
+  assert.ok(Math.abs(slow.wall - 1203.342618384401) < 1e-9);
+  assert.ok(Math.abs(fast.wall - 75.20891364902506) < 1e-9);
+  assert.ok(Math.abs(slow.angle1 - fast.angle1) < 1e-12);
+  assert.ok(Math.abs(slow.angle2 - fast.angle2) < 1e-12);
+  assert.ok(Math.abs(slow.angle1 - slowChunked.angle1) < 1e-12);
+  assert.ok(Math.abs(slow.angle2 - slowChunked.angle2) < 1e-12);
+});
+
 test('fixed-step replay has a stable geometry fixture', () => {
   assert.match(html, /const REPLAY_STEPS_PER_SECOND = 360/);
   assert.match(html, /replaySession\.completedSteps < targetSteps/);

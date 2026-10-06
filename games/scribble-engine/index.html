@@ -1643,6 +1643,8 @@
       if (!replaySession && !recipeSession) return;
       replaySession = null;
       recipeSession = null;
+      state.running = false;
+      breakStroke();
       setReplayStatus('Remix mode - current changes are not part of the original replay. Make a new link to share this starting setup.');
       setRecipeStatus('Remix mode · recipe playback stopped; edits remain available');
       syncControls();
@@ -1827,7 +1829,9 @@
         if (new Blob([text]).size > MAX_RECIPE_FILE_BYTES) throw new Error(`Recipe rejected: file is larger than ${MAX_RECIPE_FILE_BYTES / 1024} KiB.`);
         let parsed;
         try { parsed = JSON.parse(text); } catch { throw new Error('Recipe rejected: the file is not valid JSON.'); }
-        recipeProgram = validateRecipe(parsed);
+        const recipe = validateRecipe(parsed);
+        leaveReplayForRemix();
+        recipeProgram = recipe;
         selectedRecipeSection = 0;
         selectedRecipeStage = 0;
         renderRecipeEditor(`Loaded "${recipeProgram.name}" from file`);
@@ -1943,6 +1947,10 @@
       state.lineWidth = operation.width;
       state.penDown = operation.penDown;
       breakStroke();
+      if (state.penDown) {
+        const start = positions();
+        previousPen = { x: start.penX, y: start.penY };
+      }
       syncControls();
       return operation;
     }
@@ -1957,11 +1965,11 @@
 
     function advanceRecipe(elapsedSeconds) {
       if (!recipeSession) return;
-      recipeSession.sampleCarry += elapsedSeconds * recipeOriginal.playbackRate * REPLAY_STEPS_PER_SECOND;
-      const available = Math.floor(recipeSession.sampleCarry);
-      recipeSession.sampleCarry -= available;
-      const target = Math.min(recipeSession.compiled.totalSteps, recipeSession.completedSteps + available);
-      while (recipeSession.completedSteps < target && state.running) {
+      recipeSession.geometryCarry += elapsedSeconds * recipeOriginal.playbackRate;
+      while (recipeSession.completedSteps < recipeSession.compiled.totalSteps && state.running) {
+        const operation = applyRecipeOperationForStep();
+        if (!operation || recipeSession.geometryCarry + 1e-9 < operation.stepSeconds) break;
+        recipeSession.geometryCarry = Math.max(0, recipeSession.geometryCarry - operation.stepSeconds);
         recipeStep();
         recipeSession.completedSteps += 1;
       }
@@ -1977,7 +1985,7 @@
       clearInk(true);
       recipeOriginal = validateRecipe(cloneRecipe(recipe));
       const compiled = compileRecipe(recipeOriginal);
-      recipeSession = { compiled, completedSteps: 0, operationIndex: -1, sampleCarry: 0 };
+      recipeSession = { compiled, completedSteps: 0, operationIndex: -1, geometryCarry: 0 };
       replaySession = null;
       recipeProgram = cloneRecipe(recipeOriginal);
       selectedRecipeSection = 0;

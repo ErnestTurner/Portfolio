@@ -453,11 +453,7 @@ body[data-experiment="traffic"] .apparatus-shell.traffic-received .signal-packet
 .archive-drawer > div:last-child { display: flex; gap: 10px; }
 .archive-drawer a { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid #425c68; border-radius: 4px; text-decoration: none; font-size: .72rem; }
 
-.personnel-station { display: grid; grid-template-columns: 150px minmax(260px, .9fr) minmax(320px, 1.1fr); gap: clamp(24px, 4vw, 68px); align-items: start; padding: clamp(28px, 5vw, 66px); }
-.personnel-label { min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 13px; border: 1px solid #48616c; border-radius: 6px; background: #0c1b24; }
-.personnel-label span { color: var(--dim); font: .58rem "DM Mono", monospace; }
-.personnel-label strong { color: var(--green); font-size: 1.25rem; line-height: 1.05; }
-.personnel-label small { color: var(--muted); font: .58rem "DM Mono", monospace; }
+.personnel-station { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(320px, 1.2fr); gap: clamp(24px, 5vw, 80px); align-items: start; padding: clamp(28px, 5vw, 66px); }
 .legacy-links { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line-soft); font: .6rem "DM Mono", monospace; }
 .legacy-links span { width: 100%; color: var(--amber); }
 
@@ -519,8 +515,7 @@ body[data-experiment="mirror"] { --accent: #aefc6d; --accent-soft: #aefc6d25; }
   .control-station .instrument-readings { grid-template-columns: 1fr 1fr; }
   .control-station .control-actions { align-self: start; margin-top: 0; }
   .control-station .bench-status { grid-column: 1 / -1; }
-  .personnel-station { grid-template-columns: 120px 1fr; }
-  .about-copy { grid-column: 2; }
+  .personnel-station { grid-template-columns: minmax(220px, .75fr) minmax(320px, 1.25fr); }
 }
 
 @media (max-width: 760px) {
@@ -587,8 +582,7 @@ body[data-experiment="mirror"] { --accent: #aefc6d; --accent-soft: #aefc6d25; }
   .record-grid article, .record-grid article:nth-child(2n) { min-height: 164px; border-right: 0; }
   .archive-drawer { display: grid; padding: 22px 17px; }
   .archive-drawer > div:last-child { flex-wrap: wrap; }
-  .personnel-station { display: grid; grid-template-columns: 72px 1fr; padding: 24px 16px; gap: 20px 15px; }
-  .personnel-label { min-height: 120px; }
+  .personnel-station { display: grid; grid-template-columns: 1fr; padding: 24px 16px; gap: 20px; }
   .about-copy { grid-column: 1 / -1; }
   footer { grid-template-columns: 1fr; gap: 12px; }
 }

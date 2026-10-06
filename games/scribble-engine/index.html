@@ -195,6 +195,30 @@
     .pen-toggle[aria-pressed="false"] span:last-child { color: var(--blue); }
     .vector-status { grid-column: 1 / -1; margin: -3px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
     .vector-status.limit { color: var(--pink); }
+    .score-tools legend { color: var(--pink); }
+    .score-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 12px; }
+    .score-preset { min-height: 52px; padding: 8px; border-color: #755c69; font-size: .78rem; }
+    .score-preset span { display: block; color: var(--pink); font: 700 .67rem/1.2 "Courier New", monospace; letter-spacing: .05em; text-transform: uppercase; }
+    .cue-list { display: grid; gap: 8px; margin: 10px 0; }
+    .cue-row { display: grid; grid-template-columns: 2rem minmax(0,1fr) 42px; grid-template-areas: "index duration color" ". width width" ". pen remove"; gap: 7px; align-items: center; padding: 8px; border: 1px solid #30445a; border-radius: 8px; background: #0b1627; }
+    .cue-row.active { border-color: var(--mint); box-shadow: inset 3px 0 var(--mint); }
+    .cue-index { grid-area: index; color: var(--pink); font: 800 .72rem "Courier New", monospace; text-align: center; }
+    .cue-field { display: grid; gap: 3px; margin: 0; }
+    .cue-field span { color: var(--muted); font-size: .61rem; letter-spacing: .05em; text-transform: uppercase; }
+    .cue-row > .cue-field:first-of-type { grid-area: duration; }
+    .cue-row > input[type="color"] { grid-area: color; }
+    .cue-field input[type="number"] { width: 100%; min-height: 36px; border: 1px solid #40566d; border-radius: 6px; padding: 5px 7px; background: #14243a; color: var(--ink); font: inherit; }
+    .cue-field input[type="range"] { min-width: 84px; }
+    .cue-width-field { grid-area: width; }
+    .cue-width { color: var(--blue); font: 700 .68rem "Courier New", monospace; }
+    .cue-pen { grid-area: pen; min-width: 74px; padding: 7px; color: var(--mint); font-size: .72rem; }
+    .cue-pen[aria-pressed="false"] { color: var(--blue); border-color: #6687a7; }
+    .cue-remove { grid-area: remove; min-width: 36px; padding: 7px; color: var(--pink); }
+    .score-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+    #playScore { border-color: var(--mint); color: var(--mint); }
+    #undoCue { border-color: #755c69; }
+    .score-status { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
+    .score-status.error { color: var(--pink); }
     .checkpoint-tools legend { color: var(--mint); }
     .checkpoint-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .checkpoint-status { margin: 0 0 11px; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; letter-spacing: .04em; }
@@ -298,6 +322,8 @@
       .checkpoint-row { grid-template-columns: 1fr; }
       .setup-actions { grid-template-columns: 1fr; }
       .replay-grid, .replay-actions { grid-template-columns: 1fr; }
+      .score-presets, .score-actions { grid-template-columns: 1fr; }
+      .cue-row { grid-template-columns: 2rem minmax(0,1fr) 42px; }
     }
   </style>
   <link rel="stylesheet" href="../lab-shell.css?v=1">
@@ -394,6 +420,23 @@
         </div>
       </fieldset>
 
+      <fieldset class="score-tools">
+        <legend>Cue Score</legend>
+        <p class="setup-note">Give the machine a tiny score: timed ink changes and pen lifts that replay exactly.</p>
+        <div class="score-presets" aria-label="Authored score presets">
+          <button class="score-preset" type="button" data-score-preset="neon-bloom">Neon Bloom<span>layered petals</span></button>
+          <button class="score-preset" type="button" data-score-preset="solar-weave">Solar Weave<span>warm woven orbit</span></button>
+          <button class="score-preset" type="button" data-score-preset="ghost-garden">Ghost Garden<span>airy orbital stems</span></button>
+        </div>
+        <div class="cue-list" id="cueList" aria-label="Editable drawing phases"></div>
+        <div class="score-actions">
+          <button id="addCue" type="button">Add phase</button>
+          <button id="undoCue" type="button" disabled>Undo cue edit</button>
+          <button id="playScore" type="button">Play score</button>
+        </div>
+        <p class="score-status" id="scoreStatus" role="status" aria-live="polite">4 phases / 24 seconds scored</p>
+      </fieldset>
+
       <fieldset class="checkpoint-tools">
         <legend>Checkpoint</legend>
         <p class="checkpoint-status" id="checkpointStatus">Empty · current page session only</p>
@@ -405,7 +448,7 @@
 
       <fieldset class="setup-tools">
         <legend>Reusable Setup</legend>
-        <p class="setup-note">Starting configuration only · no artwork, checkpoint, or project history.</p>
+        <p class="setup-note">Starting configuration and cue score only · no artwork, checkpoint, or project history.</p>
         <label class="setup-name" for="setupName">
           <span>Setup name</span>
           <input id="setupName" type="text" maxlength="60" value="Untitled experiment" autocomplete="off">
@@ -420,7 +463,7 @@
 
       <fieldset class="replay-tools">
         <legend>Replay Link</legend>
-        <p class="setup-note">Shares this starting setup and a finite run — not your artwork or mid-run changes.</p>
+        <p class="setup-note">Shares this starting setup, cue score, and finite run — never your artwork or project history.</p>
         <div class="replay-grid">
           <div>
             <label class="compact-label" for="replayDuration">Run time</label>
@@ -539,6 +582,8 @@
     let exportSnapshot = null;
     let replayOriginal = null;
     let replaySession = null;
+    let cueScore = [];
+    let cueHistory = [];
 
     // Kinematics: both angles are absolute page angles, exactly as shown here.
     function positions(source = state) {
@@ -743,18 +788,96 @@
 
     // Reusable setups are deliberately small configuration files, never artwork.
     const SETUP_SCHEMA = 'trikzik.scribble-engine.setup';
-    const SETUP_VERSION = 1;
+    const SETUP_VERSION = 2;
+    const LEGACY_SETUP_VERSION = 1;
     const MAX_SETUP_BYTES = 16 * 1024;
     const REPLAY_SCHEMA = 'trikzik.scribble-engine.replay';
-    const REPLAY_VERSION = 1;
+    const REPLAY_VERSION = 2;
+    const LEGACY_REPLAY_VERSION = 1;
     const REPLAY_PARAMETER = 'replay';
     const MAX_REPLAY_BYTES = 1024;
     const MAX_REPLAY_TOKEN_LENGTH = 1400;
     const MAX_REPLAY_URL_LENGTH = 2048;
     const MIN_REPLAY_DURATION = 5;
     const MAX_REPLAY_DURATION = 60;
+    const MIN_CUE_SECONDS = 0.5;
+    const MAX_CUE_SECONDS = 30;
+    const MAX_CUES = 6;
     const REPLAY_STEPS_PER_SECOND = 360;
     const REPLAY_STEP_SECONDS = 1 / REPLAY_STEPS_PER_SECOND;
+    const DEFAULT_CUES = Object.freeze([
+      Object.freeze({ seconds: 6, color: '#eff5fa', width: 1.5, penDown: true }),
+      Object.freeze({ seconds: 2, color: '#eff5fa', width: 1.5, penDown: false }),
+      Object.freeze({ seconds: 8, color: '#b4f7a7', width: 1, penDown: true }),
+      Object.freeze({ seconds: 8, color: '#a2c8ff', width: 0.5, penDown: true })
+    ]);
+    const SCORE_PRESETS = Object.freeze({
+      'neon-bloom': Object.freeze({
+        name: 'Neon Bloom', duration: 18,
+        state: Object.freeze({ length1: 118, length2: 64, speed1: 42, speed2: 137, direction1: 1, direction2: -1, angle1: 0.2, angle2: 2.1, inkColor: '#b4f7a7', lineWidth: 1.5, strokeStyle: 'solid', paperColor: '#08101e', transparentPaper: false, penDown: true }),
+        cues: Object.freeze([
+          Object.freeze({ seconds: 4, color: '#b4f7a7', width: 1.5, penDown: true }),
+          Object.freeze({ seconds: 1, color: '#b4f7a7', width: 1.5, penDown: false }),
+          Object.freeze({ seconds: 5, color: '#a2c8ff', width: 2.5, penDown: true }),
+          Object.freeze({ seconds: 1, color: '#a2c8ff', width: 2.5, penDown: false }),
+          Object.freeze({ seconds: 7, color: '#ffafcc', width: 0.5, penDown: true })
+        ])
+      }),
+      'solar-weave': Object.freeze({
+        name: 'Solar Weave', duration: 20,
+        state: Object.freeze({ length1: 72, length2: 132, speed1: 79, speed2: 113, direction1: 1, direction2: 1, angle1: 0.6, angle2: 2.8, inkColor: '#ffd166', lineWidth: 3, strokeStyle: 'dashed', paperColor: '#1a0d18', transparentPaper: false, penDown: true }),
+        cues: Object.freeze([
+          Object.freeze({ seconds: 5, color: '#ffd166', width: 3, penDown: true }),
+          Object.freeze({ seconds: 1, color: '#ffd166', width: 3, penDown: false }),
+          Object.freeze({ seconds: 6, color: '#ff6b6b', width: 1, penDown: true }),
+          Object.freeze({ seconds: 1, color: '#ff6b6b', width: 1, penDown: false }),
+          Object.freeze({ seconds: 7, color: '#fff1d0', width: 0.5, penDown: true })
+        ])
+      }),
+      'ghost-garden': Object.freeze({
+        name: 'Ghost Garden', duration: 24,
+        state: Object.freeze({ length1: 132, length2: 38, speed1: 23, speed2: 211, direction1: -1, direction2: 1, angle1: 1.2, angle2: 0.4, inkColor: '#a2c8ff', lineWidth: 4, strokeStyle: 'dotted', paperColor: '#06131a', transparentPaper: false, penDown: true }),
+        cues: Object.freeze([
+          Object.freeze({ seconds: 6, color: '#a2c8ff', width: 4, penDown: true }),
+          Object.freeze({ seconds: 2, color: '#a2c8ff', width: 4, penDown: false }),
+          Object.freeze({ seconds: 6, color: '#b4f7a7', width: 1.5, penDown: true }),
+          Object.freeze({ seconds: 2, color: '#b4f7a7', width: 1.5, penDown: false }),
+          Object.freeze({ seconds: 8, color: '#eff5fa', width: 0.5, penDown: true })
+        ])
+      })
+    });
+
+    function cloneCues(cues) {
+      return cues.map(cue => ({ ...cue }));
+    }
+
+    function cueSeconds(cues) {
+      return cues.reduce((sum, cue) => sum + cue.seconds, 0);
+    }
+
+    function singleCue(stateValue, duration) {
+      return [{ seconds: duration, color: stateValue.inkColor, width: stateValue.lineWidth, penDown: stateValue.penDown }];
+    }
+
+    function validateCues(value, duration, fail) {
+      const exact = (item, keys) => item !== null && typeof item === 'object' && !Array.isArray(item)
+        && Object.keys(item).length === keys.length && keys.every(key => Object.prototype.hasOwnProperty.call(item, key));
+      const color = item => typeof item === 'string' && /^#[0-9a-f]{6}$/i.test(item);
+      if (!Array.isArray(value) || value.length < 1 || value.length > MAX_CUES) fail(`cue score must contain 1-${MAX_CUES} phases.`);
+      const cues = value.map((cue, index) => {
+        if (!exact(cue, ['seconds', 'color', 'width', 'penDown'])) fail(`cue ${index + 1} has unexpected or missing fields.`);
+        if (typeof cue.seconds !== 'number' || !Number.isFinite(cue.seconds) || cue.seconds < MIN_CUE_SECONDS || cue.seconds > MAX_CUE_SECONDS || !Number.isInteger(cue.seconds * 2)) fail(`cue ${index + 1} duration is outside its supported range.`);
+        if (!color(cue.color)) fail(`cue ${index + 1} color must use six-digit hex notation.`);
+        if (typeof cue.width !== 'number' || !Number.isFinite(cue.width) || cue.width < 0.5 || cue.width > 8 || !Number.isInteger(cue.width * 2)) fail(`cue ${index + 1} width is outside its supported range.`);
+        if (typeof cue.penDown !== 'boolean') fail(`cue ${index + 1} pen state must be true or false.`);
+        return { seconds: cue.seconds, color: cue.color.toLowerCase(), width: cue.width, penDown: cue.penDown };
+      });
+      if (cueSeconds(cues) > duration) fail('cue score is longer than the replay run time.');
+      if (!cues.some(cue => cue.penDown)) fail('cue score must include at least one drawing phase.');
+      return cues;
+    }
+
+    cueScore = cloneCues(DEFAULT_CUES);
 
     function captureSetup(name) {
       return {
@@ -780,6 +903,10 @@
         paper: {
           color: state.paperColor,
           transparent: state.transparentPaper
+        },
+        score: {
+          duration: Number(controls.replayDuration.value),
+          cues: cloneCues(cueScore)
         }
       };
     }
@@ -787,13 +914,16 @@
     function validateSetupFile(value) {
       const fail = message => { throw new Error(`Setup rejected: ${message}`); };
       const record = item => item !== null && typeof item === 'object' && !Array.isArray(item);
+      const exactKeys = (item, keys) => record(item)
+        && Object.keys(item).length === keys.length
+        && keys.every(key => Object.prototype.hasOwnProperty.call(item, key));
       const numberIn = (item, minimum, maximum) =>
         typeof item === 'number' && Number.isFinite(item) && item >= minimum && item <= maximum;
       const color = item => typeof item === 'string' && /^#[0-9a-f]{6}$/i.test(item);
 
       if (!record(value)) fail('the top level must be a JSON object.');
       if (value.schema !== SETUP_SCHEMA) fail('this is not a Scribble Engine setup file.');
-      if (value.version !== SETUP_VERSION) fail(`version ${String(value.version)} is not supported.`);
+      if (![LEGACY_SETUP_VERSION, SETUP_VERSION].includes(value.version)) fail(`version ${String(value.version)} is not supported.`);
       if (typeof value.name !== 'string' || !value.name.trim() || value.name.trim().length > 60 || /[\u0000-\u001f\u007f]/.test(value.name)) {
         fail('name must contain 1–60 printable characters.');
       }
@@ -818,26 +948,30 @@
       if (!color(value.paper.color)) fail('paper color must use six-digit hex notation.');
       if (typeof value.paper.transparent !== 'boolean') fail('transparent paper must be true or false.');
 
-      return {
-        name: value.name.trim(),
-        state: {
-          length1: value.machine.length1,
-          length2: value.machine.length2,
-          speed1: value.machine.speed1,
-          speed2: value.machine.speed2,
-          direction1: value.machine.direction1,
-          direction2: value.machine.direction2,
-          angle1: value.machine.angle1,
-          angle2: value.machine.angle2,
-          // Version-1 setup files from before pen control mean Pen Down.
-          penDown: value.machine.penDown ?? true,
-          inkColor: value.ink.color.toLowerCase(),
-          lineWidth: value.ink.width,
-          strokeStyle: value.ink.style,
-          paperColor: value.paper.color.toLowerCase(),
-          transparentPaper: value.paper.transparent
-        }
+      const validatedState = {
+        length1: value.machine.length1,
+        length2: value.machine.length2,
+        speed1: value.machine.speed1,
+        speed2: value.machine.speed2,
+        direction1: value.machine.direction1,
+        direction2: value.machine.direction2,
+        angle1: value.machine.angle1,
+        angle2: value.machine.angle2,
+        // Version-1 setup files from before pen control mean Pen Down.
+        penDown: value.machine.penDown ?? true,
+        inkColor: value.ink.color.toLowerCase(),
+        lineWidth: value.ink.width,
+        strokeStyle: value.ink.style,
+        paperColor: value.paper.color.toLowerCase(),
+        transparentPaper: value.paper.transparent
       };
+      if (value.version === LEGACY_SETUP_VERSION) {
+        const duration = 24;
+        return { name: value.name.trim(), state: validatedState, duration, cues: singleCue(validatedState, duration) };
+      }
+      if (!exactKeys(value.score, ['duration', 'cues'])) fail('cue score is malformed.');
+      if (!Number.isInteger(value.score.duration) || value.score.duration < MIN_REPLAY_DURATION || value.score.duration > MAX_REPLAY_DURATION) fail(`run time must be ${MIN_REPLAY_DURATION}-${MAX_REPLAY_DURATION} seconds.`);
+      return { name: value.name.trim(), state: validatedState, duration: value.score.duration, cues: validateCues(value.score.cues, value.score.duration, fail) };
     }
 
     function captureReplayPayload(duration) {
@@ -864,7 +998,8 @@
         paper: {
           color: state.paperColor,
           transparent: state.transparentPaper
-        }
+        },
+        cues: cloneCues(cueScore)
       };
     }
 
@@ -875,9 +1010,13 @@
         && Object.keys(item).length === keys.length
         && keys.every(key => Object.prototype.hasOwnProperty.call(item, key));
 
-      if (!exactKeys(value, ['schema', 'version', 'duration', 'machine', 'ink', 'paper'])) fail('unexpected or missing fields.');
+      if (!record(value)) fail('the top level must be a JSON object.');
       if (value.schema !== REPLAY_SCHEMA) fail('this is not a Scribble Engine replay.');
-      if (value.version !== REPLAY_VERSION) fail(`version ${String(value.version)} is not supported.`);
+      if (![LEGACY_REPLAY_VERSION, REPLAY_VERSION].includes(value.version)) fail(`version ${String(value.version)} is not supported.`);
+      const keys = value.version === LEGACY_REPLAY_VERSION
+        ? ['schema', 'version', 'duration', 'machine', 'ink', 'paper']
+        : ['schema', 'version', 'duration', 'machine', 'ink', 'paper', 'cues'];
+      if (!exactKeys(value, keys)) fail('unexpected or missing fields.');
       if (!Number.isInteger(value.duration) || value.duration < MIN_REPLAY_DURATION || value.duration > MAX_REPLAY_DURATION) {
         fail(`run time must be ${MIN_REPLAY_DURATION}-${MAX_REPLAY_DURATION} seconds.`);
       }
@@ -889,13 +1028,16 @@
 
       const setup = validateSetupFile({
         schema: SETUP_SCHEMA,
-        version: SETUP_VERSION,
+        version: LEGACY_SETUP_VERSION,
         name: 'Shared replay',
         machine: value.machine,
         ink: value.ink,
         paper: value.paper
       });
-      return { duration: value.duration, state: setup.state };
+      const cues = value.version === LEGACY_REPLAY_VERSION
+        ? singleCue(setup.state, value.duration)
+        : validateCues(value.cues, value.duration, fail);
+      return { duration: value.duration, state: setup.state, cues, version: value.version };
     }
 
     function encodeReplayPayload(payload) {
@@ -940,13 +1082,129 @@
     }
 
     function cloneReplay(replay) {
-      return { duration: replay.duration, state: { ...replay.state } };
+      return { duration: replay.duration, state: { ...replay.state }, cues: cloneCues(replay.cues), version: replay.version };
     }
 
     function setSetupStatus(message, isError = false) {
       const status = document.querySelector('#setupStatus');
       status.textContent = message;
       status.classList.toggle('error', isError);
+    }
+
+    function setScoreStatus(message, isError = false) {
+      const status = document.querySelector('#scoreStatus');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function scoreSnapshot() {
+      return { duration: Number(controls.replayDuration.value), cues: cloneCues(cueScore) };
+    }
+
+    function rememberCueEdit() {
+      cueHistory.push(scoreSnapshot());
+      if (cueHistory.length > 20) cueHistory.shift();
+    }
+
+    function scoreSummary(prefix = '') {
+      const scored = cueSeconds(cueScore);
+      const duration = Number(controls.replayDuration.value);
+      const hold = Math.max(0, duration - scored);
+      return `${prefix ? `${prefix} · ` : ''}${cueScore.length} phase${cueScore.length === 1 ? '' : 's'} · ${scored} seconds scored${hold ? ` · final cue holds ${hold} seconds` : ''}`;
+    }
+
+    function commitCueEdit(next, message) {
+      const total = cueSeconds(next);
+      if (!next.length || next.length > MAX_CUES || !next.some(cue => cue.penDown)) {
+        setScoreStatus(`Keep 1-${MAX_CUES} phases with at least one drawing phase.`, true);
+        return false;
+      }
+      if (total > MAX_REPLAY_DURATION) {
+        setScoreStatus(`Score is ${total} seconds; maximum run time is ${MAX_REPLAY_DURATION}.`, true);
+        return false;
+      }
+      rememberCueEdit();
+      leaveReplayForRemix();
+      cueScore = cloneCues(next);
+      if (Number(controls.replayDuration.value) < total) controls.replayDuration.value = String(Math.ceil(total));
+      renderCueEditor(message);
+      return true;
+    }
+
+    function renderCueEditor(message = '') {
+      const list = document.querySelector('#cueList');
+      list.replaceChildren(...cueScore.map((cue, index) => {
+        const row = document.createElement('div');
+        row.className = `cue-row${replaySession?.cueIndex === index ? ' active' : ''}`;
+        const number = document.createElement('span');
+        number.className = 'cue-index';
+        number.textContent = String(index + 1).padStart(2, '0');
+
+        const durationLabel = document.createElement('label');
+        durationLabel.className = 'cue-field';
+        const durationText = document.createElement('span');
+        durationText.textContent = 'Seconds';
+        const duration = document.createElement('input');
+        duration.type = 'number'; duration.min = String(MIN_CUE_SECONDS); duration.max = String(MAX_CUE_SECONDS); duration.step = '0.5'; duration.value = String(cue.seconds); duration.inputMode = 'decimal'; duration.setAttribute('aria-label', `Phase ${index + 1} duration`);
+        duration.addEventListener('change', () => {
+          const value = Number(duration.value);
+          if (!Number.isFinite(value) || value < MIN_CUE_SECONDS || value > MAX_CUE_SECONDS || !Number.isInteger(value * 2)) { renderCueEditor(); setScoreStatus(`Phase ${index + 1} needs a half-second duration from ${MIN_CUE_SECONDS}-${MAX_CUE_SECONDS}.`, true); return; }
+          const next = cloneCues(cueScore); next[index].seconds = value; commitCueEdit(next, `Phase ${index + 1} timing changed`);
+        });
+        durationLabel.append(durationText, duration);
+
+        const color = document.createElement('input');
+        color.type = 'color'; color.value = cue.color; color.setAttribute('aria-label', `Phase ${index + 1} ink color`);
+        color.addEventListener('change', () => { const next = cloneCues(cueScore); next[index].color = color.value; commitCueEdit(next, `Phase ${index + 1} color changed`); });
+
+        const widthLabel = document.createElement('label');
+        widthLabel.className = 'cue-field cue-width-field';
+        const widthText = document.createElement('span');
+        widthText.textContent = 'Width';
+        const width = document.createElement('input');
+        width.type = 'range'; width.min = '0.5'; width.max = '8'; width.step = '0.5'; width.value = String(cue.width); width.setAttribute('aria-label', `Phase ${index + 1} line width`);
+        const widthValue = document.createElement('span');
+        widthValue.className = 'cue-width'; widthValue.textContent = `${cue.width.toFixed(1)} px`;
+        width.addEventListener('input', () => { widthValue.textContent = `${Number(width.value).toFixed(1)} px`; });
+        width.addEventListener('change', () => { const next = cloneCues(cueScore); next[index].width = Number(width.value); commitCueEdit(next, `Phase ${index + 1} width changed`); });
+        widthLabel.append(widthText, width, widthValue);
+
+        const pen = document.createElement('button');
+        pen.type = 'button'; pen.className = 'cue-pen'; pen.setAttribute('aria-pressed', String(cue.penDown)); pen.textContent = cue.penDown ? 'Pen down' : 'Pen up';
+        pen.addEventListener('click', () => { const next = cloneCues(cueScore); next[index].penDown = !next[index].penDown; if (!next.some(item => item.penDown)) { setScoreStatus('Keep at least one drawing phase.', true); return; } commitCueEdit(next, `Phase ${index + 1} pen ${next[index].penDown ? 'lowered' : 'lifted'}`); });
+
+        const remove = document.createElement('button');
+        remove.type = 'button'; remove.className = 'cue-remove'; remove.textContent = '×'; remove.title = `Remove phase ${index + 1}`; remove.setAttribute('aria-label', `Remove phase ${index + 1}`); remove.disabled = cueScore.length === 1;
+        remove.addEventListener('click', () => { const next = cloneCues(cueScore); next.splice(index, 1); commitCueEdit(next, `Phase ${index + 1} removed`); });
+        row.append(number, durationLabel, color, widthLabel, pen, remove);
+        return row;
+      }));
+      controls.addCue.disabled = cueScore.length >= MAX_CUES;
+      controls.undoCue.disabled = cueHistory.length === 0;
+      setScoreStatus(scoreSummary(message));
+    }
+
+    function applyScorePreset(key) {
+      const preset = SCORE_PRESETS[key];
+      if (!preset) return;
+      leaveReplayForRemix();
+      cueHistory = [];
+      cueScore = cloneCues(preset.cues);
+      Object.assign(state, preset.state, { running: false });
+      controls.replayDuration.value = String(preset.duration);
+      controls.setupName.value = preset.name;
+      breakStroke();
+      renderCueEditor(`${preset.name} loaded`);
+      syncControls();
+    }
+
+    function undoCueEdit() {
+      const previous = cueHistory.pop();
+      if (!previous) return;
+      leaveReplayForRemix();
+      cueScore = cloneCues(previous.cues);
+      controls.replayDuration.value = String(previous.duration);
+      renderCueEditor('Last cue edit undone');
     }
 
     function setupFilename(name) {
@@ -987,6 +1245,10 @@
       strokeDistance = 0;
       previousTime = performance.now();
       controls.setupName.value = setup.name;
+      controls.replayDuration.value = String(setup.duration);
+      cueScore = cloneCues(setup.cues);
+      cueHistory = [];
+      renderCueEditor(`Loaded ${setup.name} score`);
       setSetupStatus(`Loaded “${setup.name}” · paused on fresh paper`);
       syncControls();
     }
@@ -1007,9 +1269,12 @@
       replaySession = {
         elapsed: 0,
         completedSteps: 0,
-        totalSteps: replay.duration * REPLAY_STEPS_PER_SECOND
+        totalSteps: replay.duration * REPLAY_STEPS_PER_SECOND,
+        cueIndex: -1
       };
       const shouldRun = autoplay && !reducedMotionPreferred();
+      cueScore = cloneCues(replay.cues);
+      cueHistory = [];
       Object.assign(state, replay.state, { running: shouldRun });
       hasInk = false;
       previewDirty = true;
@@ -1018,8 +1283,10 @@
       previousTime = performance.now();
       controls.replayDuration.value = String(replay.duration);
       controls.replayOriginal.disabled = false;
+      applyReplayCueForStep();
+      renderCueEditor();
       syncControls();
-      if (shouldRun) setReplayStatus(`${source === 'history' ? 'History replay' : 'Shared replay'} running from fresh paper - ${replay.duration} seconds`);
+      if (shouldRun) setReplayStatus(`${source === 'history' ? 'History replay' : source === 'score' ? 'Cue score' : 'Shared replay'} running from fresh paper - ${replay.duration} seconds / ${replay.cues.length} phases`);
       else setReplayStatus(`Replay ready on fresh paper - press Resume to play ${replay.duration} seconds (reduced motion respected)`);
     }
 
@@ -1044,7 +1311,31 @@
       syncControls();
     }
 
+    function replayCueIndexForStep(step) {
+      let boundary = 0;
+      for (let index = 0; index < replayOriginal.cues.length; index += 1) {
+        boundary += Math.round(replayOriginal.cues[index].seconds * REPLAY_STEPS_PER_SECOND);
+        if (step < boundary) return index;
+      }
+      return replayOriginal.cues.length - 1;
+    }
+
+    function applyReplayCueForStep() {
+      if (!replaySession || !replayOriginal) return;
+      const index = replayCueIndexForStep(replaySession.completedSteps);
+      if (index === replaySession.cueIndex) return;
+      const cue = replayOriginal.cues[index];
+      replaySession.cueIndex = index;
+      state.inkColor = cue.color;
+      state.lineWidth = cue.width;
+      state.penDown = cue.penDown;
+      breakStroke();
+      syncControls();
+      renderCueEditor();
+    }
+
     function replayStep() {
+      applyReplayCueForStep();
       const radians1 = state.direction1 * state.speed1 * Math.PI / 180;
       const radians2 = state.direction2 * state.speed2 * Math.PI / 180;
       state.angle1 = (state.angle1 + radians1 * REPLAY_STEP_SECONDS) % (Math.PI * 2);
@@ -1064,7 +1355,7 @@
       if (replaySession.completedSteps >= replaySession.totalSteps) {
         state.running = false;
         breakStroke();
-        setReplayStatus(`Replay complete - ${replayOriginal.duration} seconds, ${replaySession.completedSteps.toLocaleString()} fixed steps. Adjust controls to remix or replay the original.`);
+        setReplayStatus(`Replay complete - ${replayOriginal.duration} seconds, ${replayOriginal.cues.length} phases, ${replaySession.completedSteps.toLocaleString()} fixed steps. Adjust controls to remix or replay the original.`);
         syncControls();
       }
     }
@@ -1125,7 +1416,7 @@
         try {
           if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') throw new Error('Clipboard unavailable');
           await navigator.clipboard.writeText(url.href);
-          setReplayStatus(`Replay link copied - ${replay.duration}-second starting setup only`);
+          setReplayStatus(`Replay link copied - ${replay.duration}-second setup and ${replay.cues.length}-phase cue score`);
         } catch {
           controls.replayLink.focus();
           controls.replayLink.select();
@@ -1430,6 +1721,10 @@
       restoreCheckpoint: document.querySelector('#restoreCheckpoint'),
       setupName: document.querySelector('#setupName'),
       setupFile: document.querySelector('#setupFile'),
+      cueList: document.querySelector('#cueList'),
+      addCue: document.querySelector('#addCue'),
+      undoCue: document.querySelector('#undoCue'),
+      playScore: document.querySelector('#playScore'),
       replayDuration: document.querySelector('#replayDuration'),
       replayOriginal: document.querySelector('#replayOriginal'),
       replayLink: document.querySelector('#replayLink'),
@@ -1580,6 +1875,40 @@
     document.querySelector('#downloadSetup').addEventListener('click', downloadSetup);
     document.querySelector('#loadSetup').addEventListener('click', () => controls.setupFile.click());
     controls.setupFile.addEventListener('change', event => importSetup(event.target.files[0]));
+    document.querySelectorAll('[data-score-preset]').forEach(button => {
+      button.addEventListener('click', () => applyScorePreset(button.dataset.scorePreset));
+    });
+    controls.addCue.addEventListener('click', () => {
+      if (cueScore.length >= MAX_CUES) return;
+      const previous = cueScore[cueScore.length - 1];
+      const next = cloneCues(cueScore);
+      next.push({
+        seconds: 2,
+        color: previous.color,
+        width: previous.width,
+        penDown: !previous.penDown
+      });
+      commitCueEdit(next, `Phase ${next.length} added`);
+    });
+    controls.undoCue.addEventListener('click', undoCueEdit);
+    controls.playScore.addEventListener('click', () => {
+      try {
+        requestReplayStart(replayFromCurrentControls(), { autoplay: true, source: 'score' });
+      } catch (error) {
+        setScoreStatus(error instanceof Error ? error.message : 'Cue score could not start.', true);
+      }
+    });
+    controls.replayDuration.addEventListener('change', () => {
+      const duration = Number(controls.replayDuration.value);
+      const minimum = Math.max(MIN_REPLAY_DURATION, Math.ceil(cueSeconds(cueScore)));
+      if (!Number.isInteger(duration) || duration < minimum || duration > MAX_REPLAY_DURATION) {
+        controls.replayDuration.value = String(Math.min(MAX_REPLAY_DURATION, minimum));
+        setScoreStatus(`Run time must be a whole number from ${minimum}-${MAX_REPLAY_DURATION} seconds for this score.`, true);
+        return;
+      }
+      leaveReplayForRemix();
+      renderCueEditor('Run time changed');
+    });
     document.querySelector('#copyReplay').addEventListener('click', copyReplayLink);
     controls.replayOriginal.addEventListener('click', () => {
       if (replayOriginal) requestReplayStart(replayOriginal, { autoplay: true, source: 'original' });
@@ -1627,9 +1956,14 @@
 
     document.querySelector('#reset').addEventListener('click', () => {
       replaySession = null;
+      replayOriginal = null;
+      cueScore = cloneCues(DEFAULT_CUES);
+      cueHistory = [];
+      controls.replayDuration.value = '24';
       Object.assign(state, DEFAULTS, { running: true });
       clearInk(false);
       previousTime = performance.now();
+      renderCueEditor('Default score restored');
       syncControls();
     });
 
@@ -1664,6 +1998,7 @@
 
     window.addEventListener('popstate', () => replayFromLocation());
 
+    renderCueEditor();
     syncControls();
     replayFromLocation({ initial: true });
     drawMechanism(positions());

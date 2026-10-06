@@ -208,6 +208,16 @@
     #downloadSetup { border-color: #755c69; }
     .setup-status { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
     .setup-status.error { color: var(--pink); }
+    .replay-tools legend { color: var(--blue); }
+    .replay-grid { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 10px; align-items: end; }
+    .replay-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .replay-link-wrap { display: block; margin: 11px 0 0; }
+    .replay-link-wrap[hidden] { display: none; }
+    .replay-link-wrap span { display: block; margin-bottom: 6px; color: #dbe5ee; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+    #replayLink { width: 100%; min-height: 42px; border: 1px solid #40566d; border-radius: 6px; padding: 8px 10px; background: #0b1627; color: var(--blue); font: 700 10px/1.35 "Courier New", monospace; }
+    #copyReplay { border-color: #6687a7; color: var(--blue); }
+    #replayOriginal { border-color: #557565; }
+    #replayDuration { width: 100%; min-height: 42px; border: 1px solid #40566d; border-radius: 6px; padding: 8px 10px; background: #14243a; color: var(--ink); font: inherit; }
 
     button {
       min-height: 44px;
@@ -287,6 +297,7 @@
       .export-actions { display: grid; grid-template-columns: 1fr; }
       .checkpoint-row { grid-template-columns: 1fr; }
       .setup-actions { grid-template-columns: 1fr; }
+      .replay-grid, .replay-actions { grid-template-columns: 1fr; }
     }
   </style>
   <link rel="stylesheet" href="../lab-shell.css?v=1">
@@ -407,6 +418,26 @@
         <p class="setup-status" id="setupStatus" role="status" aria-live="polite">Named file · survives reloads</p>
       </fieldset>
 
+      <fieldset class="replay-tools">
+        <legend>Replay Link</legend>
+        <p class="setup-note">Shares this starting setup and a finite run — not your artwork or mid-run changes.</p>
+        <div class="replay-grid">
+          <div>
+            <label class="compact-label" for="replayDuration">Run time</label>
+            <input id="replayDuration" type="number" min="5" max="60" step="1" value="24" inputmode="numeric">
+          </div>
+          <div class="replay-actions">
+            <button id="copyReplay" type="button">Copy Replay Link</button>
+            <button id="replayOriginal" type="button" disabled>Replay Original</button>
+          </div>
+        </div>
+        <label class="replay-link-wrap" id="replayLinkWrap" for="replayLink" hidden>
+          <span>Replay link — copy manually if needed</span>
+          <input id="replayLink" type="text" readonly spellcheck="false">
+        </label>
+        <p class="setup-status" id="replayStatus" role="status" aria-live="polite">No replay loaded — make a link from the current starting setup</p>
+      </fieldset>
+
       <p class="note">Both arm angles are measured from the page, independently—not from each other.</p>
 
       <div class="shared">
@@ -497,6 +528,7 @@
     let checkpoint = null;
     let pendingCheckpointAction = null;
     let pendingSetup = null;
+    let pendingReplay = null;
     let previewDirty = true;
     let previousTime = performance.now();
     let vectorStrokes = [];
@@ -505,6 +537,8 @@
     let vectorComplete = true;
     let recordingLimitReached = false;
     let exportSnapshot = null;
+    let replayOriginal = null;
+    let replaySession = null;
 
     // Kinematics: both angles are absolute page angles, exactly as shown here.
     function positions(source = state) {
@@ -711,6 +745,16 @@
     const SETUP_SCHEMA = 'trikzik.scribble-engine.setup';
     const SETUP_VERSION = 1;
     const MAX_SETUP_BYTES = 16 * 1024;
+    const REPLAY_SCHEMA = 'trikzik.scribble-engine.replay';
+    const REPLAY_VERSION = 1;
+    const REPLAY_PARAMETER = 'replay';
+    const MAX_REPLAY_BYTES = 1024;
+    const MAX_REPLAY_TOKEN_LENGTH = 1400;
+    const MAX_REPLAY_URL_LENGTH = 2048;
+    const MIN_REPLAY_DURATION = 5;
+    const MAX_REPLAY_DURATION = 60;
+    const REPLAY_STEPS_PER_SECOND = 360;
+    const REPLAY_STEP_SECONDS = 1 / REPLAY_STEPS_PER_SECOND;
 
     function captureSetup(name) {
       return {
@@ -796,6 +840,109 @@
       };
     }
 
+    function captureReplayPayload(duration) {
+      return {
+        schema: REPLAY_SCHEMA,
+        version: REPLAY_VERSION,
+        duration,
+        machine: {
+          length1: state.length1,
+          length2: state.length2,
+          speed1: state.speed1,
+          speed2: state.speed2,
+          direction1: state.direction1,
+          direction2: state.direction2,
+          angle1: state.angle1,
+          angle2: state.angle2,
+          penDown: state.penDown
+        },
+        ink: {
+          color: state.inkColor,
+          width: state.lineWidth,
+          style: state.strokeStyle
+        },
+        paper: {
+          color: state.paperColor,
+          transparent: state.transparentPaper
+        }
+      };
+    }
+
+    function validateReplayPayload(value) {
+      const fail = message => { throw new Error(`Replay rejected: ${message}`); };
+      const record = item => item !== null && typeof item === 'object' && !Array.isArray(item);
+      const exactKeys = (item, keys) => record(item)
+        && Object.keys(item).length === keys.length
+        && keys.every(key => Object.prototype.hasOwnProperty.call(item, key));
+
+      if (!exactKeys(value, ['schema', 'version', 'duration', 'machine', 'ink', 'paper'])) fail('unexpected or missing fields.');
+      if (value.schema !== REPLAY_SCHEMA) fail('this is not a Scribble Engine replay.');
+      if (value.version !== REPLAY_VERSION) fail(`version ${String(value.version)} is not supported.`);
+      if (!Number.isInteger(value.duration) || value.duration < MIN_REPLAY_DURATION || value.duration > MAX_REPLAY_DURATION) {
+        fail(`run time must be ${MIN_REPLAY_DURATION}-${MAX_REPLAY_DURATION} seconds.`);
+      }
+      if (!exactKeys(value.machine, ['length1', 'length2', 'speed1', 'speed2', 'direction1', 'direction2', 'angle1', 'angle2', 'penDown'])) {
+        fail('machine settings are malformed.');
+      }
+      if (!exactKeys(value.ink, ['color', 'width', 'style'])) fail('ink settings are malformed.');
+      if (!exactKeys(value.paper, ['color', 'transparent'])) fail('paper settings are malformed.');
+
+      const setup = validateSetupFile({
+        schema: SETUP_SCHEMA,
+        version: SETUP_VERSION,
+        name: 'Shared replay',
+        machine: value.machine,
+        ink: value.ink,
+        paper: value.paper
+      });
+      return { duration: value.duration, state: setup.state };
+    }
+
+    function encodeReplayPayload(payload) {
+      const bytes = new TextEncoder().encode(JSON.stringify(payload));
+      if (bytes.byteLength > MAX_REPLAY_BYTES) throw new Error('Replay rejected: setup is too large to share.');
+      let binary = '';
+      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      const token = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+      if (token.length > MAX_REPLAY_TOKEN_LENGTH) throw new Error('Replay rejected: link payload is too long.');
+      return token;
+    }
+
+    function decodeReplayToken(token) {
+      if (!token || token.length > MAX_REPLAY_TOKEN_LENGTH || !/^[A-Za-z0-9_-]+$/.test(token)) {
+        throw new Error('Replay rejected: link payload is missing or malformed.');
+      }
+      const padding = '='.repeat((4 - token.length % 4) % 4);
+      let binary;
+      try {
+        binary = atob(token.replace(/-/g, '+').replace(/_/g, '/') + padding);
+      } catch {
+        throw new Error('Replay rejected: link payload is not valid.');
+      }
+      if (binary.length > MAX_REPLAY_BYTES) throw new Error('Replay rejected: setup is too large to share.');
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      let parsed;
+      try {
+        parsed = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+      } catch {
+        throw new Error('Replay rejected: link payload is not valid JSON.');
+      }
+      return validateReplayPayload(parsed);
+    }
+
+    function replayUrlFor(payload) {
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.hash = '';
+      url.searchParams.set(REPLAY_PARAMETER, encodeReplayPayload(payload));
+      if (url.href.length > MAX_REPLAY_URL_LENGTH) throw new Error('Replay rejected: generated link is too long.');
+      return url;
+    }
+
+    function cloneReplay(replay) {
+      return { duration: replay.duration, state: { ...replay.state } };
+    }
+
     function setSetupStatus(message, isError = false) {
       const status = document.querySelector('#setupStatus');
       status.textContent = message;
@@ -832,6 +979,7 @@
     function applySetup(setup) {
       // This uses the existing one-step clear recovery and never touches checkpoint.
       clearInk(true);
+      replaySession = null;
       Object.assign(state, setup.state, { running: false });
       hasInk = false;
       previewDirty = true;
@@ -843,14 +991,95 @@
       syncControls();
     }
 
+    function setReplayStatus(message, isError = false) {
+      const status = document.querySelector('#replayStatus');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function reducedMotionPreferred() {
+      return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function applyReplay(replay, { autoplay = true, source = 'link' } = {}) {
+      clearInk(true);
+      replayOriginal = cloneReplay(replay);
+      replaySession = {
+        elapsed: 0,
+        completedSteps: 0,
+        totalSteps: replay.duration * REPLAY_STEPS_PER_SECOND
+      };
+      const shouldRun = autoplay && !reducedMotionPreferred();
+      Object.assign(state, replay.state, { running: shouldRun });
+      hasInk = false;
+      previewDirty = true;
+      previousPen = null;
+      strokeDistance = 0;
+      previousTime = performance.now();
+      controls.replayDuration.value = String(replay.duration);
+      controls.replayOriginal.disabled = false;
+      syncControls();
+      if (shouldRun) setReplayStatus(`${source === 'history' ? 'History replay' : 'Shared replay'} running from fresh paper - ${replay.duration} seconds`);
+      else setReplayStatus(`Replay ready on fresh paper - press Resume to play ${replay.duration} seconds (reduced motion respected)`);
+    }
+
+    function requestReplayStart(replay, options = {}) {
+      if (!hasInk) {
+        applyReplay(replay, options);
+        return;
+      }
+      pendingSetup = null;
+      pendingReplay = { replay: cloneReplay(replay), options };
+      document.querySelector('#setupDialogTitle').textContent = 'Start replay?';
+      document.querySelector('#setupDialogMessage').textContent =
+        `This ${replay.duration}-second replay starts on fresh paper. Restore Clear can recover the displaced artwork; your checkpoint will not change.`;
+      document.querySelector('#confirmSetupLoad').textContent = 'Start Fresh Replay';
+      setupDialog.showModal();
+    }
+
+    function leaveReplayForRemix() {
+      if (!replaySession) return;
+      replaySession = null;
+      setReplayStatus('Remix mode - current changes are not part of the original replay. Make a new link to share this starting setup.');
+      syncControls();
+    }
+
+    function replayStep() {
+      const radians1 = state.direction1 * state.speed1 * Math.PI / 180;
+      const radians2 = state.direction2 * state.speed2 * Math.PI / 180;
+      state.angle1 = (state.angle1 + radians1 * REPLAY_STEP_SECONDS) % (Math.PI * 2);
+      state.angle2 = (state.angle2 + radians2 * REPLAY_STEP_SECONDS) % (Math.PI * 2);
+      addInk(positions());
+    }
+
+    function advanceReplay(elapsedSeconds) {
+      if (!replaySession) return;
+      replaySession.elapsed = Math.min(replayOriginal.duration, replaySession.elapsed + elapsedSeconds);
+      let targetSteps = Math.floor(replaySession.elapsed * REPLAY_STEPS_PER_SECOND + 1e-7);
+      if (replaySession.elapsed >= replayOriginal.duration) targetSteps = replaySession.totalSteps;
+      while (replaySession.completedSteps < targetSteps && state.running) {
+        replayStep();
+        replaySession.completedSteps += 1;
+      }
+      if (replaySession.completedSteps >= replaySession.totalSteps) {
+        state.running = false;
+        breakStroke();
+        setReplayStatus(`Replay complete - ${replayOriginal.duration} seconds, ${replaySession.completedSteps.toLocaleString()} fixed steps. Adjust controls to remix or replay the original.`);
+        syncControls();
+      }
+    }
+
     function requestSetupLoad(setup) {
       if (!hasInk) {
         applySetup(setup);
         return;
       }
+      pendingReplay = null;
       pendingSetup = setup;
+      document.querySelector('#setupDialogTitle').textContent = 'Load setup?';
       document.querySelector('#setupDialogMessage').textContent =
         `“${setup.name}” will replace the current artwork with fresh paper and start paused. The displaced artwork can be restored with Restore Clear; your checkpoint will not change.`;
+      document.querySelector('#confirmSetupLoad').textContent = 'Load Fresh Setup';
       setupDialog.showModal();
     }
 
@@ -871,6 +1100,55 @@
         setSetupStatus(error instanceof Error ? error.message : 'Setup rejected.', true);
       } finally {
         controls.setupFile.value = '';
+      }
+    }
+
+    function replayFromCurrentControls() {
+      const duration = Number(controls.replayDuration.value);
+      return validateReplayPayload(captureReplayPayload(duration));
+    }
+
+    function exposeReplayLink(url) {
+      controls.replayLink.value = url.href;
+      document.querySelector('#replayLinkWrap').hidden = false;
+    }
+
+    async function copyReplayLink() {
+      try {
+        const replay = replayFromCurrentControls();
+        const payload = captureReplayPayload(replay.duration);
+        const url = replayUrlFor(payload);
+        exposeReplayLink(url);
+        replayOriginal = cloneReplay(replay);
+        controls.replayOriginal.disabled = false;
+        history.pushState({ scribbleReplay: url.searchParams.get(REPLAY_PARAMETER) }, '', url);
+        try {
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') throw new Error('Clipboard unavailable');
+          await navigator.clipboard.writeText(url.href);
+          setReplayStatus(`Replay link copied - ${replay.duration}-second starting setup only`);
+        } catch {
+          controls.replayLink.focus();
+          controls.replayLink.select();
+          setReplayStatus('Replay link ready - copy it manually from the selected field');
+        }
+      } catch (error) {
+        setReplayStatus(error instanceof Error ? error.message : 'Replay link could not be created.', true);
+      }
+    }
+
+    function replayFromLocation({ initial = false } = {}) {
+      const url = new URL(window.location.href);
+      const token = url.searchParams.get(REPLAY_PARAMETER);
+      if (!token) {
+        if (!initial) setReplayStatus('No replay in this history entry - current drawing unchanged');
+        return;
+      }
+      try {
+        const replay = decodeReplayToken(token);
+        exposeReplayLink(url);
+        requestReplayStart(replay, { autoplay: true, source: initial ? 'link' : 'history' });
+      } catch (error) {
+        setReplayStatus(`${error instanceof Error ? error.message : 'Replay rejected.'} Current drawing unchanged.`, true);
       }
     }
 
@@ -1123,7 +1401,10 @@
     function frame(now) {
       const elapsed = Math.min((now - previousTime) / 1000, 0.05);
       previousTime = now;
-      if (state.running) advance(elapsed);
+      if (state.running) {
+        if (replaySession) advanceReplay(elapsed);
+        else advance(elapsed);
+      }
       drawMechanism(positions());
       requestAnimationFrame(frame);
     }
@@ -1149,6 +1430,9 @@
       restoreCheckpoint: document.querySelector('#restoreCheckpoint'),
       setupName: document.querySelector('#setupName'),
       setupFile: document.querySelector('#setupFile'),
+      replayDuration: document.querySelector('#replayDuration'),
+      replayOriginal: document.querySelector('#replayOriginal'),
+      replayLink: document.querySelector('#replayLink'),
       pause: document.querySelector('#pause')
     };
 
@@ -1198,12 +1482,17 @@
       document.querySelector('#checkpointStatus').textContent = checkpoint
         ? `Saved ${checkpoint.savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · current session only`
         : 'Empty · current page session only';
-      controls.pause.textContent = state.running ? 'Pause' : 'Resume';
+      controls.replayOriginal.disabled = !replayOriginal;
+      controls.pause.textContent = replaySession
+        ? (state.running ? 'Pause Replay' : replaySession.completedSteps >= replaySession.totalSteps ? 'Replay Complete' : 'Resume Replay')
+        : (state.running ? 'Pause' : 'Resume');
+      controls.pause.disabled = Boolean(replaySession && replaySession.completedSteps >= replaySession.totalSteps);
       updateVectorStatus();
     }
 
     for (const key of ['length1', 'length2']) {
       controls[key].addEventListener('input', event => {
+        leaveReplayForRemix();
         state[key] = Number(event.target.value);
         breakStroke();
         syncControls();
@@ -1212,6 +1501,7 @@
 
     for (const key of ['speed1', 'speed2']) {
       controls[key].addEventListener('input', event => {
+        leaveReplayForRemix();
         state[key] = Number(event.target.value);
         syncControls();
       });
@@ -1219,59 +1509,81 @@
 
     for (const key of ['direction1', 'direction2']) {
       controls[key].addEventListener('click', () => {
+        leaveReplayForRemix();
         state[key] *= -1;
         syncControls();
       });
     }
 
     controls.inkColor.addEventListener('input', event => {
+      leaveReplayForRemix();
       state.inkColor = event.target.value;
     });
 
     document.querySelectorAll('.swatch').forEach(swatch => {
       swatch.addEventListener('click', () => {
+        leaveReplayForRemix();
         state.inkColor = swatch.dataset.color;
         syncControls();
       });
     });
 
     controls.lineWidth.addEventListener('input', event => {
+      leaveReplayForRemix();
       state.lineWidth = Number(event.target.value);
       syncControls();
     });
 
     controls.strokeStyle.addEventListener('change', event => {
+      leaveReplayForRemix();
       state.strokeStyle = event.target.value;
       strokeDistance = 0;
       activeVectorStroke = null;
     });
 
     controls.paperColor.addEventListener('input', event => {
+      leaveReplayForRemix();
       state.paperColor = event.target.value;
       previewDirty = true;
     });
 
     controls.transparentPaper.addEventListener('change', event => {
+      leaveReplayForRemix();
       state.transparentPaper = event.target.checked;
       previewDirty = true;
     });
 
-    controls.penToggle.addEventListener('click', togglePen);
+    controls.penToggle.addEventListener('click', () => {
+      leaveReplayForRemix();
+      togglePen();
+    });
 
     controls.pause.addEventListener('click', () => {
       state.running = !state.running;
-      breakStroke();
+      // Replay time is frozen while paused, so reconnecting the same deterministic
+      // path is safe. Free drawing still breaks to avoid bridging wall-clock gaps.
+      if (!replaySession) breakStroke();
       previousTime = performance.now();
       syncControls();
     });
 
-    document.querySelector('#clear').addEventListener('click', () => clearInk(true));
-    controls.restoreClear.addEventListener('click', restoreLastClear);
+    document.querySelector('#clear').addEventListener('click', () => {
+      leaveReplayForRemix();
+      clearInk(true);
+    });
+    controls.restoreClear.addEventListener('click', () => {
+      leaveReplayForRemix();
+      restoreLastClear();
+    });
     controls.saveCheckpoint.addEventListener('click', () => requestCheckpointAction('save'));
     controls.restoreCheckpoint.addEventListener('click', () => requestCheckpointAction('restore'));
     document.querySelector('#downloadSetup').addEventListener('click', downloadSetup);
     document.querySelector('#loadSetup').addEventListener('click', () => controls.setupFile.click());
     controls.setupFile.addEventListener('change', event => importSetup(event.target.files[0]));
+    document.querySelector('#copyReplay').addEventListener('click', copyReplayLink);
+    controls.replayOriginal.addEventListener('click', () => {
+      if (replayOriginal) requestReplayStart(replayOriginal, { autoplay: true, source: 'original' });
+    });
 
     document.querySelector('#cancelCheckpointAction').addEventListener('click', () => {
       pendingCheckpointAction = null;
@@ -1283,27 +1595,38 @@
       pendingCheckpointAction = null;
       checkpointDialog.close();
       if (action === 'save') commitCheckpointSave();
-      else if (action === 'restore') commitCheckpointRestore();
+      else if (action === 'restore') {
+        leaveReplayForRemix();
+        commitCheckpointRestore();
+      }
     });
 
     document.querySelector('#cancelSetupLoad').addEventListener('click', () => {
       pendingSetup = null;
+      pendingReplay = null;
       setupDialog.close();
       setSetupStatus('Load canceled · current drawing unchanged');
     });
 
     document.querySelector('#confirmSetupLoad').addEventListener('click', () => {
       const setup = pendingSetup;
+      const replayRequest = pendingReplay;
       pendingSetup = null;
+      pendingReplay = null;
       setupDialog.close();
       if (setup) applySetup(setup);
+      else if (replayRequest) applyReplay(replayRequest.replay, replayRequest.options);
     });
 
     setupDialog.addEventListener('close', () => {
-      if (!setupDialog.returnValue) pendingSetup = null;
+      if (!setupDialog.returnValue) {
+        pendingSetup = null;
+        pendingReplay = null;
+      }
     });
 
     document.querySelector('#reset').addEventListener('click', () => {
+      replaySession = null;
       Object.assign(state, DEFAULTS, { running: true });
       clearInk(false);
       previousTime = performance.now();
@@ -1336,10 +1659,13 @@
 
     document.addEventListener('visibilitychange', () => {
       previousTime = performance.now();
-      breakStroke();
+      if (!replaySession) breakStroke();
     });
 
+    window.addEventListener('popstate', () => replayFromLocation());
+
     syncControls();
+    replayFromLocation({ initial: true });
     drawMechanism(positions());
     requestAnimationFrame(frame);
   </script>

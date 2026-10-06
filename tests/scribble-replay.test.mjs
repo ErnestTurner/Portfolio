@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import vm from 'node:vm';
 
 const html = await readFile(new URL('../games/scribble-engine/index.html', import.meta.url), 'utf8');
 
@@ -26,13 +27,72 @@ test('cue-score replay links are versioned, bounded, and backward compatible', (
   assert.match(capture, /machine:/);
   assert.match(capture, /ink:/);
   assert.match(capture, /paper:/);
-  assert.match(capture, /cues: cloneCues\(cueScore\)/);
+  assert.match(capture, /cues: cloneCues\(cues\)/);
+});
+
+test('a 60-second v1 replay can play, copy to v2, download, and reimport without trimming', () => {
+  const constants = html.slice(html.indexOf("const SETUP_SCHEMA"), html.indexOf('const DEFAULT_CUES'));
+  const functions = html.slice(html.indexOf('function cloneCues'), html.indexOf('function encodeReplayPayload'));
+  const state = {
+    length1: 112, length2: 73, speed1: 47, speed2: 131,
+    direction1: 1, direction2: -1, angle1: 0.25, angle2: 1.1,
+    penDown: true, inkColor: '#eff5fa', lineWidth: 1.5,
+    strokeStyle: 'solid', paperColor: '#0b1425', transparentPaper: false
+  };
+  const context = vm.createContext({ state, controls: { replayDuration: { value: '60' } }, cueScore: [] });
+  vm.runInContext(`${constants}\nconst DEFAULT_CUES = [];\n${functions}\nthis.api = { cloneCues, captureSetup, validateSetupFile, captureReplayPayload, validateReplayPayload };`, context);
+
+  const legacy = context.api.validateReplayPayload({
+    schema: 'trikzik.scribble-engine.replay', version: 1, duration: 60,
+    machine: {
+      length1: state.length1, length2: state.length2, speed1: state.speed1, speed2: state.speed2,
+      direction1: state.direction1, direction2: state.direction2, angle1: state.angle1, angle2: state.angle2, penDown: true
+    },
+    ink: { color: state.inkColor, width: state.lineWidth, style: state.strokeStyle },
+    paper: { color: state.paperColor, transparent: state.transparentPaper }
+  });
+  assert.equal(legacy.duration, 60);
+  assert.equal(legacy.cues.length, 1);
+  assert.equal(legacy.cues[0].seconds, 60);
+
+  context.cueScore = context.api.cloneCues(legacy.cues);
+  const copiedV2 = context.api.validateReplayPayload(context.api.captureReplayPayload(60));
+  assert.equal(copiedV2.version, 2);
+  assert.equal(copiedV2.duration, 60);
+  assert.equal(copiedV2.cues[0].seconds, 60);
+
+  const downloaded = JSON.parse(JSON.stringify(context.api.captureSetup('Legacy sixty')));
+  const reimported = context.api.validateSetupFile(downloaded);
+  assert.equal(reimported.duration, 60);
+  assert.equal(reimported.cues.length, 1);
+  assert.equal(reimported.cues[0].seconds, 60);
+
+  const penUpLegacy = context.api.validateReplayPayload({
+    schema: 'trikzik.scribble-engine.replay', version: 1, duration: 60,
+    machine: {
+      length1: state.length1, length2: state.length2, speed1: state.speed1, speed2: state.speed2,
+      direction1: state.direction1, direction2: state.direction2, angle1: state.angle1, angle2: state.angle2, penDown: false
+    },
+    ink: { color: state.inkColor, width: state.lineWidth, style: state.strokeStyle },
+    paper: { color: state.paperColor, transparent: state.transparentPaper }
+  });
+  assert.equal(penUpLegacy.cues.length, 1);
+  assert.equal(penUpLegacy.cues[0].seconds, 60);
+  assert.equal(penUpLegacy.cues[0].penDown, false);
+  context.state = { ...state, penDown: false };
+  context.cueScore = context.api.cloneCues(penUpLegacy.cues);
+  const copiedPenUp = context.api.validateReplayPayload(context.api.captureReplayPayload(60));
+  assert.equal(copiedPenUp.cues[0].penDown, false);
+  const penUpSetup = context.api.validateSetupFile(JSON.parse(JSON.stringify(context.api.captureSetup('Legacy pen up'))));
+  assert.equal(penUpSetup.duration, 60);
+  assert.equal(penUpSetup.cues[0].penDown, false);
 });
 
 test('cue-score validation is bounded and presets are authored compositions', () => {
   assert.match(html, /value\.length < 1 \|\| value\.length > MAX_CUES/);
   assert.match(html, /cue\.seconds < MIN_CUE_SECONDS \|\| cue\.seconds > MAX_CUE_SECONDS/);
   assert.match(html, /cue\.width < 0\.5 \|\| cue\.width > 8/);
+  assert.match(html, /const MAX_CUE_SECONDS = MAX_REPLAY_DURATION/);
   assert.match(html, /cueSeconds\(cues\) > duration/);
   assert.match(html, /cues\.some\(cue => cue\.penDown\)/);
   assert.match(html, /'neon-bloom'/);
@@ -114,6 +174,8 @@ test('score editing, sharing, and playback retain explicit user control', () => 
   assert.match(html, /leaveReplayForRemix\(\);/);
   assert.match(html, /data-score-preset="neon-bloom"/);
   assert.match(html, /requestReplayStart\(replayFromCurrentControls\(\), \{ autoplay: true, source: 'score' \}\)/);
+  assert.match(html, /const replay = replaySession && replayOriginal\s*\? cloneReplay\(replayOriginal\)\s*:\s*replayFromCurrentControls\(\)/);
+  assert.match(html, /captureReplayPayload\(replay\.duration, replay\.state, replay\.cues\)/);
   assert.match(html, /document\.querySelector\('#copyReplay'\)\.addEventListener\('click', copyReplayLink\)/);
   assert.match(html, /navigator\.clipboard\.writeText\(url\.href\)/);
   assert.match(html, /controls\.replayLink\.focus\(\);\s*controls\.replayLink\.select\(\)/);

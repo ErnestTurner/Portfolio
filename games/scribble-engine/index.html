@@ -801,7 +801,9 @@
     const MIN_REPLAY_DURATION = 5;
     const MAX_REPLAY_DURATION = 60;
     const MIN_CUE_SECONDS = 0.5;
-    const MAX_CUE_SECONDS = 30;
+    // A single cue may span the full run so legacy 5-60 second replays can be
+    // copied or saved as v2 without inserting a stroke break or trimming time.
+    const MAX_CUE_SECONDS = MAX_REPLAY_DURATION;
     const MAX_CUES = 6;
     const REPLAY_STEPS_PER_SECOND = 360;
     const REPLAY_STEP_SECONDS = 1 / REPLAY_STEPS_PER_SECOND;
@@ -873,7 +875,9 @@
         return { seconds: cue.seconds, color: cue.color.toLowerCase(), width: cue.width, penDown: cue.penDown };
       });
       if (cueSeconds(cues) > duration) fail('cue score is longer than the replay run time.');
-      if (!cues.some(cue => cue.penDown)) fail('cue score must include at least one drawing phase.');
+      // A single lifted cue preserves valid legacy pen-up-only replays/setups.
+      // Newly authored multi-phase scores still need at least one drawing phase.
+      if (!cues.some(cue => cue.penDown) && cues.length !== 1) fail('cue score must include at least one drawing phase.');
       return cues;
     }
 
@@ -974,32 +978,32 @@
       return { name: value.name.trim(), state: validatedState, duration: value.score.duration, cues: validateCues(value.score.cues, value.score.duration, fail) };
     }
 
-    function captureReplayPayload(duration) {
+    function captureReplayPayload(duration, stateValue = state, cues = cueScore) {
       return {
         schema: REPLAY_SCHEMA,
         version: REPLAY_VERSION,
         duration,
         machine: {
-          length1: state.length1,
-          length2: state.length2,
-          speed1: state.speed1,
-          speed2: state.speed2,
-          direction1: state.direction1,
-          direction2: state.direction2,
-          angle1: state.angle1,
-          angle2: state.angle2,
-          penDown: state.penDown
+          length1: stateValue.length1,
+          length2: stateValue.length2,
+          speed1: stateValue.speed1,
+          speed2: stateValue.speed2,
+          direction1: stateValue.direction1,
+          direction2: stateValue.direction2,
+          angle1: stateValue.angle1,
+          angle2: stateValue.angle2,
+          penDown: stateValue.penDown
         },
         ink: {
-          color: state.inkColor,
-          width: state.lineWidth,
-          style: state.strokeStyle
+          color: stateValue.inkColor,
+          width: stateValue.lineWidth,
+          style: stateValue.strokeStyle
         },
         paper: {
-          color: state.paperColor,
-          transparent: state.transparentPaper
+          color: stateValue.paperColor,
+          transparent: stateValue.transparentPaper
         },
-        cues: cloneCues(cueScore)
+        cues: cloneCues(cues)
       };
     }
 
@@ -1406,8 +1410,12 @@
 
     async function copyReplayLink() {
       try {
-        const replay = replayFromCurrentControls();
-        const payload = captureReplayPayload(replay.duration);
+        // An untouched running, paused, or completed replay keeps its original
+        // start. Any explicit edit leaves replay mode and captures a new remix.
+        const replay = replaySession && replayOriginal
+          ? cloneReplay(replayOriginal)
+          : replayFromCurrentControls();
+        const payload = captureReplayPayload(replay.duration, replay.state, replay.cues);
         const url = replayUrlFor(payload);
         exposeReplayLink(url);
         replayOriginal = cloneReplay(replay);

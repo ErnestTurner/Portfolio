@@ -193,6 +193,26 @@ body.lab-themed-game {
   border-color: var(--lab-line);
 }
 
+.lab-themed-game .lab-privacy-link {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: max-content;
+  margin: 12px 12px 12px auto;
+  padding: 5px 8px;
+  border: 1px solid #3c5658;
+  border-radius: 4px;
+  background: #071014e8;
+  color: #b7c7c5;
+  font: 700 9px/1 "Courier New", monospace;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.lab-themed-game .lab-privacy-link:hover { color: var(--lab-green); border-color: var(--lab-green); }
+.lab-themed-game .lab-privacy-link:focus-visible { outline: 3px solid #fff2a8; outline-offset: 3px; }
+
 @media (max-width: 500px) {
   .lab-themed-game .lab-back-link {
     width: max-content;

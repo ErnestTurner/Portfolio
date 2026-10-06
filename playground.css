@@ -485,7 +485,7 @@ footer {
   width: min(1500px, calc(100% - 32px));
   min-height: 120px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   gap: 30px;
   align-items: center;
   margin: 24px auto 0;

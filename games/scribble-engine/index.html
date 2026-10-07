@@ -1880,6 +1880,35 @@
       return commitRecipe(next, message);
     }
 
+    function changeRecipePlaybackRate() {
+      try {
+        const next = cloneRecipe(recipeProgram);
+        next.playbackRate = Number(controls.recipePlayback.value);
+        recipeProgram = validateRecipe(next);
+        if (recipeSession && recipeOriginal) {
+          recipeOriginal.playbackRate = recipeProgram.playbackRate;
+          recipeSession.compiled.wallSeconds = recipeSession.compiled.geometrySeconds / recipeProgram.playbackRate;
+          previousTime = performance.now();
+          const complete = recipeSession.completedSteps >= recipeSession.compiled.totalSteps;
+          const playbackState = complete
+            ? 'recipe complete; applies to the next run'
+            : state.running
+              ? 'recipe continues from its current position'
+              : 'recipe remains paused at its current position';
+          renderRecipeEditor(`Playback speed changed to ${recipeProgram.playbackRate}x; ${playbackState}`);
+          syncControls();
+          return true;
+        }
+        if (replaySession) leaveReplayForRemix();
+        renderRecipeEditor(`Playback speed changed to ${recipeProgram.playbackRate}x; applies to the next recipe run`);
+        return true;
+      } catch (error) {
+        renderRecipeEditor();
+        setRecipeStatus(error instanceof Error ? error.message : 'Playback speed change was rejected.', true);
+        return false;
+      }
+    }
+
     function renderRecipeEditor(message = '') {
       selectedRecipeSection = Math.max(0, Math.min(selectedRecipeSection, recipeProgram.sections.length - 1));
       const section = recipeProgram.sections[selectedRecipeSection];
@@ -2451,6 +2480,7 @@
         ? `Saved ${checkpoint.savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · current session only`
         : 'Empty · current page session only';
       controls.replayOriginal.disabled = !replayOriginal;
+      const recipeQuickActions = Boolean(recipeSession && recipeOriginal);
       controls.pause.textContent = recipeSession
         ? (state.running ? 'Pause Recipe' : recipeSession.completedSteps >= recipeSession.compiled.totalSteps ? 'Recipe Complete' : 'Resume Recipe')
         : replaySession
@@ -2459,8 +2489,13 @@
       controls.pause.disabled = Boolean((replaySession && replaySession.completedSteps >= replaySession.totalSteps) || (recipeSession && recipeSession.completedSteps >= recipeSession.compiled.totalSteps));
       controls.mobilePause.textContent = controls.pause.textContent;
       controls.mobilePause.disabled = controls.pause.disabled;
+      controls.mobilePlayScore.textContent = 'Play score';
       controls.mobilePlayScore.disabled = controls.playScore.disabled;
-      controls.mobileReplayOriginal.disabled = controls.replayOriginal.disabled;
+      controls.mobileReplayOriginal.textContent = recipeQuickActions ? 'Replay recipe' : 'Replay score';
+      controls.mobileReplayOriginal.setAttribute('aria-label', recipeQuickActions ? 'Replay current recipe' : 'Replay original cue score');
+      controls.mobileReplayOriginal.disabled = recipeQuickActions ? false : controls.replayOriginal.disabled;
+      controls.mobileCopyReplay.textContent = recipeQuickActions ? 'Share recipe' : 'Share score';
+      controls.mobileCopyReplay.setAttribute('aria-label', recipeQuickActions ? 'Copy recipe link' : 'Copy cue-score replay link');
       updateVectorStatus();
     }
 
@@ -2553,8 +2588,14 @@
     });
     controls.mobilePause.addEventListener('click', () => controls.pause.click());
     controls.mobilePlayScore.addEventListener('click', () => controls.playScore.click());
-    controls.mobileReplayOriginal.addEventListener('click', () => controls.replayOriginal.click());
-    controls.mobileCopyReplay.addEventListener('click', () => document.querySelector('#copyReplay').click());
+    controls.mobileReplayOriginal.addEventListener('click', () => {
+      if (recipeSession && recipeOriginal) requestRecipeStart(recipeOriginal, { autoplay: true, source: 'recipe' });
+      else controls.replayOriginal.click();
+    });
+    controls.mobileCopyReplay.addEventListener('click', () => {
+      if (recipeSession && recipeOriginal) copyRecipeLink();
+      else document.querySelector('#copyReplay').click();
+    });
 
     document.querySelector('#clear').addEventListener('click', () => {
       leaveReplayForRemix();
@@ -2614,7 +2655,7 @@
       });
     });
     controls.recipeName.addEventListener('change', () => editSelectedRecipe(({ next }) => { next.name = controls.recipeName.value; }, 'Recipe renamed'));
-    controls.recipePlayback.addEventListener('change', () => editSelectedRecipe(({ next }) => { next.playbackRate = Number(controls.recipePlayback.value); }, 'Playback speed changed'));
+    controls.recipePlayback.addEventListener('change', changeRecipePlaybackRate);
     controls.recipeSection.addEventListener('change', () => { selectedRecipeSection = Number(controls.recipeSection.value); selectedRecipeStage = 0; renderRecipeEditor(); });
     controls.recipeStage.addEventListener('change', () => { selectedRecipeStage = Number(controls.recipeStage.value); renderRecipeEditor(); });
     controls.recipeSectionName.addEventListener('change', () => editSelectedRecipe(({ section }) => { section.name = controls.recipeSectionName.value; }, 'Section renamed'));

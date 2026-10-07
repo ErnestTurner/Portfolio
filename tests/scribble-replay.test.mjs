@@ -220,6 +220,129 @@ test('complete motifs include t=0 and recipe transitions never bridge discontinu
   assert.ok(context.result.jump > 1, 'pen-up geometry jump must not be connected');
 });
 
+test('live recipe speed changes preserve the session, progress, and pause state', () => {
+  const source = html.slice(html.indexOf('function changeRecipePlaybackRate'), html.indexOf('function renderRecipeEditor'));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    let recipeProgram = { playbackRate:4, sections:[{ stages:[{}] }] };
+    let recipeOriginal = { playbackRate:4 };
+    let replaySession = null;
+    let recipeSession = { compiled:{ geometrySeconds:20, wallSeconds:5, totalSteps:100 }, completedSteps:41, operationIndex:2, geometryCarry:.001 };
+    let previousTime = 10;
+    const state = { running:true };
+    const controls = { recipePlayback:{ value:'1' } };
+    const messages = [];
+    let syncs = 0;
+    const performance = { now:() => 25 };
+    function cloneRecipe(value) { return JSON.parse(JSON.stringify(value)); }
+    function validateRecipe(value) { return value; }
+    function renderRecipeEditor(message = '') { messages.push(message); }
+    function syncControls() { syncs += 1; }
+    function leaveReplayForRemix() { throw new Error('active recipe speed change must not leave its session'); }
+    function setRecipeStatus() {}
+    ${source}
+    const identity = recipeSession;
+    const initial = { completedSteps:recipeSession.completedSteps, operationIndex:recipeSession.operationIndex, geometryCarry:recipeSession.geometryCarry };
+    changeRecipePlaybackRate();
+    const running = { same:recipeSession === identity, running:state.running, rate:recipeOriginal.playbackRate, wall:recipeSession.compiled.wallSeconds, progress:[recipeSession.completedSteps, recipeSession.operationIndex, recipeSession.geometryCarry], message:messages.at(-1), previousTime };
+    controls.recipePlayback.value = '4';
+    changeRecipePlaybackRate();
+    state.running = false;
+    controls.recipePlayback.value = '2';
+    changeRecipePlaybackRate();
+    const paused = { same:recipeSession === identity, running:state.running, rate:recipeOriginal.playbackRate, progress:[recipeSession.completedSteps, recipeSession.operationIndex, recipeSession.geometryCarry], message:messages.at(-1) };
+    recipeSession.completedSteps = recipeSession.compiled.totalSteps;
+    controls.recipePlayback.value = '.5';
+    changeRecipePlaybackRate();
+    this.result = { initial, running, paused, completedMessage:messages.at(-1), syncs };
+  `, context);
+  const { initial, running, paused, completedMessage, syncs } = context.result;
+  assert.equal(running.same, true);
+  assert.equal(running.running, true);
+  assert.equal(running.rate, 1);
+  assert.equal(running.wall, 20);
+  assert.deepEqual(Array.from(running.progress), Object.values(initial));
+  assert.match(running.message, /continues from its current position/);
+  assert.equal(running.previousTime, 25);
+  assert.equal(paused.same, true);
+  assert.equal(paused.running, false);
+  assert.equal(paused.rate, 2);
+  assert.deepEqual(Array.from(paused.progress), Object.values(initial));
+  assert.match(paused.message, /remains paused at its current position/);
+  assert.match(completedMessage, /recipe complete; applies to the next run/);
+  assert.equal(syncs, 4);
+});
+
+test('rapid live speed changes retain every deterministic recipe sample across transitions', () => {
+  const execution = html.slice(html.indexOf('function applyRecipeOperationForStep'), html.indexOf('function applyRecipe('));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    const CENTER = { x:300, y:300 };
+    let state, recipeOriginal, recipeSession, previousPen, stream, completions;
+    function positions(source = state) {
+      const elbowX = CENTER.x + source.length1 * Math.cos(source.angle1);
+      const elbowY = CENTER.y + source.length1 * Math.sin(source.angle1);
+      return { penX:elbowX + source.length2 * Math.cos(source.angle2), penY:elbowY + source.length2 * Math.sin(source.angle2) };
+    }
+    function breakStroke() { previousPen = null; }
+    function syncControls() {}
+    function setRecipeStatus(message) { if (message.startsWith('Recipe complete')) completions += 1; }
+    function addInk(point) { previousPen = { x:point.penX, y:point.penY }; stream.push(point.penX.toFixed(9) + ',' + point.penY.toFixed(9)); }
+    ${execution}
+    const operations = [
+      { name:'A', length1:90, length2:70, speed1:120, speed2:-80, offset:0, penDown:true, color:'#fff', width:1, seconds:1, steps:360, stepSeconds:1/360, endStep:360 },
+      { name:'B', length1:105, length2:45, speed1:-160, speed2:100, offset:35, penDown:true, color:'#0ff', width:2, seconds:1, steps:360, stepSeconds:1/360, endStep:720 },
+      { name:'C', length1:75, length2:110, speed1:95, speed2:-145, offset:-20, penDown:true, color:'#f0f', width:1.5, seconds:1, steps:360, stepSeconds:1/360, endStep:1080 }
+    ];
+    function begin(rate) {
+      state = { length1:0, length2:0, speed1:0, speed2:0, direction1:1, direction2:1, angle1:.2, angle2:1.1, inkColor:'#fff', lineWidth:1, penDown:false, running:true };
+      recipeOriginal = { playbackRate:rate };
+      recipeSession = { compiled:{ operations, totalSteps:1080 }, completedSteps:0, operationIndex:-1, geometryCarry:0 };
+      previousPen = null; stream = []; completions = 0;
+    }
+    function finish() { while (state.running) advanceRecipe(.017); }
+    begin(1); finish();
+    const fixed = { stream:[...stream], steps:recipeSession.completedSteps, completions };
+    begin(4);
+    advanceRecipe(.249);
+    recipeOriginal.playbackRate = 1;
+    advanceRecipe(.012);
+    recipeOriginal.playbackRate = 4;
+    advanceRecipe(.001);
+    recipeOriginal.playbackRate = .5;
+    advanceRecipe(.013);
+    recipeOriginal.playbackRate = 2;
+    advanceRecipe(.247);
+    const beforePause = recipeSession.completedSteps;
+    state.running = false;
+    recipeOriginal.playbackRate = 4;
+    const afterWait = recipeSession.completedSteps;
+    state.running = true;
+    recipeOriginal.playbackRate = 1;
+    finish();
+    this.result = { fixed, changed:{ stream:[...stream], steps:recipeSession.completedSteps, completions }, beforePause, afterWait };
+  `, context);
+  assert.equal(context.result.beforePause, context.result.afterWait);
+  assert.equal(context.result.fixed.steps, 1080);
+  assert.equal(context.result.changed.steps, 1080);
+  assert.equal(context.result.fixed.completions, 1);
+  assert.equal(context.result.changed.completions, 1);
+  assert.deepEqual(Array.from(context.result.changed.stream), Array.from(context.result.fixed.stream));
+});
+
+test('quick actions route recipe share and replay separately from cue-score controls', () => {
+  const syncStart = html.indexOf('function syncControls');
+  const sync = html.slice(syncStart, html.indexOf("for (const key of ['length1', 'length2'])", syncStart));
+  const handlers = html.slice(html.indexOf("controls.mobilePause.addEventListener"), html.indexOf("document.querySelector('#clear')"));
+  assert.match(sync, /recipeQuickActions = Boolean\(recipeSession && recipeOriginal\)/);
+  assert.match(sync, /'Replay recipe' : 'Replay score'/);
+  assert.match(sync, /'Share recipe' : 'Share score'/);
+  assert.match(sync, /recipeQuickActions \? false : controls\.replayOriginal\.disabled/);
+  assert.match(handlers, /if \(recipeSession && recipeOriginal\) requestRecipeStart\(recipeOriginal/);
+  assert.match(handlers, /if \(recipeSession && recipeOriginal\) copyRecipeLink\(\)/);
+  assert.match(handlers, /else document\.querySelector\('#copyReplay'\)\.click\(\)/);
+});
+
 test('recipe import stops running, paused, and completed sessions before sharing the imported recipe', async () => {
   const leave = html.slice(html.indexOf('function leaveReplayForRemix'), html.indexOf('function replayCueIndexForStep'));
   const imported = html.slice(html.indexOf('async function importRecipe'), html.indexOf('async function copyRecipeLink'));

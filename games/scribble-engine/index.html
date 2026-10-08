@@ -242,8 +242,16 @@
     #copyRecipeLink { border-color: #6687a7; color: var(--blue); }
     .recipe-status { min-height: 1.45em; margin: 9px 0 0; color: var(--muted); font: 700 10px/1.45 "Courier New", monospace; }
     .recipe-status.error { color: var(--pink); }
-    .mobile-quick { display: none; }
-    .mobile-tabs { display: none; }
+    .mobile-quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 7px; margin: 0 0 9px; }
+    .mobile-quick button[hidden] { display: none; }
+    .mobile-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 0 0 10px; }
+    .mobile-tabs button { min-width: 0; color: var(--muted); }
+    .mobile-tabs button[aria-selected="true"] { border-color: var(--pink); background: #342233; color: var(--ink); box-shadow: inset 0 -2px var(--pink); }
+    .workspace-status { min-height: 1.35em; margin: -3px 0 8px; color: var(--blue); font: 700 10px/1.35 "Courier New", monospace; }
+    .workspace-stage { min-width: 0; }
+    [data-workspace-content][hidden] { display: none !important; }
+    .mode-speed { margin-bottom: 12px; }
+    .mode-speed label { display: grid; gap: 5px; margin: 0; color: var(--muted); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; }
     .control-section { margin: 0; padding: 0; border: 0; }
     .control-section > summary { display: none; }
     .control-section > .section-body { display: contents; }
@@ -263,6 +271,7 @@
     .replay-tools legend { color: var(--blue); }
     .replay-grid { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: 10px; align-items: end; }
     .replay-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .replay-grid > .replay-actions { grid-column: 1 / -1; }
     .replay-link-wrap { display: block; margin: 11px 0 0; }
     .replay-link-wrap[hidden] { display: none; }
     .replay-link-wrap span { display: block; margin-bottom: 6px; color: #dbe5ee; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
@@ -355,16 +364,17 @@
       .arcade-back { margin: 0 0 3px; font-size: 9px; }
       .eyebrow, .invitation, .designation { display: none; }
       h1 { margin: 0 0 5px; font-size: clamp(1.35rem, 6vw, 1.75rem); line-height: 1; }
-      .mobile-quick { display: grid; width: 100%; min-width: 0; flex: 0 0 auto; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0 0 5px; }
+      .mobile-quick { width: 100%; min-width: 0; flex: 0 0 auto; grid-template-columns: repeat(auto-fit, minmax(74px, 1fr)); gap: 4px; margin: 0 0 5px; }
       .mobile-quick button { min-width: 0; min-height: 44px; padding: 5px 3px; font-size: clamp(.62rem, 2.4vw, .72rem); line-height: 1.05; }
       .mobile-quick #mobilePause, .mobile-quick #mobilePlayScore { border-color: var(--mint); color: var(--mint); }
-      .mobile-tabs { display: grid; width: 100%; min-width: 0; flex: 0 0 auto; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-bottom: 5px; }
+      .mobile-tabs { width: 100%; min-width: 0; flex: 0 0 auto; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-bottom: 5px; }
       .mobile-tabs button { min-width: 0; min-height: 44px; padding: 6px 3px; border-radius: 5px; color: var(--muted); font-size: .72rem; }
       .mobile-tabs button[aria-selected="true"] { border-color: var(--pink); background: #342233; color: var(--ink); box-shadow: inset 0 -2px var(--pink); }
-      .control-section { display: none; position: relative; width: 100%; min-width: 0; flex: 1 1 auto; min-height: 0; margin: 0; border: 1px solid var(--edge); border-radius: 9px; background: #ffffff03; overflow: hidden; }
-      .control-section[open] { display: flex; flex-direction: column; }
+      .workspace-stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+      .control-section { display: none; position: relative; width: 100%; min-width: 0; min-height: 0; margin: 0 0 7px; border: 1px solid var(--edge); border-radius: 9px; background: #ffffff03; overflow: hidden; }
+      .control-section[open] { display: block; }
       .control-section > summary { display: none; }
-      .control-section > .section-body { display: block; position: absolute; inset: 0; width: 100%; min-height: 0; padding: 7px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+      .control-section > .section-body { display: block; width: 100%; min-height: 0; padding: 7px; }
       .control-section fieldset { min-width: 0; margin-bottom: 8px; }
       .control-section fieldset:last-child { margin-bottom: 0; }
       .cue-row { display: block; padding: 0; overflow: hidden; }
@@ -421,16 +431,24 @@
         <button id="mobileCopyReplay" type="button" aria-label="Copy replay link">Share</button>
       </div>
 
-      <div class="mobile-tabs" role="tablist" aria-label="Scribble controls">
-        <button id="mobileTabMachine" type="button" role="tab" aria-controls="mobilePanelMachine" aria-selected="false" tabindex="-1" data-mobile-tab="machine">Machine</button>
-        <button id="mobileTabInk" type="button" role="tab" aria-controls="mobilePanelInk" aria-selected="false" tabindex="-1" data-mobile-tab="ink">Ink</button>
-        <button id="mobileTabSequence" type="button" role="tab" aria-controls="mobilePanelSequence" aria-selected="true" tabindex="0" data-mobile-tab="sequence">Score</button>
-        <button id="mobileTabProject" type="button" role="tab" aria-controls="mobilePanelProject" aria-selected="false" tabindex="-1" data-mobile-tab="project">More</button>
+      <div class="mobile-tabs" role="tablist" aria-label="Scribble workspaces">
+        <button id="workspaceTabDraw" type="button" role="tab" aria-selected="true" tabindex="0" data-workspace-tab="draw">Draw</button>
+        <button id="workspaceTabRecipe" type="button" role="tab" aria-selected="false" tabindex="-1" data-workspace-tab="recipe">Recipe</button>
+        <button id="workspaceTabReplay" type="button" role="tab" aria-selected="false" tabindex="-1" data-workspace-tab="replay">Replay</button>
       </div>
+      <p class="workspace-status" id="workspaceStatus" role="status" aria-live="polite">Draw workspace active</p>
 
-      <details class="control-section" id="mobilePanelMachine" data-mobile-section="machine" role="tabpanel" aria-labelledby="mobileTabMachine" open>
+      <div class="workspace-stage">
+
+      <details class="control-section" id="mobilePanelMachine" data-workspace-section="draw" open>
         <summary>Machine <span>Arms and motion</span></summary>
         <div class="section-body">
+      <fieldset class="mode-speed">
+        <legend>Draw Transport</legend>
+        <label for="drawPlayback">Live drawing speed
+          <select id="drawPlayback"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select>
+        </label>
+      </fieldset>
       <fieldset class="arm-one">
         <legend>Arm 1</legend>
         <div class="control-row">
@@ -463,7 +481,7 @@
         </div>
       </details>
 
-      <details class="control-section" id="mobilePanelInk" data-mobile-section="ink" role="tabpanel" aria-labelledby="mobileTabInk" open>
+      <details class="control-section" id="mobilePanelInk" data-workspace-section="draw" open>
         <summary>Ink <span>Marks and export</span></summary>
         <div class="section-body">
       <fieldset class="ink-tools">
@@ -516,10 +534,10 @@
         </div>
       </details>
 
-      <details class="control-section" id="mobilePanelSequence" data-mobile-section="sequence" role="tabpanel" aria-labelledby="mobileTabSequence" open>
+      <details class="control-section" id="mobilePanelSequence" data-workspace-section="sequence" open>
         <summary>Sequence <span>Cues and replay</span></summary>
         <div class="section-body">
-      <fieldset class="score-tools">
+      <fieldset class="score-tools" data-workspace-content="replay" hidden>
         <legend>Cue Score</legend>
         <p class="setup-note">Give the machine a tiny score: timed ink changes and pen lifts that replay exactly.</p>
         <div class="score-presets" aria-label="Authored score presets">
@@ -536,7 +554,7 @@
         <p class="score-status" id="scoreStatus" role="status" aria-live="polite">4 phases / 24 seconds scored</p>
       </fieldset>
 
-      <fieldset class="recipe-tools">
+      <fieldset class="recipe-tools" data-workspace-content="recipe" hidden>
         <legend>Recipe Bench</legend>
         <p class="setup-note">Build repeated drawing instructions without turning the bench into a wall of controls. Geometry time and playback speed stay separate.</p>
         <div class="recipe-presets" aria-label="Recipe examples">
@@ -595,13 +613,17 @@
         <p class="recipe-status" id="recipeStatus" role="status" aria-live="polite">8 repeated motifs · ready to compile</p>
       </fieldset>
 
-      <fieldset class="replay-tools">
+      <fieldset class="replay-tools" data-workspace-content="replay" hidden>
         <legend>Replay Link</legend>
         <p class="setup-note">Shares this starting setup, cue score, and finite run — never your artwork or project history.</p>
         <div class="replay-grid">
           <div>
             <label class="compact-label" for="replayDuration">Run time</label>
             <input id="replayDuration" type="number" min="5" max="60" step="1" value="24" inputmode="numeric">
+          </div>
+          <div>
+            <label class="compact-label" for="replayPlayback">Replay speed</label>
+            <select id="replayPlayback"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select>
           </div>
           <div class="replay-actions">
             <button id="copyReplay" type="button">Copy Replay Link</button>
@@ -617,7 +639,7 @@
         </div>
       </details>
 
-      <details class="control-section" id="mobilePanelProject" data-mobile-section="project" role="tabpanel" aria-labelledby="mobileTabProject" open>
+      <details class="control-section" id="mobilePanelProject" data-workspace-section="draw" open>
         <summary>Project <span>Save and restore</span></summary>
         <div class="section-body">
       <fieldset class="checkpoint-tools">
@@ -654,6 +676,7 @@
       </div>
         </div>
       </details>
+      </div>
     </section>
   </main>
 
@@ -756,6 +779,10 @@
     let recipeSession = null;
     let selectedRecipeSection = 0;
     let selectedRecipeStage = 0;
+    let activeWorkspace = 'draw';
+    let drawPlaybackRate = 1;
+    let replayPlaybackRate = 1;
+    const workspaceSnapshots = { draw: null, recipe: null, replay: null };
 
     // Kinematics: both angles are absolute page angles, exactly as shown here.
     function positions(source = state) {
@@ -1597,7 +1624,6 @@
 
     function applyReplay(replay, { autoplay = true, source = 'link' } = {}) {
       clearInk(true);
-      recipeSession = null;
       replayOriginal = cloneReplay(replay);
       replaySession = {
         elapsed: 0,
@@ -1625,6 +1651,7 @@
     }
 
     function requestReplayStart(replay, options = {}) {
+      if (activeWorkspace !== 'replay') activateWorkspace('replay');
       if (!hasInk) {
         applyReplay(replay, options);
         return;
@@ -1640,9 +1667,11 @@
     }
 
     function leaveReplayForRemix() {
-      if (!replaySession && !recipeSession) return;
-      replaySession = null;
-      recipeSession = null;
+      const leavingRecipe = activeWorkspace === 'recipe' && recipeSession;
+      const leavingReplay = activeWorkspace === 'replay' && replaySession;
+      if (!leavingRecipe && !leavingReplay) return;
+      if (leavingRecipe) recipeSession = null;
+      if (leavingReplay) replaySession = null;
       state.running = false;
       breakStroke();
       setReplayStatus('Remix mode - current changes are not part of the original replay. Make a new link to share this starting setup.');
@@ -1685,7 +1714,7 @@
 
     function advanceReplay(elapsedSeconds) {
       if (!replaySession) return;
-      replaySession.elapsed = Math.min(replayOriginal.duration, replaySession.elapsed + elapsedSeconds);
+      replaySession.elapsed = Math.min(replayOriginal.duration, replaySession.elapsed + elapsedSeconds * replayPlaybackRate);
       let targetSteps = Math.floor(replaySession.elapsed * REPLAY_STEPS_PER_SECOND + 1e-7);
       if (replaySession.elapsed >= replayOriginal.duration) targetSteps = replaySession.totalSteps;
       while (replaySession.completedSteps < targetSteps && state.running) {
@@ -2015,7 +2044,6 @@
       recipeOriginal = validateRecipe(cloneRecipe(recipe));
       const compiled = compileRecipe(recipeOriginal);
       recipeSession = { compiled, completedSteps: 0, operationIndex: -1, geometryCarry: 0 };
-      replaySession = null;
       recipeProgram = cloneRecipe(recipeOriginal);
       selectedRecipeSection = 0;
       selectedRecipeStage = 0;
@@ -2036,6 +2064,7 @@
     }
 
     function requestRecipeStart(recipe, options = {}) {
+      if (activeWorkspace !== 'recipe') activateWorkspace('recipe');
       if (!hasInk) { applyRecipe(recipe, options); return; }
       pendingSetup = null;
       pendingReplay = null;
@@ -2303,6 +2332,7 @@
 
     // Motion: subdivide elapsed time so fast settings still leave a smooth trail.
     function advance(elapsedSeconds) {
+      elapsedSeconds *= drawPlaybackRate;
       const radians1 = state.direction1 * state.speed1 * Math.PI / 180;
       const radians2 = state.direction2 * state.speed2 * Math.PI / 180;
       const fastest = Math.max(Math.abs(radians1), Math.abs(radians2));
@@ -2322,9 +2352,9 @@
       const elapsed = Math.min((now - previousTime) / 1000, 0.05);
       previousTime = now;
       if (state.running) {
-        if (recipeSession) advanceRecipe(elapsed);
-        else if (replaySession) advanceReplay(elapsed);
-        else advance(elapsed);
+        if (activeWorkspace === 'recipe' && recipeSession) advanceRecipe(elapsed);
+        else if (activeWorkspace === 'replay' && replaySession) advanceReplay(elapsed);
+        else if (activeWorkspace === 'draw') advance(elapsed);
       }
       drawMechanism(positions());
       requestAnimationFrame(frame);
@@ -2336,6 +2366,7 @@
       length2: document.querySelector('#length2'),
       speed1: document.querySelector('#speed1'),
       speed2: document.querySelector('#speed2'),
+      drawPlayback: document.querySelector('#drawPlayback'),
       direction1: document.querySelector('#direction1'),
       direction2: document.querySelector('#direction2'),
       inkColor: document.querySelector('#inkColor'),
@@ -2359,6 +2390,7 @@
       mobilePlayScore: document.querySelector('#mobilePlayScore'),
       mobileReplayOriginal: document.querySelector('#mobileReplayOriginal'),
       mobileCopyReplay: document.querySelector('#mobileCopyReplay'),
+      workspaceStatus: document.querySelector('#workspaceStatus'),
       recipeName: document.querySelector('#recipeName'),
       recipePlayback: document.querySelector('#recipePlayback'),
       recipeSection: document.querySelector('#recipeSection'),
@@ -2388,50 +2420,71 @@
       recipeFile: document.querySelector('#recipeFile'),
       recipeLink: document.querySelector('#recipeLink'),
       replayDuration: document.querySelector('#replayDuration'),
+      replayPlayback: document.querySelector('#replayPlayback'),
       replayOriginal: document.querySelector('#replayOriginal'),
       replayLink: document.querySelector('#replayLink'),
       pause: document.querySelector('#pause')
     };
 
     const mobileWorkspaceQuery = window.matchMedia('(max-width: 760px), (max-width: 900px) and (max-height: 520px), (max-width: 1100px) and (hover: none) and (pointer: coarse)');
-    const mobileSections = [...document.querySelectorAll('[data-mobile-section]')];
-    const mobileTabs = [...document.querySelectorAll('[data-mobile-tab]')];
-    let activeMobileSection = 'sequence';
+    const workspaceNames = ['draw', 'recipe', 'replay'];
+    const workspaceSections = [...document.querySelectorAll('[data-workspace-section]')];
+    const workspaceContents = [...document.querySelectorAll('[data-workspace-content]')];
+    const workspaceTabs = [...document.querySelectorAll('[data-workspace-tab]')];
 
-    function activateMobileSection(name, { focus = false } = {}) {
-      if (mobileSections.some(section => section.dataset.mobileSection === name)) activeMobileSection = name;
-      mobileSections.forEach(section => {
-        section.open = !mobileWorkspaceQuery.matches || section.dataset.mobileSection === activeMobileSection;
+    function captureWorkspaceState() {
+      return { ...state, running: false };
+    }
+
+    function renderWorkspace({ focus = false } = {}) {
+      workspaceSections.forEach(section => {
+        section.open = activeWorkspace === 'draw'
+          ? section.dataset.workspaceSection === 'draw'
+          : section.dataset.workspaceSection === 'sequence';
       });
-      mobileTabs.forEach(tab => {
-        const selected = tab.dataset.mobileTab === activeMobileSection;
+      workspaceContents.forEach(content => { content.hidden = content.dataset.workspaceContent !== activeWorkspace; });
+      workspaceTabs.forEach(tab => {
+        const selected = tab.dataset.workspaceTab === activeWorkspace;
         tab.setAttribute('aria-selected', String(selected));
         tab.tabIndex = selected ? 0 : -1;
         if (focus && selected) tab.focus();
       });
     }
 
-    function configureMobileWorkspace() {
-      activateMobileSection(activeMobileSection);
-      renderCueEditor();
+    function activateWorkspace(name, { focus = false, initial = false } = {}) {
+      if (!workspaceNames.includes(name)) return false;
+      if (!initial && name !== activeWorkspace) {
+        workspaceSnapshots[activeWorkspace] = captureWorkspaceState();
+        state.running = false;
+        breakStroke();
+        activeWorkspace = name;
+        if (!workspaceSnapshots[name]) workspaceSnapshots[name] = captureWorkspaceState();
+        Object.assign(state, workspaceSnapshots[name], { running: false });
+        previousTime = performance.now();
+      } else {
+        activeWorkspace = name;
+      }
+      renderWorkspace({ focus });
+      controls.workspaceStatus.textContent = initial
+        ? `${name[0].toUpperCase()}${name.slice(1)} workspace active`
+        : `${name[0].toUpperCase()}${name.slice(1)} workspace active - press ${name === 'draw' ? 'Resume Draw' : name === 'recipe' ? 'Play recipe or Resume Recipe' : 'Play score or Resume Replay'} when ready`;
+      syncControls();
+      return true;
     }
 
-    mobileTabs.forEach((tab, tabIndex) => {
-      tab.addEventListener('click', () => activateMobileSection(tab.dataset.mobileTab));
+    workspaceTabs.forEach((tab, tabIndex) => {
+      tab.addEventListener('click', () => activateWorkspace(tab.dataset.workspaceTab));
       tab.addEventListener('keydown', event => {
         let nextIndex = null;
-        if (event.key === 'ArrowRight') nextIndex = (tabIndex + 1) % mobileTabs.length;
-        if (event.key === 'ArrowLeft') nextIndex = (tabIndex - 1 + mobileTabs.length) % mobileTabs.length;
+        if (event.key === 'ArrowRight') nextIndex = (tabIndex + 1) % workspaceTabs.length;
+        if (event.key === 'ArrowLeft') nextIndex = (tabIndex - 1 + workspaceTabs.length) % workspaceTabs.length;
         if (event.key === 'Home') nextIndex = 0;
-        if (event.key === 'End') nextIndex = mobileTabs.length - 1;
+        if (event.key === 'End') nextIndex = workspaceTabs.length - 1;
         if (nextIndex === null) return;
         event.preventDefault();
-        activateMobileSection(mobileTabs[nextIndex].dataset.mobileTab, { focus: true });
+        activateWorkspace(workspaceTabs[nextIndex].dataset.workspaceTab, { focus: true });
       });
     });
-    if (typeof mobileWorkspaceQuery.addEventListener === 'function') mobileWorkspaceQuery.addEventListener('change', configureMobileWorkspace);
-    else if (typeof mobileWorkspaceQuery.addListener === 'function') mobileWorkspaceQuery.addListener(configureMobileWorkspace);
-    configureMobileWorkspace();
 
     function updateVectorStatus() {
       const snapshot = exportDialog.open && exportSnapshot ? exportSnapshot : null;
@@ -2466,6 +2519,8 @@
       controls.strokeStyle.value = state.strokeStyle;
       controls.paperColor.value = state.paperColor;
       controls.transparentPaper.checked = state.transparentPaper;
+      controls.drawPlayback.value = String(drawPlaybackRate);
+      controls.replayPlayback.value = String(replayPlaybackRate);
       controls.penToggle.setAttribute('aria-pressed', String(state.penDown));
       controls.penToggle.setAttribute('aria-label', state.penDown
         ? 'Pen is down and drawing. Activate to lift it.'
@@ -2480,24 +2535,44 @@
         ? `Saved ${checkpoint.savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · current session only`
         : 'Empty · current page session only';
       controls.replayOriginal.disabled = !replayOriginal;
-      const recipeQuickActions = Boolean(recipeSession && recipeOriginal);
-      controls.pause.textContent = recipeSession
-        ? (state.running ? 'Pause Recipe' : recipeSession.completedSteps >= recipeSession.compiled.totalSteps ? 'Recipe Complete' : 'Resume Recipe')
-        : replaySession
-          ? (state.running ? 'Pause Replay' : replaySession.completedSteps >= replaySession.totalSteps ? 'Replay Complete' : 'Resume Replay')
-          : (state.running ? 'Pause' : 'Resume');
-      controls.pause.disabled = Boolean((replaySession && replaySession.completedSteps >= replaySession.totalSteps) || (recipeSession && recipeSession.completedSteps >= recipeSession.compiled.totalSteps));
+      const recipeComplete = Boolean(recipeSession && recipeSession.completedSteps >= recipeSession.compiled.totalSteps);
+      const replayComplete = Boolean(replaySession && replaySession.completedSteps >= replaySession.totalSteps);
+      controls.pause.textContent = activeWorkspace === 'draw'
+        ? (state.running ? 'Pause Draw' : 'Resume Draw')
+        : activeWorkspace === 'recipe'
+          ? (!recipeSession ? 'Recipe idle' : recipeComplete ? 'Recipe Complete' : state.running ? 'Pause Recipe' : 'Resume Recipe')
+          : (!replaySession ? 'Replay idle' : replayComplete ? 'Replay Complete' : state.running ? 'Pause Replay' : 'Resume Replay');
+      controls.pause.disabled = activeWorkspace === 'recipe'
+        ? !recipeSession || recipeComplete
+        : activeWorkspace === 'replay' ? !replaySession || replayComplete : false;
       controls.mobilePause.textContent = controls.pause.textContent;
       controls.mobilePause.disabled = controls.pause.disabled;
       controls.mobilePlayScore.textContent = 'Play score';
       controls.mobilePlayScore.disabled = controls.playScore.disabled;
-      controls.mobileReplayOriginal.textContent = recipeQuickActions ? 'Replay recipe' : 'Replay score';
-      controls.mobileReplayOriginal.setAttribute('aria-label', recipeQuickActions ? 'Replay current recipe' : 'Replay original cue score');
-      controls.mobileReplayOriginal.disabled = recipeQuickActions ? false : controls.replayOriginal.disabled;
-      controls.mobileCopyReplay.textContent = recipeQuickActions ? 'Share recipe' : 'Share score';
-      controls.mobileCopyReplay.setAttribute('aria-label', recipeQuickActions ? 'Copy recipe link' : 'Copy cue-score replay link');
+      controls.mobilePlayScore.hidden = activeWorkspace !== 'replay';
+      controls.mobileReplayOriginal.hidden = activeWorkspace === 'draw';
+      controls.mobileCopyReplay.hidden = activeWorkspace === 'draw';
+      controls.mobileReplayOriginal.textContent = activeWorkspace === 'recipe' ? 'Replay recipe' : 'Replay score';
+      controls.mobileReplayOriginal.setAttribute('aria-label', activeWorkspace === 'recipe' ? 'Replay current recipe' : 'Replay original cue score');
+      controls.mobileReplayOriginal.disabled = activeWorkspace === 'recipe' ? !recipeSession || !recipeOriginal : controls.replayOriginal.disabled;
+      controls.mobileCopyReplay.textContent = activeWorkspace === 'recipe' ? 'Share recipe' : 'Share score';
+      controls.mobileCopyReplay.setAttribute('aria-label', activeWorkspace === 'recipe' ? 'Copy recipe link' : 'Copy cue-score replay link');
       updateVectorStatus();
     }
+
+    controls.drawPlayback.addEventListener('change', () => {
+      drawPlaybackRate = Number(controls.drawPlayback.value);
+      previousTime = performance.now();
+      controls.workspaceStatus.textContent = `Draw speed changed to ${drawPlaybackRate}x - ${state.running && activeWorkspace === 'draw' ? 'drawing continues' : 'Draw remains paused'}`;
+      syncControls();
+    });
+
+    controls.replayPlayback.addEventListener('change', () => {
+      replayPlaybackRate = Number(controls.replayPlayback.value);
+      previousTime = performance.now();
+      controls.workspaceStatus.textContent = `Replay speed changed to ${replayPlaybackRate}x - ${state.running && activeWorkspace === 'replay' ? 'replay continues' : 'Replay remains paused'}`;
+      syncControls();
+    });
 
     for (const key of ['length1', 'length2']) {
       controls[key].addEventListener('input', event => {
@@ -2580,20 +2655,21 @@
 
     controls.pause.addEventListener('click', () => {
       state.running = !state.running;
-      // Replay time is frozen while paused, so reconnecting the same deterministic
-      // path is safe. Free drawing still breaks to avoid bridging wall-clock gaps.
-      if (!replaySession && !recipeSession) breakStroke();
+      // Deterministic sessions reconnect the same sample path. Draw mode starts
+      // a new stroke so a wall-clock pause never creates a bridge.
+      if (activeWorkspace === 'draw') breakStroke();
       previousTime = performance.now();
+      controls.workspaceStatus.textContent = `${activeWorkspace[0].toUpperCase()}${activeWorkspace.slice(1)} ${state.running ? 'resumed' : 'paused'}`;
       syncControls();
     });
     controls.mobilePause.addEventListener('click', () => controls.pause.click());
     controls.mobilePlayScore.addEventListener('click', () => controls.playScore.click());
     controls.mobileReplayOriginal.addEventListener('click', () => {
-      if (recipeSession && recipeOriginal) requestRecipeStart(recipeOriginal, { autoplay: true, source: 'recipe' });
-      else controls.replayOriginal.click();
+      if (activeWorkspace === 'recipe' && recipeSession && recipeOriginal) requestRecipeStart(recipeOriginal, { autoplay: true, source: 'recipe' });
+      else if (activeWorkspace === 'replay') controls.replayOriginal.click();
     });
     controls.mobileCopyReplay.addEventListener('click', () => {
-      if (recipeSession && recipeOriginal) copyRecipeLink();
+      if (activeWorkspace === 'recipe') copyRecipeLink();
       else document.querySelector('#copyReplay').click();
     });
 
@@ -2778,6 +2854,12 @@
       cueScore = cloneCues(DEFAULT_CUES);
       cueHistory = [];
       selectedCueIndex = 0;
+      activeWorkspace = 'draw';
+      drawPlaybackRate = 1;
+      replayPlaybackRate = 1;
+      workspaceSnapshots.draw = null;
+      workspaceSnapshots.recipe = null;
+      workspaceSnapshots.replay = null;
       controls.replayDuration.value = '24';
       Object.assign(state, DEFAULTS, { running: true });
       clearInk(false);
@@ -2787,6 +2869,8 @@
       selectedRecipeSection = 0;
       selectedRecipeStage = 0;
       renderRecipeEditor('Default recipe restored');
+      renderWorkspace();
+      controls.workspaceStatus.textContent = 'Draw workspace active - defaults restored';
       syncControls();
     });
 
@@ -2824,6 +2908,8 @@
     recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES['orbit-rosette']));
     renderCueEditor();
     renderRecipeEditor();
+    workspaceSnapshots.draw = captureWorkspaceState();
+    activateWorkspace('draw', { initial: true });
     syncControls();
     replayFromLocation({ initial: true });
     drawMechanism(positions());

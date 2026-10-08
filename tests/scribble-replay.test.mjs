@@ -6,27 +6,130 @@ import vm from 'node:vm';
 
 const html = await readFile(new URL('../games/scribble-engine/index.html', import.meta.url), 'utf8');
 
-test('mobile workspace keeps the stage and transport visible while controls use one bounded panel', () => {
+test('mobile workspaces keep the canvas and one mode-specific control stack in the viewport', () => {
   assert.match(html, /height: 100svh/);
   assert.match(html, /height: 100dvh/);
   assert.match(html, /grid-template-rows: minmax\(132px, 44dvh\) minmax\(0, 1fr\)/);
   assert.match(html, /overscroll-behavior: contain/);
-  assert.match(html, /role="tablist" aria-label="Scribble controls"/);
-  assert.equal((html.match(/role="tab"/g) || []).length, 4);
-  assert.equal((html.match(/role="tabpanel"/g) || []).length, 4);
-  assert.match(html, /data-mobile-tab="machine"/);
-  assert.match(html, /data-mobile-tab="ink"/);
-  assert.match(html, /data-mobile-tab="sequence"/);
-  assert.match(html, /data-mobile-tab="project"/);
-  assert.match(html, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(html, /role="tablist" aria-label="Scribble workspaces"/);
+  assert.equal((html.match(/role="tab"/g) || []).length, 3);
+  assert.match(html, /data-workspace-tab="draw"/);
+  assert.match(html, /data-workspace-tab="recipe"/);
+  assert.match(html, /data-workspace-tab="replay"/);
+  assert.match(html, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.match(html, /class="workspace-stage"/);
+  assert.match(html, /id="drawPlayback"/);
+  assert.match(html, /id="recipePlayback"/);
+  assert.match(html, /id="replayPlayback"/);
   assert.match(html, /min-height: 44px/);
   assert.match(html, /\(max-width: 1100px\) and \(hover: none\) and \(pointer: coarse\)/);
-  assert.match(html, /function activateMobileSection/);
+  assert.match(html, /function activateWorkspace/);
+  assert.match(html, /workspaceSnapshots\[activeWorkspace\] = captureWorkspaceState\(\)/);
   assert.match(html, /event\.key === 'ArrowRight'/);
   assert.match(html, /event\.key === 'Home'/);
   assert.match(html, /document\.createElement\('details'\)/);
   assert.match(html, /selectedCueIndex = index/);
   assert.match(html, /\.cue-row\[open\] > \.cue-body/);
+});
+
+test('workspace switches pause, snapshot, and restore each mode without hidden advancement', () => {
+  const source = html.slice(html.indexOf('const workspaceNames'), html.indexOf('function updateVectorStatus'));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    const state = { angle1:1, angle2:2, running:true, penDown:true };
+    let activeWorkspace = 'draw';
+    const workspaceSnapshots = { draw:null, recipe:null, replay:null };
+    const sections = ['draw','draw','sequence','draw'].map(name => ({ dataset:{ workspaceSection:name }, open:true }));
+    const contents = ['recipe','replay','replay'].map(name => ({ dataset:{ workspaceContent:name }, hidden:false }));
+    const tabs = ['draw','recipe','replay'].map(name => ({ dataset:{ workspaceTab:name }, tabIndex:0, addEventListener(){}, setAttribute(key,value){ this[key]=value; }, focus(){ this.focused=true; } }));
+    const document = { querySelectorAll(selector) { if (selector === '[data-workspace-section]') return sections; if (selector === '[data-workspace-content]') return contents; return tabs; } };
+    const controls = { workspaceStatus:{ textContent:'' } };
+    const performance = { now:() => 50 };
+    let previousTime = 0;
+    let breaks = 0;
+    let syncs = 0;
+    function breakStroke(){ breaks += 1; }
+    function syncControls(){ syncs += 1; }
+    ${source}
+    activateWorkspace('recipe');
+    const recipeEntry = { angle1:state.angle1, running:state.running };
+    state.angle1 = 2; state.running = true;
+    activateWorkspace('replay');
+    const replayEntry = { angle1:state.angle1, running:state.running };
+    state.angle1 = 3; state.running = true;
+    activateWorkspace('draw');
+    const drawReturn = { angle1:state.angle1, running:state.running };
+    state.running = true; state.angle1 = 1.5;
+    activateWorkspace('recipe');
+    const recipeReturn = { angle1:state.angle1, running:state.running };
+    activateWorkspace('draw');
+    this.result = { recipeEntry, replayEntry, drawReturn, recipeReturn, drawAgain:{ angle1:state.angle1, running:state.running }, breaks, syncs, activeWorkspace, sections, contents, tabs };
+  `, context);
+  const result = context.result;
+  assert.deepEqual({ ...result.recipeEntry }, { angle1:1, running:false });
+  assert.deepEqual({ ...result.replayEntry }, { angle1:2, running:false });
+  assert.deepEqual({ ...result.drawReturn }, { angle1:1, running:false });
+  assert.deepEqual({ ...result.recipeReturn }, { angle1:2, running:false });
+  assert.deepEqual({ ...result.drawAgain }, { angle1:1.5, running:false });
+  assert.equal(result.breaks, 5);
+  assert.equal(result.syncs, 5);
+  assert.equal(result.activeWorkspace, 'draw');
+  assert.match(html, /if \(activeWorkspace === 'recipe' && recipeSession\) advanceRecipe\(elapsed\)/);
+  assert.match(html, /else if \(activeWorkspace === 'replay' && replaySession\) advanceReplay\(elapsed\)/);
+  assert.match(html, /else if \(activeWorkspace === 'draw'\) advance\(elapsed\)/);
+});
+
+test('draw, recipe, and replay speeds are independently scoped', () => {
+  assert.match(html, /elapsedSeconds \*= drawPlaybackRate/);
+  assert.match(html, /elapsedSeconds \* replayPlaybackRate/);
+  assert.match(html, /elapsedSeconds \* recipeOriginal\.playbackRate/);
+  assert.match(html, /drawPlaybackRate = Number\(controls\.drawPlayback\.value\)/);
+  assert.match(html, /replayPlaybackRate = Number\(controls\.replayPlayback\.value\)/);
+  assert.doesNotMatch(html, /playbackRate: replayPlaybackRate/);
+});
+
+test('draw and replay speed controls scale wall time without changing replay samples', () => {
+  const drawSource = html.slice(html.indexOf('function advance(elapsedSeconds)'), html.indexOf('function frame(now)'));
+  const replaySource = html.slice(html.indexOf('function replayCueIndexForStep'), html.indexOf('function requestSetupLoad'));
+  const context = vm.createContext({});
+  vm.runInContext(`
+    const REPLAY_STEPS_PER_SECOND = 360;
+    const REPLAY_STEP_SECONDS = 1 / REPLAY_STEPS_PER_SECOND;
+    let drawPlaybackRate = 1;
+    let replayPlaybackRate = 1;
+    let replayOriginal;
+    let replaySession;
+    let selectedCueIndex = 0;
+    let state;
+    let stream;
+    let completions;
+    function positions(){ return { penX:state.angle1, penY:state.angle2 }; }
+    function addInk(){ stream.push(state.angle1.toFixed(12) + ',' + state.angle2.toFixed(12)); }
+    function breakStroke(){}
+    function syncControls(){}
+    function renderCueEditor(){}
+    function setReplayStatus(message){ if(message.startsWith('Replay complete')) completions += 1; }
+    ${drawSource}
+    ${replaySource}
+    function drawAt(rate){ drawPlaybackRate=rate; state={ direction1:1,direction2:-1,speed1:60,speed2:120,angle1:0,angle2:0,running:true }; stream=[]; advance(.25); return [state.angle1,state.angle2]; }
+    function replayAt(rate){
+      replayPlaybackRate=rate;
+      replayOriginal={ duration:1, cues:[{ seconds:1,color:'#fff',width:1,penDown:true }] };
+      replaySession={ elapsed:0,completedSteps:0,totalSteps:360,cueIndex:-1 };
+      state={ direction1:1,direction2:-1,speed1:60,speed2:120,angle1:0,angle2:0,running:true,inkColor:'#fff',lineWidth:1,penDown:true };
+      stream=[]; completions=0;
+      advanceReplay(1/rate);
+      return { stream:[...stream],steps:replaySession.completedSteps,completions };
+    }
+    this.result={ drawOne:drawAt(1),drawTwo:drawAt(2),replayQuarter:replayAt(.25),replayFour:replayAt(4) };
+  `, context);
+  assert.ok(Math.abs(context.result.drawTwo[0] - context.result.drawOne[0] * 2) < 1e-12);
+  assert.ok(Math.abs(context.result.drawTwo[1] - context.result.drawOne[1] * 2) < 1e-12);
+  assert.equal(context.result.replayQuarter.steps, 360);
+  assert.equal(context.result.replayFour.steps, 360);
+  assert.equal(context.result.replayQuarter.completions, 1);
+  assert.equal(context.result.replayFour.completions, 1);
+  assert.deepEqual(Array.from(context.result.replayFour.stream), Array.from(context.result.replayQuarter.stream));
 });
 
 test('cue-score replay links are versioned, bounded, and backward compatible', () => {
@@ -334,12 +437,12 @@ test('quick actions route recipe share and replay separately from cue-score cont
   const syncStart = html.indexOf('function syncControls');
   const sync = html.slice(syncStart, html.indexOf("for (const key of ['length1', 'length2'])", syncStart));
   const handlers = html.slice(html.indexOf("controls.mobilePause.addEventListener"), html.indexOf("document.querySelector('#clear')"));
-  assert.match(sync, /recipeQuickActions = Boolean\(recipeSession && recipeOriginal\)/);
+  assert.match(sync, /activeWorkspace === 'recipe'/);
   assert.match(sync, /'Replay recipe' : 'Replay score'/);
   assert.match(sync, /'Share recipe' : 'Share score'/);
-  assert.match(sync, /recipeQuickActions \? false : controls\.replayOriginal\.disabled/);
-  assert.match(handlers, /if \(recipeSession && recipeOriginal\) requestRecipeStart\(recipeOriginal/);
-  assert.match(handlers, /if \(recipeSession && recipeOriginal\) copyRecipeLink\(\)/);
+  assert.match(sync, /activeWorkspace === 'recipe' \? !recipeSession \|\| !recipeOriginal/);
+  assert.match(handlers, /if \(activeWorkspace === 'recipe' && recipeSession && recipeOriginal\) requestRecipeStart\(recipeOriginal/);
+  assert.match(handlers, /if \(activeWorkspace === 'recipe'\) copyRecipeLink\(\)/);
   assert.match(handlers, /else document\.querySelector\('#copyReplay'\)\.click\(\)/);
 });
 
@@ -351,6 +454,7 @@ test('recipe import stops running, paused, and completed sessions before sharing
   const result = await vm.runInContext(`
     let replaySession = null;
     let recipeSession = null;
+    let activeWorkspace = 'recipe';
     let recipeProgram = { name: 'Orbit Rosette' };
     let selectedRecipeSection = 4;
     let selectedRecipeStage = 3;

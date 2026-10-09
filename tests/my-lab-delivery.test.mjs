@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { operate, parseArgs } from "../scripts/my-lab-delivery.mjs";
+import { createRunner, DATABASES, operate, parseArgs, resolveTarget } from "../scripts/my-lab-delivery.mjs";
 
 const id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const deliveredUrl = "https://trikziklabs.slack.com/archives/C0C7669U84S/p1791565000000000";
@@ -34,6 +34,17 @@ test("operator arguments and receipt inputs are bounded", () => {
   assert.throws(() => operate("delivered", { id: "bad", "receipt-url": deliveredUrl, "receipt-id": "1791565000.000000" }, () => []));
   assert.throws(() => operate("delivered", { id, "receipt-url": "https://evil.example/archives/C/p1", "receipt-id": "1791565000.000000" }, () => []));
   assert.throws(() => operate("delivered", { id, "receipt-url": deliveredUrl, "receipt-id": "bad" }, () => []));
+});
+
+test("production operator target is explicit, allowlisted, and cannot create synthetic work", () => {
+  assert.deepEqual(resolveTarget({ target: "preview" }), { target: "preview", database: DATABASES.preview, operationValues: {} });
+  assert.throws(() => resolveTarget({ target: "production" }), /confirm-production/);
+  assert.throws(() => resolveTarget({ target: "production", "confirm-production": "yes" }), /confirm-production/);
+  assert.deepEqual(resolveTarget({ target: "production", "confirm-production": DATABASES.production, id }), { target: "production", database: DATABASES.production, operationValues: { id } });
+  assert.throws(() => resolveTarget({ target: "other" }), /preview or production/);
+  assert.throws(() => resolveTarget({ target: "preview", "confirm-production": DATABASES.production }), /invalid for the preview/);
+  assert.throws(() => createRunner("other", () => null), /not allowed/);
+  assert.throws(() => operate("queue-test", { destination: "https://trikziklabs.slack.com/archives/C0C7669U84S/p1791479634510259", "source-revision": "abcdef1" }, () => [], "production"), /disabled for production/);
 });
 
 test("synthetic queue record is explicit, bounded, and never impersonates an owner decision", () => {

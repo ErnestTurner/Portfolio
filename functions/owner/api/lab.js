@@ -27,10 +27,13 @@ function json(status, value) {
   }});
 }
 
-function enabled(env) {
+function enabledContext(env) {
+  const context = String(env.ANALYTICS_QUERY_CONTEXT || "");
   return env.ANALYTICS_DASHBOARD_ENABLED === "true"
-    && env.ANALYTICS_QUERY_CONTEXT === "test"
-    && Boolean(env.TRIKZIK_DB?.prepare);
+    && (context === "test" || context === "production")
+    && Boolean(env.TRIKZIK_DB?.prepare)
+    ? context
+    : "";
 }
 
 function text(value, max) {
@@ -135,8 +138,8 @@ function pendingWorkflow() {
 const DELIVERY = Object.freeze({
   automatic: false,
   operatorAvailable: true,
-  label: "Agent pickup required",
-  explanation: "Saving queues a bounded request for an authorized agent to pick up. It does not automatically message or wake Pip, Rivet, Slack, or any agent. Delivery, acceptance, and completion appear only after verified receipts are recorded.",
+  label: "Shared crew thread - agent pickup required",
+  explanation: "Saving queues a bounded request for an authorized agent to pick up in the shared crew thread. It does not automatically message or wake Pip, Rivet, Slack, or any agent. Delivery, acceptance, and completion appear only after verified receipts are recorded.",
 });
 
 function entry(project, decision, delivery) {
@@ -144,9 +147,11 @@ function entry(project, decision, delivery) {
 }
 
 async function authenticate(request, env) {
-  if (!enabled(env)) return { ok: false, response: unavailable() };
+  const context = enabledContext(env);
+  if (!context) return { ok: false, response: unavailable() };
   if (!sameOriginApiRequest(request, env)) return { ok: false, response: json(403, { error: "Request rejected" }) };
-  return requireOwner(request, env);
+  const access = await requireOwner(request, env);
+  return access.ok ? { ...access, context } : access;
 }
 
 async function projectRow(env, project) {
@@ -178,7 +183,7 @@ export async function onRequestGet({ request, env }) {
     if (!projects.length) return json(503, { error: "My Lab catalog is unavailable" });
     const decisions = new Map((decisionResult?.results || []).map(row => [row.project, row]));
     const deliveries = new Map((deliveryResult?.results || []).map(row => [`${row.project}:${row.decision_revision}`, row]));
-    return json(200, { context: "test", projects: projects.map(project => { const decision = decisions.get(project.id); return entry(project, decision, decision ? deliveries.get(`${project.id}:${decision.revision}`) : null); }), delivery: DELIVERY, generatedAt: new Date().toISOString() });
+    return json(200, { context: access.context, projects: projects.map(project => { const decision = decisions.get(project.id); return entry(project, decision, decision ? deliveries.get(`${project.id}:${decision.revision}`) : null); }), delivery: DELIVERY, generatedAt: new Date().toISOString() });
   } catch {
     return json(503, { error: "My Lab is unavailable" });
   }
@@ -217,16 +222,16 @@ export async function onRequestPost({ request, env }) {
     const enqueue = env.TRIKZIK_DB.prepare(ENQUEUE_SQL).bind(deliveryId, body.project, body.requestId, deliveryId);
     const [savedResult, deliveryResult] = await env.TRIKZIK_DB.batch([statement, enqueue]);
     const saved = savedResult?.results?.[0] || null, queued = deliveryResult?.results?.[0] || null;
-    if (saved && queued) return json(200, { context: "test", entry: entry(project, saved, queued), delivery: DELIVERY, repeated: false });
+    if (saved && queued) return json(200, { context: access.context, entry: entry(project, saved, queued), delivery: DELIVERY, repeated: false });
     if (saved && !queued) return json(503, { error: "My Lab save is unavailable" });
 
     const current = await decisionRow(env, body.project);
     if (current && current.request_id === body.requestId && current.decision === body.decision && current.note === body.note) {
       const existingDelivery = await deliveryBySource(env, current.request_id);
-      return json(200, { context: "test", entry: entry(project, current, existingDelivery), delivery: DELIVERY, repeated: true });
+      return json(200, { context: access.context, entry: entry(project, current, existingDelivery), delivery: DELIVERY, repeated: true });
     }
     const currentDelivery = current ? await deliveryByRevision(env, body.project, current.revision) : null;
-    return json(409, { context: "test", entry: entry(project, current, currentDelivery), delivery: DELIVERY, error: "A newer decision is already saved" });
+    return json(409, { context: access.context, entry: entry(project, current, currentDelivery), delivery: DELIVERY, error: "A newer decision is already saved" });
   } catch {
     return json(503, { error: "My Lab save is unavailable" });
   }

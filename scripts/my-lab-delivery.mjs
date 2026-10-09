@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-const DATABASE = "trikzik-analytics-test";
+export const DATABASES = Object.freeze({ preview: "trikzik-analytics-test", production: "trikzik-analytics-production" });
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const commands = new Set(["list", "show", "queue-existing", "queue-test", "delivered", "accepted", "completed"]);
 const states = ["queued", "delivered", "accepted", "completed"];
@@ -51,10 +51,22 @@ function parseWrangler(stdout) {
   return batches.flatMap(batch => Array.isArray(batch?.results) ? batch.results : []);
 }
 
-export function createRunner(spawn = spawnSync) {
+export function resolveTarget(values) {
+  const target = values.target || "preview";
+  if (!Object.hasOwn(DATABASES, target)) throw new Error("Target must be preview or production");
+  if (target === "production" && values["confirm-production"] !== DATABASES.production) throw new Error(`Production requires --confirm-production ${DATABASES.production}`);
+  if (target === "preview" && values["confirm-production"] !== undefined) throw new Error("Production confirmation is invalid for the preview target");
+  const operationValues = { ...values };
+  delete operationValues.target;
+  delete operationValues["confirm-production"];
+  return { target, database: DATABASES[target], operationValues };
+}
+
+export function createRunner(database = DATABASES.preview, spawn = spawnSync) {
+  if (!Object.values(DATABASES).includes(database)) throw new Error("Database target is not allowed");
   return function runSql(statement) {
     const npxCli = resolve(dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js");
-    const result = spawn(process.execPath, [npxCli, "wrangler", "d1", "execute", DATABASE, "--remote", "--command", statement, "--json"], { cwd: root, encoding: "utf8", windowsHide: true, maxBuffer: 1024 * 1024 });
+    const result = spawn(process.execPath, [npxCli, "wrangler", "d1", "execute", database, "--remote", "--command", statement, "--json"], { cwd: root, encoding: "utf8", windowsHide: true, maxBuffer: 1024 * 1024 });
     if (result.status !== 0) throw new Error((result.error?.message || result.stderr || result.stdout || "Wrangler failed").trim());
     return parseWrangler(result.stdout);
   };
@@ -80,7 +92,7 @@ function transition(runSql, id, from, to, fields) {
   throw new Error("Transition outcome is ambiguous; read and reconcile the record before retrying");
 }
 
-export function operate(command, values, runSql = createRunner()) {
+export function operate(command, values, runSql = createRunner(), target = "preview") {
   if (command === "list") return { deliveries: runSql(`SELECT ${select} FROM owner_lab_deliveries WHERE status <> 'completed' ORDER BY queued_at,delivery_id LIMIT 100`) };
   if (command === "show") return { delivery: get(runSql, values.id) };
   if (command === "queue-existing") {
@@ -97,6 +109,7 @@ export function operate(command, values, runSql = createRunner()) {
     return { repeated: false, delivery };
   }
   if (command === "queue-test") {
+    if (target === "production") throw new Error("Synthetic queue creation is disabled for production");
     const destination = slackUrl(values.destination, "destination"), sourceRevision = bounded(values["source-revision"], "source revision", 64, /^[0-9a-f]{7,64}$/i);
     const existing = runSql(`SELECT ${select} FROM owner_lab_deliveries WHERE record_type='synthetic_test' AND project='delivery_test' AND decision_revision=1 LIMIT 1`)[0];
     if (existing) {
@@ -119,7 +132,8 @@ const invoked = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(im
 if (invoked) {
   try {
     const { command, values } = parseArgs(process.argv.slice(2));
-    process.stdout.write(`${JSON.stringify(operate(command, values), null, 2)}\n`);
+    const { target, database, operationValues } = resolveTarget(values);
+    process.stdout.write(`${JSON.stringify(operate(command, operationValues, createRunner(database), target), null, 2)}\n`);
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
     process.exitCode = 1;

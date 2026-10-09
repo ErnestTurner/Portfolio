@@ -93,15 +93,26 @@ async function ownerHeaders(overrides = {}) { const fixture = await fixturePromi
 function getRequest(headers) { return new Request("https://preview.example/owner/api/lab", { headers }); }
 function postRequest(body, headers, contentType = "application/json") { return new Request("https://preview.example/owner/api/lab", { method: "POST", headers: { ...headers, "content-type": contentType }, body: typeof body === "string" ? body : JSON.stringify(body) }); }
 
-test("multi-project My Lab fails closed for signed-out, wrong-owner, cross-site, production, and unbound requests", async () => {
+test("multi-project My Lab fails closed for signed-out, wrong-owner, cross-site, unsupported context, and unbound requests", async () => {
   const fixture = await fixturePromise, db = labDb({ projects: [project("scribble")] }), base = env(db), original = globalThis.fetch; globalThis.fetch = fixture.fetch;
   try {
     assert.equal((await readLab({ request: getRequest({ origin: "https://preview.example", "sec-fetch-site": "same-origin" }), env: base })).status, 401);
     assert.equal((await readLab({ request: getRequest(await ownerHeaders({ email: "wrong@example.test" })), env: base })).status, 401);
     assert.equal((await readLab({ request: getRequest({ ...(await ownerHeaders()), "sec-fetch-site": "cross-site" }), env: base })).status, 403);
-    assert.equal((await readLab({ request: getRequest(await ownerHeaders()), env: { ...base, ANALYTICS_QUERY_CONTEXT: "production" } })).status, 404);
+    assert.equal((await readLab({ request: getRequest(await ownerHeaders()), env: { ...base, ANALYTICS_QUERY_CONTEXT: "staging" } })).status, 404);
     assert.equal((await readLab({ request: getRequest(await ownerHeaders()), env: { ...base, TRIKZIK_DB: null } })).status, 404);
     assert.equal(db.calls.length, 0);
+  } finally { globalThis.fetch = original; }
+});
+
+test("production context uses the same exact owner gate and reports production", async () => {
+  const fixture = await fixturePromise, db = labDb({ projects: [project("trikzik_labs")] }), original = globalThis.fetch; globalThis.fetch = fixture.fetch;
+  try {
+    const response = await readLab({ request: getRequest(await ownerHeaders()), env: { ...env(db), ANALYTICS_QUERY_CONTEXT: "production" } });
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.context, "production");
+    assert.equal(data.projects.length, 1);
   } finally { globalThis.fetch = original; }
 });
 
@@ -110,6 +121,7 @@ test("catalog returns bounded owner-only projects with isolated saved workflows 
   try {
     const response = await readLab({ request: getRequest(await ownerHeaders()), env: env(db) }); assert.equal(response.status, 200); const data = await response.json();
     assert.equal(data.projects.length, 3); assert.deepEqual(data.projects.map(entry => entry.project.id), ["scribble", "pocket_mote", "historical"]);
+    assert.equal(data.delivery.label, "Shared crew thread - agent pickup required"); assert.match(data.delivery.explanation, /does not automatically message or wake/);
     assert.equal(data.projects[0].workflow.revision, 3); assert.equal(data.projects[0].workflow.deliveryState, "delivered"); assert.equal(data.projects[0].workflow.acceptanceState, "accepted"); assert.equal(data.projects[0].workflow.delivery.acceptedBy, "Pip"); assert.match(data.projects[0].workflow.delivery.acceptedReceiptUrl, /trikziklabs\.slack\.com/); assert.equal(data.projects[1].workflow.decision, "pending"); assert.equal(data.projects[2].project.previewUrl, ""); assert.equal(data.projects[2].project.sourceUrl, "");
     assert.equal(data.delivery.automatic, false); assert.equal(data.delivery.operatorAvailable, true); assert.match(data.delivery.explanation, /authorized agent to pick up/); assert.equal(response.headers.get("cache-control"), "private, no-store");
   } finally { globalThis.fetch = original; }
@@ -145,10 +157,12 @@ test("a failed outbox enqueue rolls back the owner decision", async () => {
 });
 
 test("migration adds a private catalog and expands decisions while preserving prior records", async () => {
-  const sql = await readFile(new URL("../migrations/0003_my_lab_projects.sql", import.meta.url), "utf8"), deliverySql = await readFile(new URL("../migrations/0004_my_lab_delivery.sql", import.meta.url), "utf8");
+  const sql = await readFile(new URL("../migrations/0003_my_lab_projects.sql", import.meta.url), "utf8"), deliverySql = await readFile(new URL("../migrations/0004_my_lab_delivery.sql", import.meta.url), "utf8"), catalogSql = await readFile(new URL("../migrations/0005_my_lab_catalog.sql", import.meta.url), "utf8");
   assert.match(sql, /CREATE TABLE IF NOT EXISTS owner_lab_projects/); assert.match(sql, /owner_lab_projects_state_order/); assert.match(sql, /owner_lab_decisions_next/); assert.match(sql, /SELECT project,revision,decision,note,saved_at,request_id FROM owner_lab_decisions/); assert.match(sql, /ALTER TABLE owner_lab_decisions_next RENAME TO owner_lab_decisions/); assert.match(sql, /length\(note\) <= 400/); assert.doesNotMatch(sql, /Scribble Engine|Pocket Mote|Slack|github\.com/i);
   for (const value of ["queued_delivery_id", "owner_lab_deliveries", "synthetic_test", "delivery snapshot is immutable", "delivery status transition is invalid", "delivery records are immutable", "queued_at", "delivered_receipt_url", "accepted_receipt_url", "completion_receipt_url", "unique_delivery_receipt", "unique_acceptance_receipt", "unique_completion_receipt"]) assert.match(deliverySql, new RegExp(value));
   assert.match(deliverySql, /OLD\.status = 'queued' AND NEW\.status = 'delivered'/); assert.match(deliverySql, /OLD\.status = 'delivered' AND NEW\.status = 'accepted'/); assert.match(deliverySql, /OLD\.status = 'accepted' AND NEW\.status = 'completed'/); assert.doesNotMatch(deliverySql, /trikziklabs\.slack|C0C7669|ErnestTurner/i);
+  for (const projectId of ["trikzik_labs","scribble","pocket_mote","et_tv","moon_snail","starfall","dungeon_reset","brain_in_a_jar","traffic_no_excuse","jelly_bench","mirror_mischief","pocket_quote","patch_trikzik_show","shadowcast_depths","weight_of_things","living_town","gravity_lab","outpost","living_world_engine","coop_roguelike","rabbit_holes"]) assert.match(catalogSql, new RegExp(`\\('${projectId}'`));
+  assert.equal((catalogSql.match(/^\('/gm) || []).length, 21); assert.match(catalogSql, /ON CONFLICT\(project\) DO NOTHING/); assert.match(catalogSql, /no Scribble production promotion is included/i); assert.doesNotMatch(catalogSql, /INSERT INTO owner_lab_decisions|INSERT INTO owner_lab_deliveries|synthetic_test|trikziklabs\.slack|C0C7669|1791479634/i);
 });
 
 test("dashboard provides attention-first filtering and per-project stale/retry guards without embedding catalog facts", async () => {

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Tell Ernest - Trikzik Labs</title>
+  <style>
+    :root{color-scheme:dark;--ink:#f7f2e7;--muted:#a6b8b0;--green:#39df82;--line:#52655d;--panel:#07120f;--error:#ff9abf}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0,#0c281d,transparent 34rem),#020807;color:var(--ink);font:16px/1.5 system-ui,sans-serif}main{width:min(680px,calc(100% - 28px));margin:auto;padding:34px 0 58px}a{color:var(--green)}h1{margin:.2rem 0 .7rem;color:var(--green);font-size:clamp(2.6rem,11vw,5rem);line-height:.9}.eyebrow{margin:0;color:var(--muted);font-size:.73rem;letter-spacing:.13em;text-transform:uppercase}.intro{font-size:1.08rem}.notice{padding:12px 14px;border:1px solid var(--line);border-radius:9px;background:#091713;color:var(--muted)}form{display:grid;gap:16px;margin-top:22px;padding:clamp(16px,4vw,28px);border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#0d1c18,#06100d)}label{display:grid;gap:7px;font-weight:700}label span,summary span{color:var(--muted);font-size:.8rem;font-weight:500}textarea,input{width:100%;min-height:48px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#020807;color:var(--ink);font:inherit}textarea{min-height:180px;resize:vertical}textarea:focus-visible,input:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--green);outline-offset:2px;border-color:var(--green)}details{border:1px solid #33463e;border-radius:9px;padding:4px 12px}summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-weight:750}summary::after{content:"+";font-size:1.4rem;color:var(--green)}details[open] summary::after{content:"−"}.details{display:grid;gap:14px;padding:8px 0 14px}.actions{display:grid;gap:10px}button{min-height:50px;padding:12px 18px;border:1px solid var(--green);border-radius:8px;background:#0b5d34;color:#fff;font:inherit;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.status{min-height:1.6em;margin:0;color:var(--muted)}.status.error{color:var(--error)}.status.success{color:var(--green)}.fine{margin:0;color:var(--muted);font-size:.82rem}@media(max-width:460px){main{width:min(100% - 20px,680px);padding-top:20px}form{padding:15px}textarea{min-height:160px}}
+  </style>
+</head>
+<body>
+<main>
+  <a href="./">← Back to the lab</a>
+  <p class="eyebrow">Private note to Ernest</p>
+  <h1>What would you like to tell me?</h1>
+  <p class="intro">A thought, a rough edge, or a bug report are all welcome. Your name is optional.</p>
+  <p class="notice">Feedback goes privately to Ernest. Please avoid passwords, personal records, or other sensitive information.</p>
+  <form id="feedback-form" novalidate>
+    <label>Your note
+      <textarea id="message" maxlength="2000" required autocomplete="off" placeholder="What would you like to tell me?"></textarea>
+      <span>Required · up to 2,000 characters</span>
+    </label>
+    <label>Name <span>Optional</span>
+      <input id="name" maxlength="80" autocomplete="name" placeholder="How should Ernest refer to you?">
+    </label>
+    <details>
+      <summary>Add useful details <span>Optional</span></summary>
+      <div class="details">
+        <label>Page or toy <span>Optional</span><input id="page" maxlength="120" autocomplete="off" placeholder="For example: Moon Snail"></label>
+        <label>What happened? <span>Optional</span><textarea id="happened" maxlength="1000"></textarea></label>
+        <label>What did you expect? <span>Optional</span><textarea id="expected" maxlength="1000"></textarea></label>
+        <label>How can I reproduce it? <span>Optional</span><textarea id="reproduction" maxlength="1500"></textarea></label>
+      </div>
+    </details>
+    <div class="actions"><button id="send" type="submit">Send privately to Ernest</button><p id="status" class="status" role="status" aria-live="polite"></p></div>
+    <p class="fine">This preview does not email, post to Slack, or create an account. Retention must be decided before a production launch.</p>
+  </form>
+</main>
+<script>
+(()=>{"use strict";const form=document.querySelector("#feedback-form"),status=document.querySelector("#status"),send=document.querySelector("#send"),ids=["message","name","page","happened","expected","reproduction"],fields=Object.fromEntries(ids.map(id=>[id,document.querySelector("#"+id)])),draftKey="trikzik-feedback-preview-draft-v1",requestKey="trikzik-feedback-preview-request-v1";function uuid(){return crypto.randomUUID()}function readDraft(){try{const value=JSON.parse(sessionStorage.getItem(draftKey)||"{}");for(const id of ids)if(typeof value[id]==="string")fields[id].value=value[id]}catch{}}function saveDraft(){try{sessionStorage.setItem(draftKey,JSON.stringify(Object.fromEntries(ids.map(id=>[id,fields[id].value]))))}catch{}}function requestId(){try{let id=sessionStorage.getItem(requestKey);if(!/^[0-9a-f-]{36}$/i.test(id||"")){id=uuid();sessionStorage.setItem(requestKey,id)}return id}catch{return uuid()}}function setStatus(text,type=""){status.textContent=text;status.className="status "+type}ids.forEach(id=>fields[id].addEventListener("input",saveDraft));form.addEventListener("submit",async event=>{event.preventDefault();const message=fields.message.value.trim();if(!message){setStatus("Please write a note before sending.","error");fields.message.focus();return}send.disabled=true;setStatus("Sending your note…");const body={requestId:requestId(),message,name:fields.name.value.trim(),page:fields.page.value.trim(),happened:fields.happened.value.trim(),expected:fields.expected.value.trim(),reproduction:fields.reproduction.value.trim()};try{const response=await fetch("/api/feedback",{method:"POST",credentials:"omit",headers:{"content-type":"application/json"},body:JSON.stringify(body)}),data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(String(response.status));setStatus(data.repeated?"Already received — your original confirmation is still valid.":"Received. Thank you — Ernest can review it privately.","success");form.reset();try{sessionStorage.removeItem(draftKey);sessionStorage.removeItem(requestKey)}catch{}}catch{setStatus("Your note was not sent. It is still here; please try again.","error");saveDraft()}finally{send.disabled=false}});readDraft()})();
+</script>
+</body>
+</html>

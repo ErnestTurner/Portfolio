@@ -26,7 +26,7 @@ test("repository-only namespaces and private seed names are blocked", async () =
 });
 
 test("public and owner routes continue through the Pages pipeline", async () => {
-  for (const path of ["/", "/assets/favicon-48.png", "/games/moon-snail/", "/owner/analytics", "/owner/api/lab"]) {
+  for (const path of ["/", "/feedback.html", "/api/feedback", "/assets/favicon-48.png", "/games/moon-snail/", "/owner/analytics", "/owner/api/lab", "/owner/api/feedback"]) {
     assert.equal(repositoryOnly(path), false);
     const expected = new Response(null, { status: 204 });
     const response = await onRequest({ request: new Request(`https://preview.example${path}`), next: () => expected });

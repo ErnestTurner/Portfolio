@@ -16,16 +16,17 @@ function project(project, overrides = {}) {
     source_url: "https://github.com/ErnestTurner/Portfolio", work_chat_url: "https://trikziklabs.slack.com/archives/TEST/p123",
     source_revision: "abc1234", decision_question: "Is this direction ready to continue?", recommendation: "Review the current evidence.", scope: "Preview only.",
     review_prompt: "Try the current workflow.", feedback_prompts_json: '["What surprised you?"]', review_checklist_json: '["Check it on phone."]', updated_at: now,
+    proposal_version: 1, proposal_action: "Continue bounded testing", proposal_target_environment: "preview", proposal_text: "Test this exact bounded proposal.", proposal_exclusions_json: '["Production deployment","Automatic execution"]',
     ...overrides,
   };
 }
 
 function decision(projectId, revision, value, note, requestId) {
-  return { project: projectId, revision, decision: value, note, saved_at: now, request_id: requestId, queued_delivery_id: null };
+  return { project: projectId, revision, decision: value, note, saved_at: now, request_id: requestId, queued_delivery_id: null, proposal_version: 1, proposal_snapshot_json: JSON.stringify({ version:1, action:"Continue bounded testing", scope:"Preview only.", exclusions:["Production deployment","Automatic execution"], targetEnvironment:"preview", text:"Test this exact bounded proposal.", sourceRevision:"abc1234" }) };
 }
 
 function delivery(projectId, revision, value, note, requestId, deliveryId, status = "queued", overrides = {}) {
-  return { delivery_id: deliveryId, record_type: "owner_decision", project: projectId, project_name: projectId.replaceAll("_", " "), decision_revision: revision, decision: value, note, scope: "Preview only.", source_revision: "abc1234", source_request_id: requestId, destination_type: "slack_thread", destination_ref: "https://trikziklabs.slack.com/archives/TEST/p123", status, queued_at: now, delivered_at: null, delivered_receipt_id: "", delivered_receipt_url: "", accepted_at: null, accepted_by: "", accepted_note: "", accepted_receipt_id: "", accepted_receipt_url: "", completed_at: null, completion_note: "", completion_receipt_id: "", completion_receipt_url: "", ...overrides };
+  return { delivery_id: deliveryId, record_type: "owner_decision", project: projectId, project_name: projectId.replaceAll("_", " "), decision_revision: revision, decision: value, note, scope: "Preview only.", source_revision: "abc1234", source_request_id: requestId, destination_type: "slack_thread", destination_ref: "https://trikziklabs.slack.com/archives/TEST/p123", status, queued_at: now, delivered_at: null, delivered_receipt_id: "", delivered_receipt_url: "", accepted_at: null, accepted_by: "", accepted_note: "", accepted_receipt_id: "", accepted_receipt_url: "", completed_at: null, completion_note: "", completion_receipt_id: "", completion_receipt_url: "", proposal_version:1, proposal_snapshot_json:decision(projectId,revision,value,note,requestId).proposal_snapshot_json, ...overrides };
 }
 
 function labDb({ projects = [], decisions = [], deliveries = [], failEnqueue = false } = {}) {
@@ -57,18 +58,18 @@ function labDb({ projects = [], decisions = [], deliveries = [], failEnqueue = f
         async execute() {
           if (sql.startsWith("INSERT INTO owner_lab_decisions")) {
             if (decisionRows.some(row => row.project === call.args[0])) return null;
-            const row = decision(call.args[0], 1, call.args[1], call.args[2], call.args[4]); row.saved_at = call.args[3]; row.queued_delivery_id = call.args[5]; decisionRows.push(row); return { ...row };
+            const row = decision(call.args[0], 1, call.args[1], call.args[2], call.args[4]); row.saved_at = call.args[3]; row.queued_delivery_id = call.args[5]; row.proposal_version=call.args[6]; row.proposal_snapshot_json=call.args[7]; decisionRows.push(row); return { ...row };
           }
           if (sql.startsWith("UPDATE")) {
-            const index = decisionRows.findIndex(row => row.project === call.args[5] && row.revision === call.args[6]);
+            const index = decisionRows.findIndex(row => row.project === call.args[7] && row.revision === call.args[8]);
             if (index < 0) return null;
-            const row = decision(call.args[5], decisionRows[index].revision + 1, call.args[0], call.args[1], call.args[3]); row.saved_at = call.args[2]; row.queued_delivery_id = call.args[4]; decisionRows[index] = row; return { ...row };
+            const row = decision(call.args[7], decisionRows[index].revision + 1, call.args[0], call.args[1], call.args[3]); row.saved_at = call.args[2]; row.queued_delivery_id = call.args[4]; row.proposal_version=call.args[5]; row.proposal_snapshot_json=call.args[6]; decisionRows[index] = row; return { ...row };
           }
           if (sql.startsWith("INSERT INTO owner_lab_deliveries")) {
             if (failEnqueue) throw new Error("Simulated enqueue failure");
             const [deliveryId, projectId, requestId, queuedId] = call.args, saved = decisionRows.find(row => row.project === projectId && row.request_id === requestId && row.queued_delivery_id === queuedId), catalog = projects.find(row => row.project === projectId);
             if (!saved || !catalog || deliveryRows.some(row => row.source_request_id === requestId)) return null;
-            const row = delivery(projectId, saved.revision, saved.decision, saved.note, requestId, deliveryId); row.project_name = catalog.name; row.scope = catalog.scope || "No project work is authorized beyond this saved decision."; row.source_revision = catalog.source_revision; row.destination_type = catalog.delivery_destination_type || "unassigned"; row.destination_ref = catalog.delivery_destination_ref || ""; row.queued_at = saved.saved_at; deliveryRows.push(row); return { ...row };
+            const row = delivery(projectId, saved.revision, saved.decision, saved.note, requestId, deliveryId); row.project_name = catalog.name; row.scope = catalog.scope || "No project work is authorized beyond this saved decision."; row.source_revision = catalog.source_revision; row.destination_type = catalog.delivery_destination_type || "unassigned"; row.destination_ref = catalog.delivery_destination_ref || ""; row.queued_at = saved.saved_at; row.proposal_version=saved.proposal_version; row.proposal_snapshot_json=saved.proposal_snapshot_json; deliveryRows.push(row); return { ...row };
           }
           throw new Error("Unexpected execute SQL");
         },
@@ -117,7 +118,7 @@ test("catalog returns bounded owner-only projects with isolated saved workflows 
 
 test("decisions remain isolated by project across save, retry, reload, update, and stale conflict", async () => {
   const fixture = await fixturePromise, projects = [project("scribble"), project("pocket_mote", { sort_order: 2 }), project("published_toy", { sort_order: 3, state: "published", state_label: "Published", decision_question: "" })], db = labDb({ projects }), headers = await ownerHeaders(), original = globalThis.fetch; globalThis.fetch = fixture.fetch;
-  const scribble = { project: "scribble", decision: "approved", note: "Keep testing.", expectedRevision: 0, requestId: requestIdA }, pocket = { project: "pocket_mote", decision: "changes_requested", note: "Inspect the repair.", expectedRevision: 0, requestId: requestIdB };
+  const scribble = { project: "scribble", decision: "approved", note: "Keep testing.", expectedRevision: 0, expectedProposalVersion: 1, requestId: requestIdA }, pocket = { project: "pocket_mote", decision: "changes_requested", note: "Inspect the repair.", expectedRevision: 0, expectedProposalVersion: 1, requestId: requestIdB };
   try {
     assert.equal((await saveLab({ request: postRequest(scribble, headers), env: env(db) })).status, 200); assert.equal((await saveLab({ request: postRequest(pocket, headers), env: env(db) })).status, 200); assert.equal(db.deliveries.length, 2); assert.deepEqual(db.deliveries.map(row => row.project), ["scribble", "pocket_mote"]); assert.ok(db.deliveries.every(row => row.status === "queued"));
     const retry = await saveLab({ request: postRequest(pocket, headers), env: env(db) }); assert.equal(retry.status, 200); assert.equal((await retry.json()).repeated, true); assert.equal(db.decisions.length, 2); assert.equal(db.deliveries.length, 2);
@@ -129,30 +130,47 @@ test("decisions remain isolated by project across save, retry, reload, update, a
   } finally { globalThis.fetch = original; }
 });
 
-test("decision writes require exact bounded JSON and cannot claim delivery", async () => {
-  const fixture = await fixturePromise, headers = await ownerHeaders(), original = globalThis.fetch, valid = { project: "scribble", decision: "approved", note: "", expectedRevision: 0, requestId: requestIdA }; globalThis.fetch = fixture.fetch;
+test("proposal versions bind immutable snapshots and stale approvals cannot expand to changed work", async () => {
+  const fixture=await fixturePromise,row=project("scribble"),db=labDb({projects:[row]}),headers=await ownerHeaders(),original=globalThis.fetch;globalThis.fetch=fixture.fetch;
   try {
-    for (const [body, type, status] of [[valid, "text/plain", 415], [{ ...valid, decision: "delivered" }, "application/json", 400], [{ ...valid, delivered: true }, "application/json", 400], [{ ...valid, note: "x".repeat(401) }, "application/json", 400], [{ ...valid, requestId: "bad" }, "application/json", 400], ["x".repeat(1100), "application/json", 413]]) assert.equal((await saveLab({ request: postRequest(body, headers, type), env: env(labDb({ projects: [project("scribble")] })) })).status, status);
+    const first={project:"scribble",decision:"approved",note:"Approve preview only.",expectedRevision:0,expectedProposalVersion:1,requestId:requestIdA};
+    assert.equal((await saveLab({request:postRequest(first,headers),env:env(db)})).status,200);
+    assert.equal(db.decisions[0].proposal_version,1);assert.match(db.decisions[0].proposal_snapshot_json,/Test this exact bounded proposal/);
+    row.proposal_version=2;row.proposal_text="A changed and separately reviewable proposal.";row.scope="A different bounded scope.";
+    const stale=await saveLab({request:postRequest({...first,expectedRevision:1,requestId:requestIdB},headers),env:env(db)});assert.equal(stale.status,409);assert.match((await stale.json()).error,/Proposal changed/);assert.equal(db.decisions[0].proposal_version,1);
+    const reload=await readLab({request:getRequest(headers),env:env(db)}),entry=(await reload.json()).projects[0];assert.equal(entry.workflow.proposalState,"stale");assert.equal(entry.workflow.proposalSnapshot.version,1);assert.equal(entry.project.proposal.version,2);
+    const updated=await saveLab({request:postRequest({...first,expectedRevision:1,expectedProposalVersion:2,requestId:requestIdC},headers),env:env(db)});assert.equal(updated.status,200);const data=await updated.json();assert.equal(data.entry.workflow.proposalState,"current");assert.equal(data.entry.workflow.proposalSnapshot.text,"A changed and separately reviewable proposal.");assert.equal(db.deliveries.at(-1).proposal_version,2);
+  } finally {globalThis.fetch=original}
+});
+
+test("decision writes require exact bounded JSON and cannot claim delivery", async () => {
+  const fixture = await fixturePromise, headers = await ownerHeaders(), original = globalThis.fetch, valid = { project: "scribble", decision: "approved", note: "", expectedRevision: 0, expectedProposalVersion: 1, requestId: requestIdA }; globalThis.fetch = fixture.fetch;
+  try {
+    for (const [body, type, status] of [[valid, "text/plain", 415], [{ ...valid, decision: "delivered" }, "application/json", 400], [{ ...valid, delivered: true }, "application/json", 400], [{ ...valid, note: "x".repeat(401) }, "application/json", 400], [{ ...valid, requestId: "bad" }, "application/json", 400], ["x".repeat(5000), "application/json", 413]]) assert.equal((await saveLab({ request: postRequest(body, headers, type), env: env(labDb({ projects: [project("scribble")] })) })).status, status);
   } finally { globalThis.fetch = original; }
 });
 
 test("a failed outbox enqueue rolls back the owner decision", async () => {
   const fixture = await fixturePromise, headers = await ownerHeaders(), db = labDb({ projects: [project("scribble")], failEnqueue: true }), original = globalThis.fetch; globalThis.fetch = fixture.fetch;
   try {
-    const response = await saveLab({ request: postRequest({ project: "scribble", decision: "approved", note: "Do not lose this.", expectedRevision: 0, requestId: requestIdA }, headers), env: env(db) });
+    const response = await saveLab({ request: postRequest({ project: "scribble", decision: "approved", note: "Do not lose this.", expectedRevision: 0, expectedProposalVersion: 1, requestId: requestIdA }, headers), env: env(db) });
     assert.equal(response.status, 503); assert.equal(db.decisions.length, 0); assert.equal(db.deliveries.length, 0);
   } finally { globalThis.fetch = original; }
 });
 
-test("migration adds a private catalog and expands decisions while preserving prior records", async () => {
-  const sql = await readFile(new URL("../migrations/0003_my_lab_projects.sql", import.meta.url), "utf8"), deliverySql = await readFile(new URL("../migrations/0004_my_lab_delivery.sql", import.meta.url), "utf8");
+test("migration adds a private catalog, feedback store, and immutable proposal snapshots while preserving prior records", async () => {
+  const sql = await readFile(new URL("../migrations/0003_my_lab_projects.sql", import.meta.url), "utf8"), deliverySql = await readFile(new URL("../migrations/0004_my_lab_delivery.sql", import.meta.url), "utf8"), catalogSql = await readFile(new URL("../migrations/0005_my_lab_catalog.sql", import.meta.url), "utf8"), proposalSql=await readFile(new URL("../migrations/0006_feedback_and_proposals.sql",import.meta.url),"utf8");
   assert.match(sql, /CREATE TABLE IF NOT EXISTS owner_lab_projects/); assert.match(sql, /owner_lab_projects_state_order/); assert.match(sql, /owner_lab_decisions_next/); assert.match(sql, /SELECT project,revision,decision,note,saved_at,request_id FROM owner_lab_decisions/); assert.match(sql, /ALTER TABLE owner_lab_decisions_next RENAME TO owner_lab_decisions/); assert.match(sql, /length\(note\) <= 400/); assert.doesNotMatch(sql, /Scribble Engine|Pocket Mote|Slack|github\.com/i);
   for (const value of ["queued_delivery_id", "owner_lab_deliveries", "synthetic_test", "delivery snapshot is immutable", "delivery status transition is invalid", "delivery records are immutable", "queued_at", "delivered_receipt_url", "accepted_receipt_url", "completion_receipt_url", "unique_delivery_receipt", "unique_acceptance_receipt", "unique_completion_receipt"]) assert.match(deliverySql, new RegExp(value));
   assert.match(deliverySql, /OLD\.status = 'queued' AND NEW\.status = 'delivered'/); assert.match(deliverySql, /OLD\.status = 'delivered' AND NEW\.status = 'accepted'/); assert.match(deliverySql, /OLD\.status = 'accepted' AND NEW\.status = 'completed'/); assert.doesNotMatch(deliverySql, /trikziklabs\.slack|C0C7669|ErnestTurner/i);
+  for (const projectId of ["trikzik_labs","scribble","pocket_mote","et_tv","moon_snail","starfall","dungeon_reset","brain_in_a_jar","traffic_no_excuse","jelly_bench","mirror_mischief","pocket_quote","patch_trikzik_show","shadowcast_depths","weight_of_things","living_town","gravity_lab","outpost","living_world_engine","coop_roguelike","rabbit_holes"]) assert.match(catalogSql, new RegExp(`\\('${projectId}'`));
+  assert.equal((catalogSql.match(/^\('/gm) || []).length, 21); assert.match(catalogSql, /ON CONFLICT\(project\) DO NOTHING/); assert.match(catalogSql, /no Scribble production promotion is included/i); assert.doesNotMatch(catalogSql, /INSERT INTO owner_lab_decisions|INSERT INTO owner_lab_deliveries|synthetic_test|trikziklabs\.slack|C0C7669|1791479634/i);
+  for(const value of ["owner_feedback","feedback_ingest_windows","proposal_version","proposal_snapshot_json","owner_lab_delivery_proposal_snapshot_immutable"])assert.match(proposalSql,new RegExp(value));assert.match(proposalSql,/proposal_version INTEGER DEFAULT NULL/);assert.doesNotMatch(proposalSql,/DELETE FROM owner_feedback|hooks\.slack\.com|trikziklabs\.slack\.com|@[a-z0-9.-]+\.[a-z]{2,}/i);
 });
 
 test("dashboard provides attention-first filtering and per-project stale/retry guards without embedding catalog facts", async () => {
   const pageEnv = { ANALYTICS_DASHBOARD_ENABLED: "true", ANALYTICS_OWNER_HOSTS: "preview.example", FIREBASE_PROJECT_ID: "trikzik-owner-auth", FIREBASE_AUTH_DOMAIN: "trikzik-owner-auth.firebaseapp.com", FIREBASE_APP_ID: "app", FIREBASE_API_KEY: "public-web-key" }, response = await dashboard({ request: new Request("https://preview.example/owner/analytics"), env: pageEnv }), body = await response.text(); assert.equal(response.status, 200);
 for (const value of ["My Lab", "Find a project", "Needs attention", "All projects", "Saved decisions", "projectNodes", "saveStates", "Queued · agent pickup required", "Delivery receipt", "Saving queues this request for agent pickup", "does not automatically message or wake", "const generation=state.generation,controller=new AbortController(),current=()=", "setCardBusy(projectNodes.get(id)||card,false)", "retryKey", "expectedRevision", "response.status===409", "applyProjectFilters", "Save failed. Your draft is still here", "Nothing saved. Your note is still here", "textContent"]) assert.match(body, new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  for(const value of ["Feedback","Proposal v","expectedProposalVersion","exact proposal snapshot","loadFeedback","proposal-stale"])assert.match(body,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
   assert.doesNotMatch(body, /Pocket Mote|ET TV|C0C6TMLFJBZ|1791328857088279|776aab5c|3c311b019103430facb3972993386e6c51869580/); assert.doesNotMatch(body, /innerHTML|service.?account|private.?key/i); assert.match(response.headers.get("content-security-policy"), /default-src 'none'/);
 });

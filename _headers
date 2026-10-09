@@ -1,0 +1,16 @@
+/scripts/*
+  Cache-Control: no-store, max-age=0
+/migrations/*
+  Cache-Control: no-store, max-age=0
+/tests/*
+  Cache-Control: no-store, max-age=0
+/docs/*
+  Cache-Control: no-store, max-age=0
+/reference-mobile/*
+  Cache-Control: no-store, max-age=0
+/.reference/*
+  Cache-Control: no-store, max-age=0
+/.wrangler/*
+  Cache-Control: no-store, max-age=0
+/*my-lab*.sql
+  Cache-Control: no-store, max-age=0

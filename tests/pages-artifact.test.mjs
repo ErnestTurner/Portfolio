@@ -26,6 +26,7 @@ test("Pages artifact contains only the explicit public allowlist", async () => {
   assert.ok(files.includes("games/moon-snail/index.html"));
   assert.ok(files.includes("games/dungeon-reset/vendor/PHASER-LICENSE.md"));
   assert.ok(files.includes("pocket-mote/privacy/index.html"));
+  assert.ok(files.includes("_headers"));
 });
 
 test("Pages artifact contains no credential shapes or private delivery seed", async () => {

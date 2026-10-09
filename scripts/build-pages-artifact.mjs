@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT_FILES = Object.freeze([
+  "_headers",
   "404.html",
   "analytics.js",
   "favicon.ico",

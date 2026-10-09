@@ -5,11 +5,17 @@ const MAX_PROJECTS = 40;
 const DECISIONS = new Set(["approved", "changes_requested", "parked"]);
 const STATES = new Set(["review", "testing", "published", "status_check", "ideas"]);
 const PROJECTS_SQL = "SELECT project,sort_order,name,kind,state,state_label,summary,latest_result,lead,blocker,evidence,evidence_verified_at,preview_url,source_url,work_chat_url,source_revision,decision_question,recommendation,scope,review_prompt,feedback_prompts_json,review_checklist_json,updated_at FROM owner_lab_projects ORDER BY sort_order,project LIMIT 40";
-const DECISIONS_SQL = "SELECT project,revision,decision,note,saved_at,request_id FROM owner_lab_decisions ORDER BY project LIMIT 40";
+const DECISIONS_SQL = "SELECT project,revision,decision,note,saved_at,request_id,queued_delivery_id FROM owner_lab_decisions ORDER BY project LIMIT 40";
 const PROJECT_SQL = "SELECT project,sort_order,name,kind,state,state_label,summary,latest_result,lead,blocker,evidence,evidence_verified_at,preview_url,source_url,work_chat_url,source_revision,decision_question,recommendation,scope,review_prompt,feedback_prompts_json,review_checklist_json,updated_at FROM owner_lab_projects WHERE project=? LIMIT 1";
-const DECISION_SQL = "SELECT project,revision,decision,note,saved_at,request_id FROM owner_lab_decisions WHERE project=? LIMIT 1";
-const INSERT_SQL = "INSERT INTO owner_lab_decisions(project,revision,decision,note,saved_at,request_id) VALUES(?,1,?,?,?,?) ON CONFLICT(project) DO NOTHING RETURNING project,revision,decision,note,saved_at,request_id";
-const UPDATE_SQL = "UPDATE owner_lab_decisions SET revision=revision+1,decision=?,note=?,saved_at=?,request_id=? WHERE project=? AND revision=? RETURNING project,revision,decision,note,saved_at,request_id";
+const DECISION_SQL = "SELECT project,revision,decision,note,saved_at,request_id,queued_delivery_id FROM owner_lab_decisions WHERE project=? LIMIT 1";
+const DELIVERY_FIELDS = "delivery_id,record_type,project,project_name,decision_revision,decision,note,scope,source_revision,source_request_id,destination_type,destination_ref,status,queued_at,delivered_at,delivered_receipt_id,delivered_receipt_url,accepted_at,accepted_by,accepted_note,accepted_receipt_id,accepted_receipt_url,completed_at,completion_note,completion_receipt_id,completion_receipt_url";
+const CURRENT_DELIVERY_FIELDS = DELIVERY_FIELDS.split(",").map(field => `l.${field}`).join(",");
+const DELIVERIES_SQL = `SELECT ${CURRENT_DELIVERY_FIELDS} FROM owner_lab_deliveries l JOIN owner_lab_decisions d ON d.project=l.project AND d.revision=l.decision_revision WHERE l.record_type='owner_decision' ORDER BY l.queued_at,l.delivery_id LIMIT 40`;
+const DELIVERY_BY_SOURCE_SQL = `SELECT ${DELIVERY_FIELDS} FROM owner_lab_deliveries WHERE source_request_id=? LIMIT 1`;
+const DELIVERY_BY_REVISION_SQL = `SELECT ${DELIVERY_FIELDS} FROM owner_lab_deliveries WHERE record_type='owner_decision' AND project=? AND decision_revision=? LIMIT 1`;
+const INSERT_SQL = "INSERT INTO owner_lab_decisions(project,revision,decision,note,saved_at,request_id,queued_delivery_id) VALUES(?,1,?,?,?,?,?) ON CONFLICT(project) DO NOTHING RETURNING project,revision,decision,note,saved_at,request_id,queued_delivery_id";
+const UPDATE_SQL = "UPDATE owner_lab_decisions SET revision=revision+1,decision=?,note=?,saved_at=?,request_id=?,queued_delivery_id=? WHERE project=? AND revision=? RETURNING project,revision,decision,note,saved_at,request_id,queued_delivery_id";
+const ENQUEUE_SQL = `INSERT INTO owner_lab_deliveries(delivery_id,record_type,project,project_name,decision_revision,decision,note,scope,source_revision,source_request_id,destination_type,destination_ref,status,queued_at) SELECT ?,'owner_decision',d.project,p.name,d.revision,d.decision,d.note,COALESCE(NULLIF(p.scope,''),'No project work is authorized beyond this saved decision.'),p.source_revision,d.request_id,p.delivery_destination_type,p.delivery_destination_ref,'queued',d.saved_at FROM owner_lab_decisions d JOIN owner_lab_projects p ON p.project=d.project WHERE d.project=? AND d.request_id=? AND d.queued_delivery_id=? ON CONFLICT DO NOTHING RETURNING ${DELIVERY_FIELDS}`;
 
 function json(status, value) {
   return new Response(JSON.stringify(value), { status, headers: {
@@ -78,10 +84,36 @@ function cleanProject(row) {
   };
 }
 
-function cleanDecision(row) {
+function cleanDelivery(row) {
+  if (!row || typeof row.delivery_id !== "string" || !/^[0-9a-f-]{36}$/i.test(row.delivery_id)) return null;
+  const queuedAt = Number(row.queued_at), deliveredAt = Number(row.delivered_at), acceptedAt = Number(row.accepted_at), completedAt = Number(row.completed_at);
+  const status = ["queued", "delivered", "accepted", "completed"].includes(row.status) ? row.status : "queued";
+  return {
+    id: row.delivery_id,
+    status,
+    recordType: row.record_type === "synthetic_test" ? "synthetic_test" : "owner_decision",
+    destinationType: row.destination_type === "slack_thread" ? "slack_thread" : "unassigned",
+    destinationRef: safeUrl(row.destination_ref),
+    scope: text(row.scope, 300),
+    sourceRevision: text(row.source_revision, 64),
+    queuedAt: Number.isSafeInteger(queuedAt) && queuedAt > 0 ? new Date(queuedAt * 1000).toISOString() : null,
+    deliveredAt: Number.isSafeInteger(deliveredAt) && deliveredAt > 0 ? new Date(deliveredAt * 1000).toISOString() : null,
+    deliveredReceiptUrl: safeUrl(row.delivered_receipt_url),
+    acceptedAt: Number.isSafeInteger(acceptedAt) && acceptedAt > 0 ? new Date(acceptedAt * 1000).toISOString() : null,
+    acceptedBy: text(row.accepted_by, 100),
+    acceptedNote: text(row.accepted_note, 400),
+    acceptedReceiptUrl: safeUrl(row.accepted_receipt_url),
+    completedAt: Number.isSafeInteger(completedAt) && completedAt > 0 ? new Date(completedAt * 1000).toISOString() : null,
+    completionNote: text(row.completion_note, 500),
+    completionReceiptUrl: safeUrl(row.completion_receipt_url),
+  };
+}
+
+function cleanDecision(row, deliveryRow) {
   if (!row || typeof row.project !== "string") return null;
   const revision = Number(row.revision), savedAt = Number(row.saved_at);
   if (!Number.isSafeInteger(revision) || revision < 1 || !DECISIONS.has(row.decision)) return null;
+  const delivery = cleanDelivery(deliveryRow);
   return {
     revision,
     decision: row.decision,
@@ -89,24 +121,26 @@ function cleanDecision(row) {
     savedAt: Number.isSafeInteger(savedAt) && savedAt > 0 ? new Date(savedAt * 1000).toISOString() : null,
     requestId: text(row.request_id, 36),
     savedState: "saved",
-    deliveryState: "not_delivered",
-    acceptanceState: "not_accepted",
-    completionState: "not_started",
+    delivery,
+    deliveryState: delivery?.status === "queued" ? "queued" : delivery ? "delivered" : "not_queued",
+    acceptanceState: ["accepted", "completed"].includes(delivery?.status) ? "accepted" : "not_accepted",
+    completionState: delivery?.status === "completed" ? "completed" : "not_started",
   };
 }
 
 function pendingWorkflow() {
-  return { revision: 0, decision: "pending", note: "", savedAt: null, requestId: null, savedState: "not_saved", deliveryState: "not_delivered", acceptanceState: "not_accepted", completionState: "not_started" };
+  return { revision: 0, decision: "pending", note: "", savedAt: null, requestId: null, savedState: "not_saved", delivery: null, deliveryState: "not_queued", acceptanceState: "not_accepted", completionState: "not_started" };
 }
 
 const DELIVERY = Object.freeze({
-  connected: false,
-  label: "Waiting for delivery",
-  explanation: "A saved decision stays in My Lab. No supported dashboard route currently delivers it to Pip, Rivet, Slack, or an agent run.",
+  automatic: false,
+  operatorAvailable: true,
+  label: "Agent pickup required",
+  explanation: "Saving queues a bounded request for an authorized agent to pick up. It does not automatically message or wake Pip, Rivet, Slack, or any agent. Delivery, acceptance, and completion appear only after verified receipts are recorded.",
 });
 
-function entry(project, decision) {
-  return { project, workflow: cleanDecision(decision) || pendingWorkflow() };
+function entry(project, decision, delivery) {
+  return { project, workflow: cleanDecision(decision, delivery) || pendingWorkflow() };
 }
 
 async function authenticate(request, env) {
@@ -123,19 +157,28 @@ async function decisionRow(env, project) {
   return env.TRIKZIK_DB.prepare(DECISION_SQL).bind(project).first();
 }
 
+async function deliveryBySource(env, requestId) {
+  return requestId ? env.TRIKZIK_DB.prepare(DELIVERY_BY_SOURCE_SQL).bind(requestId).first() : null;
+}
+
+async function deliveryByRevision(env, project, revision) {
+  return env.TRIKZIK_DB.prepare(DELIVERY_BY_REVISION_SQL).bind(project, revision).first();
+}
+
 export async function onRequestGet({ request, env }) {
   const access = await authenticate(request, env);
   if (!access.ok) return access.response;
   try {
     const projectStatement = env.TRIKZIK_DB.prepare(PROJECTS_SQL);
-    const decisionStatement = env.TRIKZIK_DB.prepare(DECISIONS_SQL);
-    let projectResult, decisionResult;
-    if (typeof env.TRIKZIK_DB.batch === "function") [projectResult, decisionResult] = await env.TRIKZIK_DB.batch([projectStatement, decisionStatement]);
-    else [projectResult, decisionResult] = await Promise.all([projectStatement.all(), decisionStatement.all()]);
+    const decisionStatement = env.TRIKZIK_DB.prepare(DECISIONS_SQL), deliveryStatement = env.TRIKZIK_DB.prepare(DELIVERIES_SQL);
+    let projectResult, decisionResult, deliveryResult;
+    if (typeof env.TRIKZIK_DB.batch === "function") [projectResult, decisionResult, deliveryResult] = await env.TRIKZIK_DB.batch([projectStatement, decisionStatement, deliveryStatement]);
+    else [projectResult, decisionResult, deliveryResult] = await Promise.all([projectStatement.all(), decisionStatement.all(), deliveryStatement.all()]);
     const projects = (projectResult?.results || []).slice(0, MAX_PROJECTS).map(cleanProject).filter(Boolean);
     if (!projects.length) return json(503, { error: "My Lab catalog is unavailable" });
     const decisions = new Map((decisionResult?.results || []).map(row => [row.project, row]));
-    return json(200, { context: "test", projects: projects.map(project => entry(project, decisions.get(project.id))), delivery: DELIVERY, generatedAt: new Date().toISOString() });
+    const deliveries = new Map((deliveryResult?.results || []).map(row => [`${row.project}:${row.decision_revision}`, row]));
+    return json(200, { context: "test", projects: projects.map(project => { const decision = decisions.get(project.id); return entry(project, decision, decision ? deliveries.get(`${project.id}:${decision.revision}`) : null); }), delivery: DELIVERY, generatedAt: new Date().toISOString() });
   } catch {
     return json(503, { error: "My Lab is unavailable" });
   }
@@ -166,18 +209,24 @@ export async function onRequestPost({ request, env }) {
   try {
     const project = cleanProject(await projectRow(env, body.project));
     if (!project || (!project.decisionQuestion && body.expectedRevision === 0)) return json(400, { error: "No owner decision is requested for this project" });
-    const now = Math.floor(Date.now() / 1000);
+    if (typeof env.TRIKZIK_DB.batch !== "function") return json(503, { error: "My Lab save is unavailable" });
+    const now = Math.floor(Date.now() / 1000), deliveryId = crypto.randomUUID();
     const statement = body.expectedRevision === 0
-      ? env.TRIKZIK_DB.prepare(INSERT_SQL).bind(body.project, body.decision, body.note, now, body.requestId)
-      : env.TRIKZIK_DB.prepare(UPDATE_SQL).bind(body.decision, body.note, now, body.requestId, body.project, body.expectedRevision);
-    const saved = await statement.first();
-    if (saved) return json(200, { context: "test", entry: entry(project, saved), delivery: DELIVERY, repeated: false });
+      ? env.TRIKZIK_DB.prepare(INSERT_SQL).bind(body.project, body.decision, body.note, now, body.requestId, deliveryId)
+      : env.TRIKZIK_DB.prepare(UPDATE_SQL).bind(body.decision, body.note, now, body.requestId, deliveryId, body.project, body.expectedRevision);
+    const enqueue = env.TRIKZIK_DB.prepare(ENQUEUE_SQL).bind(deliveryId, body.project, body.requestId, deliveryId);
+    const [savedResult, deliveryResult] = await env.TRIKZIK_DB.batch([statement, enqueue]);
+    const saved = savedResult?.results?.[0] || null, queued = deliveryResult?.results?.[0] || null;
+    if (saved && queued) return json(200, { context: "test", entry: entry(project, saved, queued), delivery: DELIVERY, repeated: false });
+    if (saved && !queued) return json(503, { error: "My Lab save is unavailable" });
 
     const current = await decisionRow(env, body.project);
     if (current && current.request_id === body.requestId && current.decision === body.decision && current.note === body.note) {
-      return json(200, { context: "test", entry: entry(project, current), delivery: DELIVERY, repeated: true });
+      const existingDelivery = await deliveryBySource(env, current.request_id);
+      return json(200, { context: "test", entry: entry(project, current, existingDelivery), delivery: DELIVERY, repeated: true });
     }
-    return json(409, { context: "test", entry: entry(project, current), delivery: DELIVERY, error: "A newer decision is already saved" });
+    const currentDelivery = current ? await deliveryByRevision(env, body.project, current.revision) : null;
+    return json(409, { context: "test", entry: entry(project, current, currentDelivery), delivery: DELIVERY, error: "A newer decision is already saved" });
   } catch {
     return json(503, { error: "My Lab save is unavailable" });
   }

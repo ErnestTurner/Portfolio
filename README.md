@@ -26,4 +26,4 @@ GitHub is the source of truth for code and version history. Google Drive stores 
 - Dungeon Reset: https://ernest-turner.pages.dev/games/dungeon-reset/
 - Pocket Mote privacy policy: https://ernest-turner.pages.dev/pocket-mote/privacy/
 
-The deployed static files are `index.html` and `games/`. Deploy only those assets, not the entire repository. Cloudflare Pages project: `ernest-turner`, production branch: `main`. Moon Snail's authoritative editable source is in `ErnestTurner/Moon-Snail`.
+Cloudflare Pages project: `ernest-turner`, production branch: `main`. Build the curated static artifact with `node scripts/build-pages-artifact.mjs`, then deploy `.pages-artifact`; Pages Functions continue to compile from `functions/`, but repository scripts, migrations, tests, docs, and tool directories never enter the public asset upload. Moon Snail's authoritative editable source is in `ErnestTurner/Moon-Snail`.

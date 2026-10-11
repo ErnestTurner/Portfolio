@@ -8,6 +8,7 @@ export const ROOT_FILES = Object.freeze([
   "404.html",
   "analytics.js",
   "favicon.ico",
+  "feedback.html",
   "google868251fe5116797f.html",
   "index.html",
   "playground.css",

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="How Trikzik Labs uses small, aggregate-only website analytics.">
+  <meta name="description" content="How Trikzik Labs handles aggregate website analytics and optional visitor feedback.">
   <title>Privacy - Trikzik Labs</title>
   <link rel="canonical" href="https://trikzik.com/privacy.html">
   <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png">
@@ -47,6 +47,10 @@
       <h2>Retention and access</h2>
       <p>Public events are stored only as aggregate counts. Dashboard queries are limited to the most recent 90 days, and database cleanup removes older event buckets when new events are written. The private dashboard is restricted to Ernest Turner’s exact verified Firebase account.</p>
       <p>The owner sign-in is separate from public analytics. Google and Firebase may process the owner’s authentication information; public visitors are not asked to sign in.</p>
+
+      <h2>Optional feedback</h2>
+      <p>The feedback form stores the note you choose to submit, an optional name, and any optional page, expected-result, observed-result, or reproduction details you provide. It does not require an account, email address, or file upload.</p>
+      <p>Feedback is visible only through Ernest Turner's verified owner account and is not automatically emailed, posted to Slack, or forwarded elsewhere. Notes are retained for up to 90 days; expired notes are removed when feedback is next submitted or reviewed.</p>
 
       <h2>Operational limits</h2>
       <p>The collector accepts only exact allowlisted values, rejects oversized or cross-site requests, and applies a global write budget. If configuration, quota, or network requests fail, the games continue working and the event is simply not counted.</p>

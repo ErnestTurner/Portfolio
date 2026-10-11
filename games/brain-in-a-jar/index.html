@@ -166,6 +166,7 @@
             <div class="editor-top"><span id="selected-name">Connection</span><output id="weight-readout" for="weight">+0.00</output></div>
             <label class="range-row" for="weight"><span>−4.0</span><input id="weight" type="range" min="-4" max="4" step="0.05"><span>+4.0</span></label>
             <button id="zero" type="button">Zero selected connection</button>
+            <button id="restore-wiring" type="button">Restore original wiring</button>
           </div>
           <div class="connection-title">All actual connections — select to edit</div>
           <div id="connections" class="connections"></div>
@@ -373,6 +374,8 @@
     document.querySelector('#reset').addEventListener('click',resetEverything);
     document.querySelector('#weight').addEventListener('input',e=>setSelectedWeight(e.target.value));
     document.querySelector('#zero').addEventListener('click',()=>setSelectedWeight(0));
+    document.querySelector('#restore-wiring').addEventListener('click',restoreWiring);
+    function restoreWiring(){ state.weights=cloneWeights();state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncEditor();renderConnections();refresh(); }
     function resetEverything(){ state.creature={x:255,y:330,angle:-0.25};state.light={x:535,y:180};state.weights=cloneWeights();state.paused=false;state.swapped=false;state.dragging=false;state.selected={layer:'ih',to:0,from:0};state.tickCount=0;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();syncEditor();renderConnections();refresh(); }
     function pointerPosition(event){const r=canvas.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height};}
     function moveLightTo(x,y){state.light.x=clamp(x,12,W-12);state.light.y=clamp(y,12,H-12);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));refresh();}
@@ -401,6 +404,7 @@
       evaluate:(inputs,weights=state.weights)=>evaluateNetwork(inputs,weights),
       tick:simulationTick,
       reset:resetEverything,
+      restoreWiring,
       setPaused:value=>{state.paused=Boolean(value);syncControls();},
       setSwapped:value=>{state.swapped=Boolean(value);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();refresh();},
       setWeight:(layer,to,from,value)=>{state.selected={layer,to,from};setSelectedWeight(value);}

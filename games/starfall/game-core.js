@@ -1,4 +1,23 @@
 export const STARFALL_VERSION = "1.0.0";
+export const TOUCH_COACH_SECONDS = 6;
+
+export function createTouchCoach() {
+  return { move: false, aim: false, elapsed: 0 };
+}
+
+export function advanceTouchCoach(coach, seconds, active) {
+  if (active && Number.isFinite(seconds) && seconds > 0) coach.elapsed += seconds;
+  return coach;
+}
+
+export function learnTouchCoachZone(coach, zone) {
+  if (zone === "move" || zone === "aim") coach[zone] = true;
+  return coach;
+}
+
+export function shouldShowTouchCoach(coach, touchLayout = true) {
+  return Boolean(touchLayout && coach.elapsed < TOUCH_COACH_SECONDS && (!coach.move || !coach.aim));
+}
 
 export const DEFAULT_CONFIG = Object.freeze({
   width: 960,

@@ -4,7 +4,7 @@
   const C=globalThis.DungeonCore,run=new C.Run(),$=id=>document.getElementById(id);
   let storage;try{storage=localStorage;}catch{storage={getItem(){return null;},setItem(){throw new Error('Unavailable');}};}
   let save=C.readSave(storage),selected=null,scene=null,modalKind=null,previousFocus=null;
-  let toastTimer=0,lastUI=0,reportDelay=0,savedRun=false,spaceDown=false;
+  let toastTimer=0,lastUI=0,savedRun=false,spaceDown=false;
   const escaped=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const formatTime=t=>`${String(Math.floor(Math.ceil(t)/60)).padStart(2,'0')}:${String(Math.ceil(t)%60).padStart(2,'0')}`;
   const persist=()=>C.writeSave(storage,save);
@@ -40,7 +40,7 @@
   function select(id){selected=id;renderUI(true);scene?.targetCaretaker(run.entity(id));}
   function actionDown(){audio.unlock();if(modalKind||run.paused)return;const e=run.entity(selected);if(!e)return;if(e.kind==='monster'&&!e.stationed){run.moveMonster(e.id,...e.home);processEvents();renderUI(true);return;}run.beginWork(e.id);}
   function actionUp(){run.stopWork();spaceDown=false;}
-  function startRun(){closeModal();audio.unlock();run.start();savedRun=false;selected=null;reportDelay=0;scene?.rebuild();processEvents();renderUI(true);toast('First job: drag each monster onto its matching station.');}
+  function startRun(){closeModal();audio.unlock();run.start();savedRun=false;selected=null;scene?.rebuild();processEvents();renderUI(true);toast('First job: drag each monster onto its matching station.');}
   function renderUI(force=false){
     if(!force&&performance.now()-lastUI<90)return;lastUI=performance.now();
     const title=run.phase==='title',repair=run.phase==='repair',raid=run.phase==='raid';
@@ -87,8 +87,9 @@
     openModal('credits',`<span class="eyebrow">DEPARTMENT OF AFTERMATH</span><h2 id="modal-title">Dungeon Reset</h2><p><b>Created and owned by Ernest Turner.</b><br>Game concept and creative direction: Ernest Turner.<br>Design, programming, original artwork direction, and testing: Codex in collaboration with Ernest.</p><p>Original dungeon and character artwork generated with OpenAI ImageGen for this game. Original procedural score “After Hours in D Minor” and sound effects synthesized in Web Audio. No stock music or borrowed characters.</p><p>Phaser 3.90.0 by Phaser Studio Inc., MIT licensed. See the bundled credits and license files for full provenance.</p><p class="muted">Build ${C.VERSION} · Browser edition · September 2026<br>Local high scores only. No accounts, analytics, or online services.</p><button class="primary" id="credits-done">BACK TO THE DUNGEON <span>→</span></button>`);$('credits-done').onclick=closeModal;
   }
   function showReport(){
-    const s=run.raidSnapshot;reportDelay=9;
+    const s=run.raidSnapshot;
     openModal('report',`<span class="eyebrow">RAID ${run.wave+1} / 5 · DAMAGE ASSESSMENT</span><h2 id="modal-title">${s.defeated===C.PARTIES[run.wave].count?'An excellent inconvenience.':s.defeated?'Mostly up to code.':'They made themselves at home.'}</h2><p>${s.defeated?'The party has filed a formal complaint. Management considers this a success.':'The heroes walked out smiling. We can do something about that next time.'}</p><div class="report-grid"><div><span>HEROES SENT PACKING</span><strong>${s.defeated} / ${C.PARTIES[run.wave].count}</strong></div><div><span>PREPARATION BONUS</span><strong>+${s.setupBonus}</strong></div></div><p>${s.ready<65?'Tip: return all three monsters first. Even without a morale boost they can fight.':s.byId.door<.6?'Tip: repairing the door boosts every trap and monster by up to 20%.':'A tidy floor and a sturdy door multiply the value of your other repairs.'}</p><button class="primary" id="next-shift">BACK TO THE MESS <span>→</span></button><p class="muted" id="report-countdown">Next repair phase in 9 seconds.</p>`);$('next-shift').onclick=nextWave;
+    $('report-countdown').textContent='The next repair phase starts when you are ready.';
   }
   function nextWave(){if(run.phase!=='report')return;closeModal();run.nextWave();selected=null;scene?.rebuild();processEvents();renderUI(true);}
   function showResults(){
@@ -152,7 +153,6 @@
     speech(text){if(this.speechTimer>1.1)return;this.speechLabel.setText(text).setVisible(true);this.speechTimer=3.3;}
     update(time,delta){
       const dt=Math.min(delta/1000,.1);if(!modalKind||modalKind==='report'||modalKind==='results')run.tick(dt);
-      if(modalKind==='report'){reportDelay-=dt;$('report-countdown').textContent=`Next repair phase in ${Math.ceil(reportDelay)} seconds.`;if(reportDelay<=0)nextWave();}
       audio.update(dt);processEvents();renderUI();if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('toast').classList.remove('visible');}
       if(run.paused){this.tweens.pauseAll();return;}this.tweens.resumeAll();if(this.speechTimer>0){this.speechTimer-=dt;if(this.speechTimer<=0)this.speechLabel.setVisible(false);}
       const title=run.phase==='title',repair=run.phase==='repair';this.caretaker.setVisible(run.phase!=='raid');this.stationLabels.forEach(l=>l.setVisible(repair));

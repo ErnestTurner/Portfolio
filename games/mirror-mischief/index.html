@@ -127,6 +127,7 @@
       .canvas-wrap { min-height: 260px; }
       .panel { grid-template-columns: 1fr; }
       .panel section + section { margin-top: 14px; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+      button { min-height: 44px; }
     }
   </style>
   <link rel="stylesheet" href="../lab-shell.css?v=1">
@@ -139,7 +140,7 @@
         <h1>Mirror <span>Mischief</span></h1>
         <p class="tagline">A small tabletop for large optical consequences and minor disobedience.</p>
       </div>
-      <div id="traceLimit" class="status-pill" role="status">Trace limit reached</div>
+      <div id="traceLimit" class="status-pill" role="status"></div>
     </header>
 
     <div class="layout">
@@ -450,7 +451,7 @@
       return 'Halves have developed opinions.';
     }
     function update() {
-      trace = calculateTrace(); ui.traceLimit.classList.toggle('visible', trace.limited);
+      trace = calculateTrace(); ui.traceLimit.textContent=trace.limited?'Ray trace safety limit reached':''; ui.traceLimit.classList.toggle('visible', trace.limited);
       ui.whisper.textContent = benchMood(); updateControls(); draw();
     }
 

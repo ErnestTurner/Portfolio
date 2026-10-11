@@ -12,3 +12,5 @@
 .mobile-room-key{display:none}
 @media(max-width:540px){.mobile-room-key{display:block;grid-column:1/-1;margin:10px 0 7px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1px}.task{font-size:14px;padding:9px 8px;min-height:44px}.task .task-status{font-size:11px}.party-note,#inspect-description{font-size:14px;line-height:1.55}.room-topline,#room-status{font-size:10px}.room-bottom,.room-bottom button{font-size:9px}}
 
+@media(max-width:340px){.masthead{height:auto;min-height:77px;flex-wrap:wrap;padding:10px 0}.header-right{margin-left:auto}}
+

@@ -140,6 +140,17 @@ const experiments = {
   }
 };
 
+const gameplayPreviews = Object.freeze({
+  moon: { src: "assets/gameplay-previews/moon-snail.jpg", alt: "Moon Snail gameplay with the snail beneath a glowing moon while a marshmallow approaches." },
+  star: { src: "assets/gameplay-previews/starfall.jpg", alt: "Starfall gameplay with the player's glowing ship flying through a dark star field." },
+  dungeon: { src: "assets/gameplay-previews/dungeon-reset.jpg", alt: "Dungeon Reset gameplay showing the damaged dungeon, staff stations, monsters, traps, and cleanup jobs." },
+  brain: { src: "assets/gameplay-previews/brain-in-a-jar.jpg", alt: "Brain in a Jar gameplay showing the small neural creature steering toward a movable light." },
+  scribble: { src: "assets/gameplay-previews/scribble-engine.jpg", alt: "Scribble Engine gameplay showing two linked drawing arms tracing a curved line." },
+  traffic: { src: "assets/gameplay-previews/traffic-with-no-excuse.jpg", alt: "Traffic With No Excuse gameplay showing cars circulating around the observation ring." },
+  jelly: { src: "assets/gameplay-previews/jelly-bench.jpg", alt: "Jelly Bench gameplay showing a soft glowing body deforming over a narrow gap." },
+  mirror: { src: "assets/gameplay-previews/mirror-mischief.jpg", alt: "Mirror Mischief gameplay showing a live beam split across mirrors and two receivers." }
+});
+
 const apparatus = document.querySelector(".apparatus-shell");
 const controls = [...document.querySelectorAll(".experiment-control")];
 const selectionCount = document.querySelector("#selection-count");
@@ -148,6 +159,10 @@ const scopeMode = document.querySelector("#scope-mode");
 const scopeArt = document.querySelector("#scope-art");
 const scopeTrace = document.querySelector("#scope-trace");
 const scopeCaption = document.querySelector("#scope-caption");
+const gameplayPreview = document.querySelector("#gameplay-preview");
+const gameplayPreviewImage = document.querySelector("#gameplay-preview-image");
+const gameplayPreviewLabel = document.querySelector("#gameplay-preview-label");
+const gameplayPreviewState = document.querySelector("#gameplay-preview-state");
 const controlTitle = document.querySelector("#control-title");
 const question = document.querySelector("#specimen-question");
 const parameter = document.querySelector("#interference");
@@ -180,6 +195,7 @@ let leverTimer = 0;
 let trafficState = null;
 let apparatusVisible = true;
 let lastControl = null;
+let previewToken = 0;
 
 function safeStorage(method, value) {
   try { return value === undefined ? localStorage[method](STORAGE_KEY) : localStorage[method](STORAGE_KEY, value); }
@@ -213,6 +229,43 @@ function updateDiagram(experiment, value) {
   readingSecondary.textContent = secondary;
   parameterOutput.value = experiment.parameter.format(value);
   parameterOutput.textContent = experiment.parameter.format(value);
+}
+
+function unmountGameplayPreview() {
+  previewToken += 1;
+  delete document.body.dataset.previewState;
+  if (gameplayPreview) gameplayPreview.hidden = true;
+  if (gameplayPreviewImage) {
+    gameplayPreviewImage.onload = null;
+    gameplayPreviewImage.onerror = null;
+    gameplayPreviewImage.removeAttribute("src");
+    gameplayPreviewImage.alt = "";
+  }
+}
+
+function mountGameplayPreview(key, experiment) {
+  const preview = gameplayPreviews[key];
+  if (!preview || !gameplayPreview || !gameplayPreviewImage) return;
+  const token = ++previewToken;
+  gameplayPreview.hidden = false;
+  document.body.dataset.previewState = "loading";
+  if (gameplayPreviewLabel) gameplayPreviewLabel.textContent = experiment.name;
+  if (gameplayPreviewState) gameplayPreviewState.textContent = "Loading actual gameplay screenshot...";
+  gameplayPreviewImage.alt = preview.alt;
+  gameplayPreviewImage.onload = () => {
+    if (token !== previewToken || selectedKey !== key) return;
+    document.body.dataset.previewState = "ready";
+    scopeMode.textContent = "GAMEPLAY";
+    scopeCaption.textContent = `Screenshot from ${experiment.name}. Open the full experiment to use its real controls.`;
+  };
+  gameplayPreviewImage.onerror = () => {
+    if (token !== previewToken || selectedKey !== key) return;
+    document.body.dataset.previewState = "error";
+    scopeMode.textContent = "SCREENSHOT OFFLINE";
+    if (gameplayPreviewState) gameplayPreviewState.textContent = "Gameplay screenshot unavailable. The full experiment is still ready to open.";
+    scopeCaption.textContent = "The screenshot did not load. Open the full experiment to continue.";
+  };
+  gameplayPreviewImage.src = preview.src;
 }
 
 function createTrafficState(value) {
@@ -382,8 +435,8 @@ function cancelTrial(message = "") {
   apparatus?.classList.remove("disturbed");
   surpriseButton?.classList.remove("lever-pulled");
   runButton?.removeAttribute("aria-busy");
-  if (runButton) runButton.disabled = !selectedKey;
-  if (selectedKey) scopeMode.textContent = "READY";
+  if (runButton) runButton.disabled = true;
+  if (selectedKey && document.body.dataset.previewState === "ready") scopeMode.textContent = "GAMEPLAY";
   if (message && selectedKey) status.textContent = message;
 }
 
@@ -436,28 +489,35 @@ function applySelection(key, { history = "none", focus = false, announce = true 
   selectionCount.value = `${keys.indexOf(key) + 1} / ${keys.length}`;
   selectionCount.textContent = `${keys.indexOf(key) + 1} / ${keys.length}`;
   scopeTitle.textContent = experiment.name;
-  scopeMode.textContent = "READY";
+  scopeMode.textContent = "LOADING";
   controlTitle.textContent = experiment.name;
   question.textContent = experiment.question;
   parameter.min = experiment.parameter.min;
   parameter.max = experiment.parameter.max;
   parameter.step = experiment.parameter.step;
   parameter.value = experiment.parameter.initial;
-  parameter.disabled = false;
-  parameterLabel.textContent = experiment.parameter.label;
-  rangeLow.textContent = experiment.parameter.low;
-  rangeHigh.textContent = experiment.parameter.high;
-  runButton.disabled = false;
+  parameter.disabled = true;
+  parameterLabel.textContent = "Real controls";
+  parameterOutput.value = "IN FULL TOY";
+  parameterOutput.textContent = "IN FULL TOY";
+  rangeLow.textContent = "shown here";
+  rangeHigh.textContent = "play there";
+  runButton.disabled = true;
   clearButton.disabled = false;
   openLink.href = experiment.route;
   openLink.classList.remove("is-disabled");
   openLink.removeAttribute("aria-disabled");
-  updateDiagram(experiment, experiment.parameter.initial);
+  scopeArt.innerHTML = "";
+  scopeTrace.setAttribute("d", "");
+  readingPrimary.textContent = "Actual in-game screenshot";
+  readingSecondary.textContent = "No homepage simulation";
+  scopeCaption.textContent = `Loading a screenshot from ${experiment.name}...`;
+  mountGameplayPreview(key, experiment);
   updateBoundaryCue(experiment);
   receiver?.classList.remove("received");
-  if (receiverText) receiverText.textContent = "TRIAL SELECTED / AWAITING SIGNAL";
+  if (receiverText) receiverText.textContent = "GAMEPLAY SCREENSHOT MOUNTED / OPEN FULL TOY TO INTERACT";
   if (trafficRecord) trafficRecord.hidden = true;
-  if (announce) status.textContent = `${experiment.name} mounted. ${experiment.parameter.label} ready.`;
+  if (announce) status.textContent = `${experiment.name} mounted with an actual gameplay screenshot.`;
   safeStorage("setItem", key);
   if (history === "push") historyPush(key);
   if (history === "replace") historyReplace(key);
@@ -467,6 +527,7 @@ function applySelection(key, { history = "none", focus = false, announce = true 
 function clearSelection({ history = "none", focus = false } = {}) {
   cancelTrial();
   selectedKey = null;
+  unmountGameplayPreview();
   delete document.body.dataset.experiment;
   document.body.dataset.labState = "idle";
   controls.forEach(control => control.setAttribute("aria-pressed", "false"));
@@ -475,7 +536,7 @@ function clearSelection({ history = "none", focus = false } = {}) {
   scopeTitle.textContent = "Nothing mounted";
   scopeMode.textContent = "STANDBY";
   controlTitle.textContent = "No specimen selected";
-  question.textContent = "Select a specimen to expose the one control most likely to make it interesting.";
+  question.textContent = "Select a specimen to inspect an actual screenshot from its live toy.";
   parameter.disabled = true;
   parameter.value = 50;
   parameterLabel.textContent = "Interference";
@@ -495,7 +556,7 @@ function clearSelection({ history = "none", focus = false } = {}) {
   openLink.setAttribute("aria-disabled", "true");
   status.textContent = "Bench idle. No emergency, technically.";
   receiver?.classList.remove("received");
-  if (receiverText) receiverText.textContent = "NO TRIAL RECEIVED";
+  if (receiverText) receiverText.textContent = "NO SCREENSHOT MOUNTED";
   if (trafficRecord) trafficRecord.hidden = true;
   updateBoundaryCue(null);
   safeStorage("removeItem");
@@ -527,25 +588,16 @@ clearButton?.addEventListener("click", () => clearSelection({ history: "push", f
 openLink?.addEventListener("click", event => { if (openLink.getAttribute("aria-disabled") === "true") event.preventDefault(); });
 
 surpriseButton?.addEventListener("click", () => {
-  const experiment = experiments[selectedKey];
-  if (!experiment) {
-    status.textContent = "The lever refuses to move without a mounted specimen.";
-    return;
-  }
   cancelTrial();
-  const low = Number(experiment.parameter.min);
-  const high = Number(experiment.parameter.max);
-  const current = Number(parameter.value);
-  const target = current <= (low + high) / 2 ? high : low;
-  parameter.value = target;
-  updateDiagram(experiment, target);
+  const pool = keys.filter(key => key !== selectedKey);
+  const key = pool[Math.floor(Math.random() * pool.length)];
   apparatus?.classList.add("disturbed");
   surpriseButton.classList.add("lever-pulled");
-  status.textContent = `Unknown disturbance moved ${experiment.parameter.label.toLowerCase()} to ${experiment.parameter.format(target)}.`;
+  status.textContent = "Unknown disturbance selecting another live specimen...";
   leverTimer = setTimeout(() => {
     apparatus?.classList.remove("disturbed");
     surpriseButton.classList.remove("lever-pulled");
-    runTrial();
+    applySelection(key, { history: "push" });
   }, reduceMotion.matches ? 20 : 260);
 });
 
@@ -583,5 +635,5 @@ window.__trikzikLabTest = Object.freeze({
   select: key => applySelection(key),
   clear: () => clearSelection(),
   run: runTrial,
-  snapshot: () => ({ selectedKey, value: Number(parameter.value), running: apparatus?.classList.contains("trial-running"), title: document.title, url: location.href, receiver: receiverText?.textContent, traffic: trafficSnapshot() })
+  snapshot: () => ({ selectedKey, value: Number(parameter.value), running: apparatus?.classList.contains("trial-running"), title: document.title, url: location.href, receiver: receiverText?.textContent, previewState: document.body.dataset.previewState || "idle", previewSrc: gameplayPreviewImage?.getAttribute("src") || "", traffic: trafficSnapshot() })
 });

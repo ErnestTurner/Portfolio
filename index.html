@@ -27,7 +27,7 @@
     <script type="application/ld+json">
       {"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://trikzik.com/#ernest-turner","name":"Ernest Turner","url":"https://trikzik.com/","sameAs":["https://github.com/ErnestTurner"]},{"@type":"WebSite","@id":"https://trikzik.com/#website","name":"Trikzik Labs","url":"https://trikzik.com/","creator":{"@id":"https://trikzik.com/#ernest-turner"}}]}
     </script>
-    <link rel="stylesheet" href="playground.css?v=signal-bench-1" />
+    <link rel="stylesheet" href="playground.css?v=gameplay-captures-2" />
   </head>
   <body data-lab-state="idle">
     <svg class="site-symbols" aria-hidden="true">
@@ -50,12 +50,12 @@
     <main id="top">
       <section class="apparatus-shell" aria-labelledby="lab-title">
         <div class="apparatus-topbar">
-          <span>ENTRY BENCH 01 / PUBLIC INTERFERENCE PERMITTED</span>
+          <span>ENTRY BENCH 01 / PUBLIC INSPECTION PERMITTED</span>
           <span class="power-readout"><i></i> LAB POWER: MOSTLY STABLE</span>
         </div>
         <div class="lab-intro">
           <div><p class="kicker">CREATED BY ERNEST TURNER</p><h1 id="lab-title">Trikzik Labs</h1></div>
-          <div class="intro-copy"><p>Choose a specimen. Change one variable. Run the bench.</p></div>
+          <div class="intro-copy"><p>Mount a specimen. See the real toy. Open it to play.</p></div>
         </div>
 
         <div class="bench-grid">
@@ -72,7 +72,7 @@
               <div class="experiment-slot"><button class="experiment-control" type="button" data-experiment="mirror" aria-pressed="false"><span>08</span><b>Mirror Mischief</b><small>downstream trouble</small></button><a class="experiment-route" href="games/mirror-mischief/index.html" aria-label="Open Mirror Mischief">↗</a></div>
             </div>
             <div class="lever-bay">
-              <button class="unknown-lever" id="surprise-experiment" type="button" aria-label="Apply an unknown disturbance to the mounted experiment"><span class="lever"><i></i></span></button>
+              <button class="unknown-lever" id="surprise-experiment" type="button" aria-label="Mount a surprise experiment"><span class="lever"><i></i></span></button>
               <svg class="bench-alien" viewBox="0 0 32 46" aria-hidden="true"><use href="#et-pilot-mark" /></svg>
             </div>
           </section>
@@ -82,7 +82,7 @@
             <div class="scope-frame">
               <svg class="signal-scope" viewBox="0 0 640 430" role="img" aria-labelledby="scope-svg-title scope-svg-desc">
                 <title id="scope-svg-title">Experiment consequence scope</title>
-                <desc id="scope-svg-desc">Choose an experiment and adjust its interference control to see a representative causal diagram.</desc>
+                <desc id="scope-svg-desc">Choose an experiment to mount an authentic gameplay capture from that toy.</desc>
                 <defs><pattern id="scope-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" /></pattern><filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
                 <rect class="scope-bed" x="1" y="1" width="638" height="428" rx="18" />
                 <rect class="scope-grid" x="18" y="18" width="604" height="394" rx="11" fill="url(#scope-grid)" />
@@ -91,14 +91,19 @@
                 <g id="scope-art" class="scope-art" aria-hidden="true"></g><path id="scope-trace" class="scope-trace" d="" /><circle id="scope-pulse" class="scope-pulse" cx="42" cy="215" r="7" />
                 <g class="scope-labels"><text x="38" y="46">INPUT / USER</text><text x="488" y="392">OUTPUT / CONSEQUENCE</text></g>
               </svg>
+              <figure class="gameplay-preview" id="gameplay-preview" hidden>
+                <img id="gameplay-preview-image" alt="" decoding="async" />
+                <figcaption><span>ACTUAL GAMEPLAY SCREENSHOT</span><b id="gameplay-preview-label">Selected experiment</b></figcaption>
+                <div class="gameplay-preview-state" id="gameplay-preview-state" role="status">Loading screenshot...</div>
+              </figure>
               <div class="scope-empty" id="scope-empty" aria-hidden="true"><b>?</b><span>Awaiting a questionable premise</span></div><div class="signal-port signal-port-in" aria-hidden="true"></div><div class="signal-port signal-port-out" aria-hidden="true"></div>
             </div>
             <p class="scope-caption" id="scope-caption">The bench is honest about not knowing what you want.</p>
           </section>
 
           <section class="station control-station" aria-labelledby="control-title">
-            <header class="station-head"><div><span>INTERFERENCE PANEL</span><h2 id="control-title">No specimen selected</h2></div><button class="clear-selection" id="clear-selection" type="button" disabled>Clear</button></header>
-            <p class="specimen-question" id="specimen-question">Select a specimen to expose the one control most likely to make it interesting.</p>
+            <header class="station-head"><div><span>GAMEPLAY NOTES</span><h2 id="control-title">No specimen selected</h2></div><button class="clear-selection" id="clear-selection" type="button" disabled>Clear</button></header>
+            <p class="specimen-question" id="specimen-question">Select a specimen to inspect a real screenshot from its live toy.</p>
             <div class="dial-control"><label for="interference"><span id="parameter-label">Interference</span><output id="parameter-output" for="interference">--</output></label><input id="interference" type="range" min="0" max="100" value="50" disabled /><div class="range-ends"><span id="range-low">less</span><span id="range-high">more</span></div></div>
             <dl class="instrument-readings"><div><dt>Observed</dt><dd id="reading-primary">No activity</dd></div><div><dt>Side effect</dt><dd id="reading-secondary">Bench remains innocent</dd></div></dl>
             <div class="control-actions"><button class="button run-trial" id="run-trial" type="button" disabled>Run this trial <span>→</span></button><a class="button open-experiment is-disabled" id="open-experiment" href="#experiments" aria-disabled="true">Open full experiment <span>↗</span></a></div>
@@ -106,12 +111,12 @@
           </section>
         </div>
         <div class="trial-ledger" aria-labelledby="trial-ledger-title">
-          <div class="ledger-label"><span>OUTPUT BUFFER</span><strong id="trial-ledger-title">Last trial receipt</strong></div>
+          <div class="ledger-label"><span>MOUNT STATUS</span><strong id="trial-ledger-title">Screenshot receipt</strong></div>
           <div class="signal-conduit" aria-hidden="true"><span class="signal-packet"></span></div>
-          <div class="receiver-readout" id="records-receiver" aria-live="polite"><i></i><span>NO TRIAL RECEIVED</span></div>
+          <div class="receiver-readout" id="records-receiver" aria-live="polite"><i></i><span>NO SCREENSHOT MOUNTED</span></div>
           <div class="trial-record" id="traffic-trial-record" hidden><span>TRAFFIC OBSERVATION</span><dl><div><dt>Cause</dt><dd id="traffic-record-cause">--</dd></div><div><dt>After release</dt><dd id="traffic-record-effect">--</dd></div></dl></div>
         </div>
-        <div class="apparatus-foot"><span>REPRESENTATIVE CAUSAL SKETCHES / FULL MECHANICS LIVE INSIDE EACH EXPERIMENT</span><span id="bench-clock">LOCAL BENCH / READY</span></div>
+        <div class="apparatus-foot"><span>SCREENSHOTS FROM THE ACTUAL TOYS / OPEN AN EXPERIMENT TO PLAY</span><span id="bench-clock">LOCAL BENCH / READY</span></div>
       </section>
 
       <section id="about" class="section personnel-station" aria-labelledby="about-title">
@@ -121,7 +126,7 @@
     </main>
 
     <footer><div><span>TRIKZIK LABS / ERNEST TURNER / 2026</span><small>Thanks for interfering.</small></div><div class="footer-support"><a id="support-link" href="https://ko-fi.com/trikziklabs" target="_blank" rel="noopener noreferrer"><span class="support-phrase">Keep the experiments running</span><span class="visually-hidden"> (opens in a new tab)</span></a></div><a href="feedback.html">Feedback</a><a href="privacy.html">Privacy</a><a href="#top">Return to entry bench ↑</a></footer>
-    <script src="surprise.js?v=signal-bench-1"></script>
+    <script src="surprise.js?v=gameplay-captures-2"></script>
     <script src="analytics.js?v=2" defer></script>
   </body>
 </html>

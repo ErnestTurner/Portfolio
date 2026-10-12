@@ -127,6 +127,7 @@
     .delete { width: 100%; margin-top: 10px; border-color: rgba(255,120,144,.28); color: #ffc6d0; }
     .reset { width: 100%; }
     .microcopy { color: var(--muted); font-size: .72rem; line-height: 1.45; margin: 8px 1px 0; }
+    .next-puzzle { width: 100%; margin-top: 10px; border-color: rgba(66, 244, 238, .5); color: var(--cyan-soft); }
     .piece-count { display: flex; justify-content: space-between; gap: 12px; color: #aac4ce; font-size: .74rem; margin-top: 9px; }
     .facts { margin: 14px 3px 2px; color: #7797a4; font-size: .68rem; line-height: 1.5; }
     @media (max-width: 850px) {
@@ -182,6 +183,7 @@
             <p id="puzzleSupply" class="puzzle-supply"></p>
             <p id="puzzleHint" class="puzzle-hint"></p>
             <p id="puzzleStatus" class="puzzle-status" role="status" aria-live="polite"></p>
+            <button id="nextPuzzle" class="next-puzzle" type="button" hidden>Next Puzzle</button>
             <div id="levelNav" class="level-nav" aria-label="Puzzle levels"></div>
           </div>
         </section>
@@ -248,6 +250,7 @@
       puzzleTitle: document.querySelector('#puzzleTitle'), puzzleGoal: document.querySelector('#puzzleGoal'),
       puzzleSupply: document.querySelector('#puzzleSupply'), puzzleHint: document.querySelector('#puzzleHint'),
       puzzleStatus: document.querySelector('#puzzleStatus'), levelNav: document.querySelector('#levelNav'),
+      nextPuzzle: document.querySelector('#nextPuzzle'),
       sandboxOnly: [...document.querySelectorAll('.sandbox-only')]
     };
     let nextId = 7;
@@ -364,6 +367,9 @@
       const readings = state.readings.map(reading => `${Math.round(reading.power * 100)}%`).join(' / ');
       ui.puzzleStatus.textContent = state.complete ? `Solved! Receiver power: ${readings}.` : `Receiver power: ${readings}. Keep experimenting.`;
       ui.puzzleStatus.classList.toggle('complete', state.complete);
+      const hasNext = levelIndex < PUZZLES.length - 1;
+      ui.nextPuzzle.hidden = !state.complete || !hasNext;
+      ui.nextPuzzle.textContent = hasNext ? `Next Puzzle: ${PUZZLES[levelIndex + 1].title}` : 'All Puzzles Solved';
       renderLevelNav();
     }
     function loadLevel(index, force=false) {
@@ -710,6 +716,7 @@
     ui.reset.addEventListener('click',()=>reset(true));
     ui.sandboxMode.addEventListener('click',enterSandbox);
     ui.puzzleMode.addEventListener('click',()=>loadLevel(levelIndex, true));
+    ui.nextPuzzle.addEventListener('click',()=>loadLevel(levelIndex + 1));
     new ResizeObserver(resizeCanvas).observe(canvas);
     window.addEventListener('resize',resizeCanvas);
 

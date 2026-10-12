@@ -259,7 +259,8 @@ function updateHud(snapshot) {
     : snapshot.light < flareCost
       ? `NEED ${flareCost} LIGHT`
       : `COST ${flareCost} LIGHT`;
-  elements.flare.disabled = snapshot.state !== "running" || !flareReady;
+  elements.flare.disabled = snapshot.state !== "running";
+  elements.flare.classList.toggle("unavailable", snapshot.state === "running" && !flareReady);
   elements.flareStatus.textContent = flareStatus;
   const flareLabel = snapshot.flareCooldown > 0
     ? `Emergency flare cooling down, ${snapshot.flareCooldown.toFixed(1)} seconds remaining`
@@ -278,6 +279,18 @@ function updateHud(snapshot) {
 function announce(text, duration = 2.2) {
   elements.announcement.textContent = text;
   announcementTimer = duration;
+}
+
+function requestFlare() {
+  sound.unlock();
+  if (simulation.triggerFlare()) return true;
+  const snapshot = simulation.snapshot();
+  if (snapshot.state !== "running") return false;
+  const text = snapshot.flareCooldown > 0
+    ? `FLARE RECHARGING · ${snapshot.flareCooldown.toFixed(1)}s`
+    : `NEED ${simulation.config.flareCost} LIGHT FOR FLARE`;
+  announce(text, 1.4);
+  return false;
 }
 
 function handleEvents(events) {
@@ -730,8 +743,7 @@ elements.pause.addEventListener("click", () => {
 });
 
 elements.flare.addEventListener("click", () => {
-  sound.unlock();
-  simulation.triggerFlare();
+  requestFlare();
 });
 
 elements.sound.addEventListener("click", () => {
@@ -789,8 +801,7 @@ window.addEventListener("keydown", (event) => {
   }
   if (event.repeat && [" ", "p", "escape", "enter"].includes(key)) return;
   if (key === " ") {
-    simulation.triggerFlare();
-    sound.unlock();
+    requestFlare();
   } else if (key === "p" || key === "escape") {
     if (simulation.state === "running") pauseRun();
     else if (simulation.state === "paused") resumeRun();

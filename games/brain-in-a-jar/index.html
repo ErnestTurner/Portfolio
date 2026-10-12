@@ -191,6 +191,7 @@
             <div class="editor-top"><span id="selected-name">Controller parameter</span><output id="weight-readout" for="weight">+0.00</output></div>
             <label class="range-row" for="weight"><span>−4.0</span><input id="weight" type="range" min="-4" max="4" step="0.05"><span>+4.0</span></label>
             <button id="zero" type="button">Zero selected parameter</button>
+            <button id="restore-selected" type="button">Restore selected parameter</button>
             <button id="restore-wiring" type="button">Restore original wiring</button>
           </div>
           <details class="parameter-browser">
@@ -349,6 +350,9 @@
     const valueOf = parameter => parameter.layer === 'ih' || parameter.layer === 'ho'
       ? state.weights[parameter.layer][parameter.to][parameter.from]
       : state.weights[parameter.layer][parameter.to];
+    const originalValueOf = parameter => parameter.layer === 'ih' || parameter.layer === 'ho'
+      ? original[parameter.layer][parameter.to][parameter.from]
+      : original[parameter.layer][parameter.to];
     const parameterLabel = parameter => parameter.layer === 'ih'
       ? `${inputNames[parameter.from]} → ${hiddenNames[parameter.to]}`
       : parameter.layer === 'ho'
@@ -424,6 +428,7 @@
     document.querySelector('#reset').addEventListener('click',resetEverything);
     document.querySelector('#weight').addEventListener('input',e=>setSelectedWeight(e.target.value));
     document.querySelector('#zero').addEventListener('click',()=>setSelectedWeight(0));
+    document.querySelector('#restore-selected').addEventListener('click',()=>setSelectedWeight(originalValueOf(state.selected)));
     document.querySelector('#restore-wiring').addEventListener('click',restoreWiring);
     function restoreWiring(){ state.weights=cloneWeights();state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncEditor();renderConnections();refresh();announceAction('Original wiring restored.'); }
     function resetEverything(){ state.creature={x:255,y:330,angle:-0.25};state.light={x:535,y:180};state.weights=cloneWeights();state.paused=false;state.swapped=false;state.dragging=false;state.selected={layer:'ih',to:0,from:0};state.tickCount=0;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));editor.hidden=true;syncControls();syncEditor();renderConnections();refresh();actionFeedback.textContent='Tap a wire or neuron to inspect its effect.'; }

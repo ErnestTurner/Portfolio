@@ -413,8 +413,10 @@
 
     function beginIntervention(carId) {
       intervention = { carId, remaining: params.pulse };
+      intervention.duration = params.pulse;
       trackedCarId = carId;
       keyboardCarId = carId;
+      keyboardStatusEl.textContent = `Car ${carId + 1} is braking for ${intervention.duration.toFixed(1)} simulation seconds.`;
     }
 
     function simulationStep(state = cars, p = params, active = intervention) {
@@ -560,7 +562,6 @@
         event.preventDefault();
         keyboardMode = true;
         beginIntervention(keyboardCarId);
-        keyboardStatusEl.textContent = `Car ${keyboardCarId + 1} is braking for ${params.pulse.toFixed(1)} simulation seconds.`;
       }
     });
 
@@ -619,7 +620,7 @@
       if (intervention) {
         caseCardEl.dataset.state = 'active';
         caseHeadlineEl.textContent = 'Reason present';
-        caseDetailEl.textContent = 'One driver is currently supplying an explanation.';
+        caseDetailEl.textContent = `Car ${intervention.carId + 1} is braking for ${intervention.duration.toFixed(1)} simulation seconds.`;
       } else if (trackedCarId !== null && speedDeviation > 0.35) {
         caseCardEl.dataset.state = 'lingering';
         caseHeadlineEl.textContent = 'Cause removed · Effect remains';

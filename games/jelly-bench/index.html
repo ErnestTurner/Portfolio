@@ -199,6 +199,7 @@
       text-align: center;
     }
     .food-dot.eaten { color: #07111b; border-color: #76ffc9; background: #76ffc9; }
+    .food-dot.next { color: #dffbff; border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(126, 244, 255, .12); }
     .maze-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
     .maze-message { min-height: 2.2em; margin-top: 9px !important; color: #dffbff !important; }
     .maze-card.complete { border-color: rgba(118, 255, 201, .7); box-shadow: 0 0 24px rgba(118, 255, 201, .12); }
@@ -660,6 +661,15 @@
       }
       updateMazeUI();
       return true;
+    }
+
+    function mazeObjective() {
+      if (mazeState.completed) return "Maze complete - every snack made a different jelly.";
+      const nextFood = mazeState.foods.find(food => !food.eaten);
+      if (!nextFood) return "All snacks collected. Reach the EXIT.";
+      const eaten = mazeState.foods.filter(food => food.eaten).length;
+      const label = nextFood.label.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase());
+      return `${eaten} of ${mazeState.foods.length} snacks - next: ${label}.`;
     }
 
     function updateMaze(dt) {
@@ -1243,10 +1253,14 @@
       card.classList.toggle("active", mode === "maze");
       card.classList.toggle("complete", mazeState.completed);
       document.querySelector("#mazeMessage").textContent = mazeState.feedback;
-      document.querySelector("#mazeHud").textContent = mazeState.feedback;
+      document.querySelector("#mazeHud").textContent = mazeObjective();
+      const nextFood = mazeState.foods.find(food => !food.eaten);
       for (const food of mazeState.foods) {
         const badge = document.querySelector(`[data-food-status="${food.id}"]`);
         badge.classList.toggle("eaten", food.eaten);
+        badge.classList.toggle("next", food === nextFood);
+        if (food === nextFood) badge.setAttribute("aria-current", "step");
+        else badge.removeAttribute("aria-current");
         badge.textContent = `${food.eaten ? "✓ " : ""}${food.id === "soft" ? "Soft" : food.id === "spring" ? "Spring" : "Pressure"}`;
       }
     }
@@ -1341,6 +1355,7 @@
       setMode,
       restartMaze,
       consumeFood,
+      mazeObjective,
       moveBlobTo: translateBlob,
       mazeRoute: MAZE_ROUTE.map(point => ({ ...point })),
       mazeLayout: {

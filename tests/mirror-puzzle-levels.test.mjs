@@ -97,4 +97,15 @@ test('Completion persists locally and unlocks the next numbered level', () => {
   assert.ok(JSON.parse(storage.get('mirror-mischief-puzzles')).includes('single-reflection'));
   assert.equal(api.mode().completed.includes('single-reflection'), true);
   assert.equal(elements.get('levelNav').children[1].disabled, false);
+  assert.equal(elements.get('nextPuzzle').hidden, false);
+  assert.equal(elements.get('nextPuzzle').textContent, 'Next Puzzle: Around the Block');
+});
+
+test('The puzzle card offers direct progression only after solving', () => {
+  const { api, elements } = bootGame();
+  api.loadLevel(0);
+  assert.equal(elements.get('nextPuzzle').hidden, true);
+  api.setPieceAngle(2, -45);
+  assert.equal(elements.get('nextPuzzle').hidden, false);
+  assert.match(html, /ui\.nextPuzzle\.addEventListener\('click',\(\)=>loadLevel\(levelIndex \+ 1\)\)/);
 });

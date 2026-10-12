@@ -318,6 +318,11 @@ canvas {
   opacity: 0.48;
 }
 
+.flare-button.unavailable {
+  border-color: #ffc85766;
+  opacity: 0.72;
+}
+
 .announcement {
   position: absolute;
   top: 22px;

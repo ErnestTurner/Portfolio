@@ -61,7 +61,7 @@
     $('phase-title').textContent=title?'Another day. Another dungeon.':raid?C.PARTIES[run.wave].name:run.phase==='results'?'You survived the night shift.':'Let’s make this look intentional.';
     $('room-status').textContent=title?'Caretaker wanted. Experience inevitable.':raid?'Stand back. Your work is being tested.':run.paused?'Break in progress.':`NEXT: ${C.PARTIES[run.wave].name.toUpperCase()}`;
     $('room-tip').textContent=raid?'WATCH WHAT YOUR REPAIRS DO. EVERY LITTLE BIT COUNTS.':selected?run.entity(selected).flavor:'DRAG MONSTERS TO THEIR RINGS · HOLD OBJECTS TO FIX THEM';
-    $('readiness').textContent=`${run.readiness()}%`;$('readiness-bar').style.width=`${run.readiness()}%`;
+    const readiness=run.readiness();$('readiness').textContent=`${readiness}%`;$('readiness-bar').style.width=`${readiness}%`;
     $('party-note').textContent=`${C.PARTIES[run.wave].count} heroes · ${C.PARTIES[run.wave].hp} base health. ${C.PARTIES[run.wave].quip}`;
     if(!title){
       if($('task-list').children.length!==run.entities.length){$('task-list').innerHTML=run.entities.map(e=>`<button class="task" data-task="${e.id}" aria-label="Select ${escaped(e.name)}"><span>${e.kind==='monster'?'◇':e.kind==='mess'?'·':'▱'} ${e.name}</span><span class="task-status"></span></button>`).join('');$('task-list').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>select(b.dataset.task)));}
@@ -73,6 +73,8 @@
     $('work-progress').style.width=e?`${(e.kind==='monster'?e.morale:e.condition)*100}%`:'0%';
     const done=e&&run.complete(e),returning=e&&e.kind==='monster'&&!e.stationed;$('work-button').disabled=!repair||!e||done||run.paused;
     $('work-button').innerHTML=done?'JOB DONE ✓':returning?'RETURN TO STATION <kbd>SPACE</kbd>':e?.kind==='monster'?'HOLD TO REASSURE <kbd>SPACE</kbd>':e?.kind==='mess'?'HOLD TO SWEEP <kbd>SPACE</kbd>':e?.kind==='chest'?'HOLD TO REFILL <kbd>SPACE</kbd>':'HOLD TO REPAIR <kbd>SPACE</kbd>';
+    $('open-doors').textContent=repair?`OPEN NOW · ${readiness}% READY →`:'Ready enough. Open the doors →';
+    $('open-doors').setAttribute('aria-label',repair?`Open the doors now at ${readiness}% readiness with ${Math.ceil(run.time)} seconds remaining`:'Open the doors');
     $('open-doors').disabled=!repair||run.paused;document.body.classList.toggle('reduced-motion',save.reducedMotion);
   }
   function openModal(kind,html){actionUp();previousFocus=document.activeElement;modalKind=kind;$('modal').innerHTML=html;$('modal-layer').hidden=false;$('modal').querySelector('button')?.focus();}

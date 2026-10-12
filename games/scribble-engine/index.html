@@ -2694,11 +2694,16 @@
 
     document.querySelector('#clear').addEventListener('click', () => {
       leaveReplayForRemix();
+      const hadInk = hasInk;
       clearInk(true);
+      controls.workspaceStatus.textContent = hadInk
+        ? 'Paper cleared - Restore Clear can bring it back'
+        : 'Paper is already clear';
     });
     controls.restoreClear.addEventListener('click', () => {
       leaveReplayForRemix();
       restoreLastClear();
+      controls.workspaceStatus.textContent = 'Last cleared drawing restored';
     });
     controls.saveCheckpoint.addEventListener('click', () => requestCheckpointAction('save'));
     controls.restoreCheckpoint.addEventListener('click', () => requestCheckpointAction('restore'));

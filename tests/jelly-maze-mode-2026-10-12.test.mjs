@@ -67,6 +67,15 @@ test('Maze completion requires all foods and an exit-center overlap', () => {
   assert.match(html, /foods: mazeState\.foods\.map\(food => \(\{ id: food\.id, eaten: food\.eaten \}\)\)/);
 });
 
+test('Maze HUD and progress badges identify the next objective', () => {
+  assert.match(html, /function mazeObjective\(\)/);
+  assert.match(html, /All snacks collected\. Reach the EXIT\./);
+  assert.match(html, /next: \$\{label\}/);
+  assert.match(html, /badge\.classList\.toggle\("next", food === nextFood\)/);
+  assert.match(html, /badge\.setAttribute\("aria-current", "step"\)/);
+  assert.match(html, /document\.querySelector\("#mazeHud"\)\.textContent = mazeObjective\(\)/);
+});
+
 test('Phone layout accounts for safe-area padding without changing the desktop composition', () => {
   assert.match(html, /padding-left: max\(10px, env\(safe-area-inset-left\)\)/);
   assert.match(html, /padding-right: max\(10px, env\(safe-area-inset-right\)\)/);

@@ -252,8 +252,22 @@ function updateHud(snapshot) {
   elements.risk.textContent = `×${snapshot.risk.toFixed(1)}`;
   elements.phase.textContent = snapshot.state === "paused" ? "PAUSED" : snapshot.phase;
   elements.objective.textContent = snapshot.phase === "ECLIPSE" ? "Break the eclipse" : "Protect the light";
-  elements.flare.disabled = snapshot.state !== "running" || snapshot.flareCooldown > 0 || snapshot.light < simulation.config.flareCost;
-  elements.flareStatus.textContent = snapshot.flareCooldown > 0 ? `${snapshot.flareCooldown.toFixed(1)}s` : snapshot.light < simulation.config.flareCost ? "NO LIGHT" : "READY";
+  const flareCost = simulation.config.flareCost;
+  const flareReady = snapshot.flareCooldown <= 0 && snapshot.light >= flareCost;
+  const flareStatus = snapshot.flareCooldown > 0
+    ? `${snapshot.flareCooldown.toFixed(1)}s`
+    : snapshot.light < flareCost
+      ? `NEED ${flareCost} LIGHT`
+      : `COST ${flareCost} LIGHT`;
+  elements.flare.disabled = snapshot.state !== "running" || !flareReady;
+  elements.flareStatus.textContent = flareStatus;
+  const flareLabel = snapshot.flareCooldown > 0
+    ? `Emergency flare cooling down, ${snapshot.flareCooldown.toFixed(1)} seconds remaining`
+    : snapshot.light < flareCost
+      ? `Emergency flare needs ${flareCost} light`
+      : `Release emergency flare, costs ${flareCost} light`;
+  elements.flare.setAttribute("aria-label", flareLabel);
+  elements.flare.title = flareLabel;
   elements.pause.disabled = !["running", "paused"].includes(snapshot.state);
   elements.pause.textContent = snapshot.state === "paused" ? "▶" : "Ⅱ";
   elements.pause.setAttribute("aria-label", snapshot.state === "paused" ? "Resume game" : "Pause game");

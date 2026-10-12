@@ -600,6 +600,7 @@
           </div>
         </div>
         <div class="recipe-actions">
+          <button id="undoRecipeEdit" type="button" disabled>Undo content edit</button>
           <button id="playRecipe" type="button">Play recipe</button>
           <button id="copyRecipeLink" type="button">Copy compact link</button>
           <button id="downloadRecipe" type="button">Download recipe</button>
@@ -775,6 +776,7 @@
     let cueHistory = [];
     let selectedCueIndex = 0;
     let recipeProgram = null;
+    let recipeUndo = null;
     let recipeOriginal = null;
     let recipeSession = null;
     let selectedRecipeSection = 0;
@@ -1859,6 +1861,7 @@
         let parsed;
         try { parsed = JSON.parse(text); } catch { throw new Error('Recipe rejected: the file is not valid JSON.'); }
         const recipe = validateRecipe(parsed);
+        recipeUndo = { program: validateRecipe(recipeProgram), section: selectedRecipeSection, stage: selectedRecipeStage };
         leaveReplayForRemix();
         recipeProgram = recipe;
         selectedRecipeSection = 0;
@@ -1888,7 +1891,9 @@
 
     function commitRecipe(next, message, sectionIndex = selectedRecipeSection, stageIndex = selectedRecipeStage) {
       try {
-        recipeProgram = validateRecipe(next);
+        const validated = validateRecipe(next);
+        recipeUndo = { program: cloneRecipe(recipeProgram), section: selectedRecipeSection, stage: selectedRecipeStage };
+        recipeProgram = validated;
         selectedRecipeSection = Math.max(0, Math.min(sectionIndex, recipeProgram.sections.length - 1));
         selectedRecipeStage = Math.max(0, Math.min(stageIndex, recipeProgram.sections[selectedRecipeSection].stages.length - 1));
         leaveReplayForRemix();
@@ -1899,6 +1904,18 @@
         setRecipeStatus(error instanceof Error ? error.message : 'Recipe edit was rejected.', true);
         return false;
       }
+    }
+
+    function undoRecipeEdit() {
+      if (!recipeUndo) return false;
+      leaveReplayForRemix();
+      const previous = recipeUndo;
+      recipeUndo = null;
+      recipeProgram = validateRecipe(cloneRecipe(previous.program));
+      selectedRecipeSection = previous.section;
+      selectedRecipeStage = previous.stage;
+      renderRecipeEditor('Content edit undone');
+      return true;
     }
 
     function editSelectedRecipe(mutator, message) {
@@ -1980,6 +1997,7 @@
       controls.recipeSectionDown.disabled = selectedRecipeSection === recipeProgram.sections.length - 1;
       controls.recipeSectionDuplicate.disabled = recipeProgram.sections.length >= MAX_RECIPE_SECTIONS;
       controls.recipeSectionAdd.disabled = recipeProgram.sections.length >= MAX_RECIPE_SECTIONS;
+      controls.undoRecipeEdit.disabled = !recipeUndo;
       const compiled = compileRecipe(recipeProgram);
       setRecipeStatus(`${message ? `${message} · ` : ''}${compiled.operations.length} operations · ${compiled.totalSteps.toLocaleString()} samples · ${compiled.geometrySeconds.toFixed(1)} geometry seconds · ${compiled.wallSeconds.toFixed(1)} playback seconds`);
     }
@@ -2417,6 +2435,7 @@
       recipeSectionDown: document.querySelector('#recipeSectionDown'),
       recipeSectionDuplicate: document.querySelector('#recipeSectionDuplicate'),
       recipeSectionAdd: document.querySelector('#recipeSectionAdd'),
+      undoRecipeEdit: document.querySelector('#undoRecipeEdit'),
       recipeFile: document.querySelector('#recipeFile'),
       recipeLink: document.querySelector('#recipeLink'),
       replayDuration: document.querySelector('#replayDuration'),
@@ -2723,13 +2742,11 @@
     });
     document.querySelectorAll('[data-recipe-preset]').forEach(button => {
       button.addEventListener('click', () => {
-        recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES[button.dataset.recipePreset]));
-        selectedRecipeSection = 0;
-        selectedRecipeStage = 0;
-        leaveReplayForRemix();
-        renderRecipeEditor(`${recipeProgram.name} loaded`);
+        const preset = validateRecipe(cloneRecipe(RECIPE_EXAMPLES[button.dataset.recipePreset]));
+        commitRecipe(preset, `${preset.name} loaded`, 0, 0);
       });
     });
+    controls.undoRecipeEdit.addEventListener('click', undoRecipeEdit);
     controls.recipeName.addEventListener('change', () => editSelectedRecipe(({ next }) => { next.name = controls.recipeName.value; }, 'Recipe renamed'));
     controls.recipePlayback.addEventListener('change', changeRecipePlaybackRate);
     controls.recipeSection.addEventListener('change', () => { selectedRecipeSection = Number(controls.recipeSection.value); selectedRecipeStage = 0; renderRecipeEditor(); });
@@ -2866,6 +2883,7 @@
       previousTime = performance.now();
       renderCueEditor('Default score restored');
       recipeProgram = validateRecipe(cloneRecipe(RECIPE_EXAMPLES['orbit-rosette']));
+      recipeUndo = null;
       selectedRecipeSection = 0;
       selectedRecipeStage = 0;
       renderRecipeEditor('Default recipe restored');

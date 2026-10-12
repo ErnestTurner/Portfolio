@@ -142,6 +142,69 @@
       text-shadow: 0 2px 18px #020712;
     }
 
+    .maze-hud {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      display: none;
+      max-width: min(76%, 430px);
+      padding: 9px 12px;
+      border: 1px solid rgba(122, 238, 248, .42);
+      border-radius: 11px;
+      color: #dffbff;
+      background: rgba(4, 13, 26, .82);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .34);
+      font: 700 .73rem/1.35 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .035em;
+      pointer-events: none;
+    }
+
+    .stage.maze-active .maze-hud { display: block; }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .mode-switch button[aria-pressed="true"] {
+      color: #07111b;
+      border-color: #7ef4ff;
+      background: linear-gradient(135deg, #77f3ff, #9cd8ff);
+    }
+
+    .maze-card {
+      display: none;
+      margin-bottom: 20px;
+      padding: 14px;
+      border: 1px solid rgba(126, 244, 255, .2);
+      border-radius: 13px;
+      background: rgba(13, 37, 55, .45);
+    }
+
+    .maze-card.active { display: block; }
+    .maze-card h3 { margin: 0 0 7px; font-size: .84rem; }
+    .maze-card p { margin: 0; color: #b9cedc; font-size: .76rem; line-height: 1.45; }
+    .maze-card strong { color: var(--cyan); }
+    .maze-foods { display: flex; gap: 8px; margin: 12px 0; }
+    .food-dot {
+      flex: 1;
+      padding: 6px 4px;
+      border: 1px solid rgba(145, 166, 188, .26);
+      border-radius: 8px;
+      color: #91a6bc;
+      font-size: .66rem;
+      font-weight: 800;
+      text-align: center;
+    }
+    .food-dot.eaten { color: #07111b; border-color: #76ffc9; background: #76ffc9; }
+    .maze-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .maze-message { min-height: 2.2em; margin-top: 9px !important; color: #dffbff !important; }
+    .maze-card.complete { border-color: rgba(118, 255, 201, .7); box-shadow: 0 0 24px rgba(118, 255, 201, .12); }
+
+    .bench-only[disabled], .bench-only :disabled { opacity: .58; }
+
     .panel {
       position: sticky;
       top: 18px;
@@ -328,13 +391,21 @@
     }
 
     @media (max-width: 560px) {
-      .app { padding: 10px; }
+      .app {
+        padding-top: max(10px, env(safe-area-inset-top));
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        padding-left: max(10px, env(safe-area-inset-left));
+      }
       header { align-items: start; }
+      .lab-game-header > div { min-width: 0; }
+      .lab-link { max-width: 100%; overflow-wrap: anywhere; }
       .tagline { max-width: 15ch; font-size: .72rem; }
       .stage { min-height: 310px; border-radius: 17px; }
       .panel { padding: 18px; border-radius: 17px; }
       .checks { grid-template-columns: 1fr 1fr; }
       button { min-height: 44px; }
+      .maze-hud { right: 8px; bottom: 8px; max-width: calc(100% - 16px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -356,7 +427,8 @@
       </header>
       <div class="stage" id="stage">
         <canvas id="canvas" aria-label="Interactive soft jelly blob between two platforms"></canvas>
-        <p class="invitation">Can you make it squeeze through the gap, then change its properties so it can’t get back?</p>
+        <p class="invitation" id="invitation">Can you make it squeeze through the gap, then change its properties so it can't get back?</p>
+        <div class="maze-hud" id="mazeHud" role="status" aria-live="polite">Drag the jelly toward the first snack.</div>
       </div>
     </section>
 
@@ -367,7 +439,24 @@
         <span class="live" id="motionStatus">Live</span>
       </div>
 
-      <fieldset>
+      <div class="mode-switch" role="group" aria-label="Jelly Bench mode">
+        <button type="button" data-mode="sandbox" aria-pressed="true">Sandbox</button>
+        <button type="button" data-mode="maze" aria-pressed="false">Snack Maze</button>
+      </div>
+
+      <section class="maze-card" id="mazeCard" aria-labelledby="mazeTitle">
+        <h3 id="mazeTitle">Three snacks. One squishy exit.</h3>
+        <p>Drag, stretch, pull, and release the jelly. Each snack grows it and changes how it moves.</p>
+        <div class="maze-foods" aria-label="Maze snack progress">
+          <span class="food-dot" data-food-status="soft">Soft</span>
+          <span class="food-dot" data-food-status="spring">Spring</span>
+          <span class="food-dot" data-food-status="pressure">Pressure</span>
+        </div>
+        <div class="maze-actions"><button id="restartMaze" type="button">Restart Maze</button></div>
+        <p class="maze-message" id="mazeMessage" aria-live="polite">Find the soft snack first.</p>
+      </section>
+
+      <fieldset class="bench-only" id="propertyControls">
         <legend>Blob Properties</legend>
         <div class="slider-row">
           <label class="slider-label" for="stiffness"><span>Stiffness</span><output id="stiffnessOut">46</output></label>
@@ -387,7 +476,7 @@
         </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset class="bench-only">
         <legend>View Options</legend>
         <div class="checks">
           <label class="check"><input id="showNodes" type="checkbox">Show Nodes</label>
@@ -397,7 +486,7 @@
         </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset class="bench-only" id="presetControls">
         <legend>Quick Presets</legend>
         <div class="button-grid" id="presets">
           <button type="button" data-preset="default" class="active">Default</button>
@@ -426,7 +515,8 @@
     const MAX_FRAME = 1 / 15;
     const NODE_COUNT = 24;
     const BASE_RADIUS = 88;
-    const START = { x: 500, y: 202 };
+    const SANDBOX_START = { x: 500, y: 202 };
+    const MAZE_START = { x: 105, y: 292 };
     const GRAVITY = 940;
     const NODE_RADIUS = 5.5;
     const MAX_SPEED = 1650;
@@ -443,7 +533,7 @@
     const view = { ...DEFAULT_VIEW };
     const nodes = [];
     const springs = [];
-    const platforms = [
+    const sandboxPlatforms = [
       { x: -30, y: 292, w: 460, h: 118 },
       { x: 570, y: 292, w: 460, h: 118 }
     ];
@@ -452,7 +542,28 @@
       { x: -35, y: 0, w: 35, h: 700 },
       { x: 1000, y: 0, w: 35, h: 700 }
     ];
-    const colliders = [...platforms, floor, ...walls];
+    const mazeWalls = [
+      { x: 286, y: 0, w: 34, h: 205 }, { x: 286, y: 395, w: 34, h: 249 },
+      { x: 510, y: 0, w: 34, h: 145 }, { x: 510, y: 345, w: 34, h: 299 },
+      { x: 738, y: 0, w: 34, h: 230 }, { x: 738, y: 445, w: 34, h: 199 }
+    ];
+    const MAZE_ROUTE = [
+      { x: 105, y: 292 }, { x: 220, y: 292 }, { x: 390, y: 300 },
+      { x: 455, y: 230 }, { x: 625, y: 245 }, { x: 690, y: 335 },
+      { x: 845, y: 335 }, { x: 920, y: 335 }
+    ];
+    const MAZE_EXIT = { x: 874, y: 262, w: 102, h: 150 };
+    const MAZE_FOOD_DEFS = [
+      { id: "soft", x: 236, y: 292, color: "#7ef4ff", label: "SOFT BERRY", delta: { stiffness: -18, restLength: 5 }, message: "Softer + bigger — pull through the first gate." },
+      { id: "spring", x: 430, y: 235, color: "#ffd36e", label: "SPRING CITRUS", delta: { damping: -18, restLength: 5 }, message: "More rebound + bigger — release momentum through the high gate." },
+      { id: "pressure", x: 650, y: 335, color: "#cf8cff", label: "PRESSURE PLUM", delta: { pressure: 20, restLength: 6 }, message: "More pressure + bigger — squeeze through the final gate to EXIT." }
+    ];
+    let mode = "sandbox";
+    let activeStart = SANDBOX_START;
+    let activePlatforms = sandboxPlatforms;
+    let colliders = [...sandboxPlatforms, floor, ...walls];
+    let sandboxSnapshot = { settings: { ...DEFAULTS }, view: { ...DEFAULT_VIEW }, activePreset: "default" };
+    let mazeState = createMazeState();
     let targetArea = Math.PI * BASE_RADIUS * BASE_RADIUS;
     let activePreset = "default";
     let accumulator = 0;
@@ -460,6 +571,17 @@
     let paused = false;
     let diagnosticSteps = 0;
     const pointer = { active: false, id: null, x: 0, y: 0, targets: [] };
+
+    function createMazeState() {
+      return {
+        foods: MAZE_FOOD_DEFS.map(food => ({ ...food, eaten: false })),
+        effectTargets: { ...DEFAULTS },
+        completed: false,
+        feedback: "Find the soft snack first.",
+        flash: 0,
+        lastFood: null
+      };
+    }
 
     // ---- Soft-body construction ------------------------------------------
     function addSpring(a, b, kind, stiffnessScale = 1) {
@@ -473,8 +595,8 @@
       springs.length = 0;
       for (let i = 0; i < NODE_COUNT; i++) {
         const angle = -Math.PI / 2 + (i / NODE_COUNT) * Math.PI * 2;
-        const x = START.x + Math.cos(angle) * BASE_RADIUS;
-        const y = START.y + Math.sin(angle) * BASE_RADIUS;
+        const x = activeStart.x + Math.cos(angle) * BASE_RADIUS;
+        const y = activeStart.y + Math.sin(angle) * BASE_RADIUS;
         nodes.push({ x, y, px: x, py: y, ax: 0, ay: 0, contact: false });
       }
       for (let i = 0; i < NODE_COUNT; i++) {
@@ -496,11 +618,115 @@
       const radius = BASE_RADIUS * (settings.restLength / 100);
       for (let i = 0; i < NODE_COUNT; i++) {
         const angle = -Math.PI / 2 + (i / NODE_COUNT) * Math.PI * 2;
-        const x = START.x + Math.cos(angle) * radius;
-        const y = START.y + Math.sin(angle) * radius;
+        const x = activeStart.x + Math.cos(angle) * radius;
+        const y = activeStart.y + Math.sin(angle) * radius;
         Object.assign(nodes[i], { x, y, px: x, py: y, ax: 0, ay: 0, contact: false });
       }
       releasePointer();
+    }
+
+    function translateBlob(x, y) {
+      const center = blobCenter();
+      const dx = x - center.x, dy = y - center.y;
+      for (const node of nodes) {
+        node.x += dx; node.px += dx;
+        node.y += dy; node.py += dy;
+      }
+      releasePointer();
+    }
+
+    function pointInsideBlob(point) {
+      let inside = false;
+      for (let i = 0, j = NODE_COUNT - 1; i < NODE_COUNT; j = i++) {
+        const a = nodes[i], b = nodes[j];
+        const crosses = ((a.y > point.y) !== (b.y > point.y)) &&
+          point.x < (b.x - a.x) * (point.y - a.y) / ((b.y - a.y) || .00001) + a.x;
+        if (crosses) inside = !inside;
+      }
+      return inside;
+    }
+
+    function consumeFood(id) {
+      if (mode !== "maze") return false;
+      const food = mazeState.foods.find(item => item.id === id);
+      if (!food || food.eaten) return false;
+      food.eaten = true;
+      mazeState.lastFood = food.id;
+      mazeState.flash = 1;
+      mazeState.feedback = food.message;
+      for (const [key, delta] of Object.entries(food.delta)) {
+        const input = document.querySelector(`#${key}`);
+        mazeState.effectTargets[key] = Math.max(Number(input.min), Math.min(Number(input.max), mazeState.effectTargets[key] + delta));
+      }
+      updateMazeUI();
+      return true;
+    }
+
+    function updateMaze(dt) {
+      if (mode !== "maze") return;
+      if (!mazeState.completed) {
+        for (const food of mazeState.foods) {
+          if (!food.eaten && (pointInsideBlob(food) || nodes.some(node => Math.hypot(node.x - food.x, node.y - food.y) < 29))) consumeFood(food.id);
+        }
+      }
+
+      let shapeChanged = false;
+      for (const key of sliderIds) {
+        const target = mazeState.effectTargets[key];
+        const difference = target - settings[key];
+        if (Math.abs(difference) > .02) {
+          settings[key] += difference * Math.min(1, dt * 2.4);
+          if (key === "restLength") shapeChanged = true;
+        } else settings[key] = target;
+      }
+      if (shapeChanged) updateRestShape();
+      mazeState.flash = Math.max(0, mazeState.flash - dt * 1.4);
+
+      const center = blobCenter();
+      if (!mazeState.completed && mazeState.foods.every(food => food.eaten) && center.x >= MAZE_EXIT.x && center.x <= MAZE_EXIT.x + MAZE_EXIT.w && center.y >= MAZE_EXIT.y && center.y <= MAZE_EXIT.y + MAZE_EXIT.h) {
+        mazeState.completed = true;
+        mazeState.feedback = "Maze complete — every snack made a different jelly.";
+        updateMazeUI();
+      } else if (diagnosticSteps % 8 === 0) syncPropertyOutputs();
+    }
+
+    function restartMaze() {
+      mode = "maze";
+      activeStart = MAZE_START;
+      activePlatforms = [];
+      colliders = [...mazeWalls, floor, ...walls];
+      mazeState = createMazeState();
+      Object.assign(settings, DEFAULTS);
+      activePreset = null;
+      updateRestShape();
+      resetBlob();
+      setPaused(false);
+      updateModeUI();
+      syncUI();
+      return mazeState;
+    }
+
+    function setMode(nextMode) {
+      if (nextMode !== "sandbox" && nextMode !== "maze") return mode;
+      if (nextMode === mode) return mode;
+      if (nextMode === "maze") {
+        sandboxSnapshot = { settings: { ...settings }, view: { ...view }, activePreset };
+        restartMaze();
+      } else {
+        mode = "sandbox";
+        activeStart = SANDBOX_START;
+        activePlatforms = sandboxPlatforms;
+        colliders = [...sandboxPlatforms, floor, ...walls];
+        Object.assign(settings, sandboxSnapshot.settings);
+        Object.assign(view, sandboxSnapshot.view);
+        activePreset = sandboxSnapshot.activePreset;
+        updateRestShape();
+        resetBlob();
+        setPaused(false);
+        updateModeUI();
+        syncUI();
+      }
+      return mode;
     }
 
     // ---- Force calculation and constraint solving ------------------------
@@ -660,6 +886,7 @@
         solveCollisions();
       }
       recoverIfInvalid();
+      updateMaze(dt);
       diagnosticSteps++;
     }
 
@@ -785,8 +1012,7 @@
     }
 
     function drawBench() {
-      drawPlatform(platforms[0], false);
-      drawPlatform(platforms[1], true);
+      for (let i = 0; i < activePlatforms.length; i++) drawPlatform(activePlatforms[i], i === 1);
 
       const floorGrad = ctx.createLinearGradient(0, floor.y, 0, WORLD.height);
       floorGrad.addColorStop(0, "#263a4d");
@@ -797,13 +1023,62 @@
       ctx.fillStyle = "rgba(137, 221, 241, .22)";
       ctx.fillRect(0, floor.y, WORLD.width, 2);
 
-      ctx.fillStyle = "rgba(157, 207, 222, .3)";
-      ctx.font = "700 12px ui-monospace, monospace";
-      ctx.letterSpacing = "2px";
-      ctx.fillText("CLEARANCE 140", 445, 430);
-      ctx.fillStyle = "rgba(117, 167, 186, .18)";
-      ctx.fillRect(499, 444, 2, 176);
-      for (let y = 458; y < 620; y += 24) ctx.fillRect(490, y, 21, 1);
+      if (mode === "sandbox") {
+        ctx.fillStyle = "rgba(157, 207, 222, .3)";
+        ctx.font = "700 12px ui-monospace, monospace";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("CLEARANCE 140", 445, 430);
+        ctx.fillStyle = "rgba(117, 167, 186, .18)";
+        ctx.fillRect(499, 444, 2, 176);
+        for (let y = 458; y < 620; y += 24) ctx.fillRect(490, y, 21, 1);
+      }
+    }
+
+    function drawMaze() {
+      if (mode !== "maze") return;
+      ctx.save();
+      for (const wall of mazeWalls) {
+        const metal = ctx.createLinearGradient(wall.x, 0, wall.x + wall.w, 0);
+        metal.addColorStop(0, "#172a3b"); metal.addColorStop(.5, "#6b8392"); metal.addColorStop(1, "#132333");
+        ctx.fillStyle = metal;
+        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
+        ctx.strokeStyle = "rgba(179, 234, 244, .34)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+      }
+
+      const ready = mazeState.foods.every(food => food.eaten);
+      ctx.fillStyle = ready ? "rgba(118, 255, 201, .2)" : "rgba(118, 255, 201, .07)";
+      ctx.fillRect(MAZE_EXIT.x, MAZE_EXIT.y, MAZE_EXIT.w, MAZE_EXIT.h);
+      ctx.strokeStyle = ready ? "#76ffc9" : "rgba(118, 255, 201, .38)";
+      ctx.lineWidth = 4;
+      ctx.setLineDash([12, 8]);
+      ctx.strokeRect(MAZE_EXIT.x, MAZE_EXIT.y, MAZE_EXIT.w, MAZE_EXIT.h);
+      ctx.setLineDash([]);
+      ctx.fillStyle = ready ? "#c9ffe9" : "rgba(201, 255, 233, .48)";
+      ctx.font = "800 17px ui-monospace, monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("EXIT", MAZE_EXIT.x + MAZE_EXIT.w / 2, MAZE_EXIT.y - 12);
+
+      for (const food of mazeState.foods) {
+        if (food.eaten) continue;
+        const pulse = 1 + Math.sin(performance.now() / 210) * .08;
+        ctx.beginPath();
+        ctx.arc(food.x, food.y, 23 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = food.color;
+        ctx.shadowColor = food.color;
+        ctx.shadowBlur = 20;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#07111b";
+        ctx.font = "900 18px ui-monospace, monospace";
+        ctx.fillText(food.id === "soft" ? "S" : food.id === "spring" ? "↗" : "P", food.x, food.y + 6);
+        ctx.fillStyle = food.color;
+        ctx.font = "800 10px ui-monospace, monospace";
+        ctx.fillText(food.label, food.x, food.y + 42);
+      }
+      ctx.textAlign = "start";
+      ctx.restore();
     }
 
     function traceBlob() {
@@ -872,6 +1147,20 @@
         const a = nodes[i], b = nodes[(i + 6) % NODE_COUNT];
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
+      if (mode === "maze") {
+        const eaten = mazeState.foods.filter(food => food.eaten);
+        for (let i = 0; i < eaten.length; i++) {
+          const food = eaten[i];
+          ctx.globalAlpha = .62 + mazeState.flash * .2;
+          ctx.fillStyle = food.color;
+          for (let dot = 0; dot < 5; dot++) {
+            const angle = (i * 1.7 + dot * 1.27);
+            ctx.beginPath();
+            ctx.arc(center.x + Math.cos(angle) * (24 + dot * 7), center.y + Math.sin(angle) * (18 + dot * 6), 4 + (dot % 2), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
       ctx.restore();
 
       if (view.showSprings) {
@@ -915,6 +1204,7 @@
       ctx.setTransform(sx, 0, 0, sy, 0, 0);
       drawBackground();
       drawBench();
+      drawMaze();
       drawBlob();
       drawCollisionShapes();
       if (pointer.active) {
@@ -941,6 +1231,41 @@
     // ---- UI controls -----------------------------------------------------
     const sliderIds = ["stiffness", "damping", "pressure", "restLength"];
 
+    function syncPropertyOutputs() {
+      for (const key of sliderIds) {
+        const value = Math.round(settings[key]);
+        document.querySelector(`#${key}Out`).value = key === "restLength" ? `${value}%` : value;
+      }
+    }
+
+    function updateMazeUI() {
+      const card = document.querySelector("#mazeCard");
+      card.classList.toggle("active", mode === "maze");
+      card.classList.toggle("complete", mazeState.completed);
+      document.querySelector("#mazeMessage").textContent = mazeState.feedback;
+      document.querySelector("#mazeHud").textContent = mazeState.feedback;
+      for (const food of mazeState.foods) {
+        const badge = document.querySelector(`[data-food-status="${food.id}"]`);
+        badge.classList.toggle("eaten", food.eaten);
+        badge.textContent = `${food.eaten ? "✓ " : ""}${food.id === "soft" ? "Soft" : food.id === "spring" ? "Spring" : "Pressure"}`;
+      }
+    }
+
+    function updateModeUI() {
+      stage.classList.toggle("maze-active", mode === "maze");
+      document.querySelector("#invitation").textContent = mode === "maze"
+        ? "Grab the jelly itself. Stretch, pull, and release it through every gate."
+        : "Can you make it squeeze through the gap, then change its properties so it can't get back?";
+      canvas.setAttribute("aria-label", mode === "maze"
+        ? "Interactive soft jelly in a three-snack rectangular maze"
+        : "Interactive soft jelly blob between two platforms");
+      document.querySelectorAll("[data-mode]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mode === mode)));
+      document.querySelectorAll(".bench-only input, .bench-only button").forEach(control => { control.disabled = mode === "maze"; });
+      document.querySelector("#resetBlob").disabled = mode === "maze";
+      document.querySelector("#resetAll").disabled = mode === "maze";
+      updateMazeUI();
+    }
+
     function setPaused(value) {
       paused = Boolean(value);
       lastTime = performance.now();
@@ -957,8 +1282,8 @@
       for (const key of sliderIds) {
         const input = document.querySelector(`#${key}`);
         input.value = settings[key];
-        document.querySelector(`#${key}Out`).value = key === "restLength" ? `${settings[key]}%` : settings[key];
       }
+      syncPropertyOutputs();
       for (const key of Object.keys(DEFAULT_VIEW)) document.querySelector(`#${key}`).checked = view[key];
       document.querySelectorAll("[data-preset]").forEach(button => button.classList.toggle("active", button.dataset.preset === activePreset));
     }
@@ -992,6 +1317,8 @@
       const button = event.target.closest("[data-preset]");
       if (button) applyPreset(button.dataset.preset);
     });
+    document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
+    document.querySelector("#restartMaze").addEventListener("click", restartMaze);
     document.querySelector("#toggleMotion").addEventListener("click", () => setPaused(!paused));
     document.querySelector("#resetBlob").addEventListener("click", resetBlob);
     document.querySelector("#resetAll").addEventListener("click", () => {
@@ -1011,6 +1338,16 @@
       applyPreset,
       resetBlob,
       resetAll() { document.querySelector("#resetAll").click(); },
+      setMode,
+      restartMaze,
+      consumeFood,
+      moveBlobTo: translateBlob,
+      mazeRoute: MAZE_ROUTE.map(point => ({ ...point })),
+      mazeLayout: {
+        walls: mazeWalls.map(rect => ({ ...rect })),
+        exit: { ...MAZE_EXIT },
+        gaps: [190, 200, 215]
+      },
       setPointer(x, y, index = 0) {
         pointer.active = true;
         pointer.x = Math.max(0, Math.min(WORLD.width, x));
@@ -1023,7 +1360,12 @@
         const center = blobCenter();
         const ys = nodes.map(n => n.y), xs = nodes.map(n => n.x);
         return {
-          settings: { ...settings }, view: { ...view }, activePreset, paused,
+          settings: { ...settings }, view: { ...view }, activePreset, paused, mode,
+          maze: {
+            foods: mazeState.foods.map(food => ({ id: food.id, eaten: food.eaten })),
+            effectTargets: { ...mazeState.effectTargets }, completed: mazeState.completed,
+            feedback: mazeState.feedback
+          },
           finite: finiteBlob(), area: signedArea(), targetArea, center,
           bounds: { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) },
           contacts: nodes.filter(n => n.contact).length, steps: diagnosticSteps
@@ -1033,6 +1375,7 @@
 
     buildBlob();
     syncUI();
+    updateModeUI();
     requestAnimationFrame(frame);
   </script>
   <a class="lab-privacy-link" href="../../privacy.html">Privacy</a>

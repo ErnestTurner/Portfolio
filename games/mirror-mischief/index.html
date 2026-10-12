@@ -94,6 +94,19 @@
     }
     .panel { padding: 16px; }
     .panel section + section { margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mode-switch button[aria-pressed="true"] { border-color: var(--cyan); color: #061522; background: var(--cyan); }
+    .puzzle-card { margin-top: 12px; padding: 12px; border: 1px solid rgba(185,255,92,.25); border-radius: 12px; background: rgba(18,45,39,.45); }
+    .puzzle-card[hidden], .sandbox-only[hidden] { display: none; }
+    .puzzle-kicker { margin: 0 0 4px; color: #b9ff5c; font: 700 .66rem/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .puzzle-title { margin: 0; color: #efffff; font-size: 1rem; }
+    .puzzle-goal, .puzzle-hint, .puzzle-supply { margin: 7px 0 0; color: #aac4ce; font-size: .74rem; line-height: 1.45; }
+    .puzzle-hint { color: #d6efb2; }
+    .puzzle-status { margin: 10px 0 0; min-height: 2.5em; color: #9ffdfa; font-size: .78rem; font-weight: 700; line-height: 1.35; }
+    .puzzle-status.complete { color: #b9ff5c; }
+    .level-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 10px; }
+    .level-nav button { padding-inline: 5px; }
+    .level-nav button[aria-current="step"] { border-color: #b9ff5c; color: #dfffb7; }
     h2 { margin: 0 0 10px; color: #9bb7c2; font-size: .72rem; letter-spacing: .13em; text-transform: uppercase; }
     .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     button {
@@ -157,14 +170,31 @@
 
       <aside class="panel lab-shell-panel" aria-label="Tabletop controls">
         <section>
+          <h2>Bench Mode</h2>
+          <div class="mode-switch" role="group" aria-label="Bench mode">
+            <button id="sandboxMode" aria-pressed="true">Sandbox</button>
+            <button id="puzzleMode" aria-pressed="false">Puzzles</button>
+          </div>
+          <div id="puzzleCard" class="puzzle-card" hidden>
+            <p id="puzzleKicker" class="puzzle-kicker">Puzzle 1 of 3</p>
+            <h3 id="puzzleTitle" class="puzzle-title"></h3>
+            <p id="puzzleGoal" class="puzzle-goal"></p>
+            <p id="puzzleSupply" class="puzzle-supply"></p>
+            <p id="puzzleHint" class="puzzle-hint"></p>
+            <p id="puzzleStatus" class="puzzle-status" role="status" aria-live="polite"></p>
+            <div id="levelNav" class="level-nav" aria-label="Puzzle levels"></div>
+          </div>
+        </section>
+
+        <section>
           <h2>Add Piece</h2>
-          <div class="add-grid">
+          <div id="addGrid" class="add-grid">
             <button data-add="mirror">Mirror</button>
             <button data-add="splitter">Beam Splitter</button>
             <button data-add="blocker">Blocker</button>
             <button data-add="receiver">Receiver</button>
           </div>
-          <div class="piece-count"><span id="pieceCount">5 of 16 pieces</span><span id="limitNote"></span></div>
+          <div class="piece-count sandbox-only"><span id="pieceCount">5 of 16 pieces</span><span id="limitNote"></span></div>
         </section>
 
         <section>
@@ -212,7 +242,13 @@
       count: document.querySelector('#pieceCount'), limitNote: document.querySelector('#limitNote'),
       traceLimit: document.querySelector('#traceLimit'), whisper: document.querySelector('#benchWhisper'),
       keyboardStatus: document.querySelector('#table-key-status'),
-      add: [...document.querySelectorAll('[data-add]')]
+      add: [...document.querySelectorAll('[data-add]')], addGrid: document.querySelector('#addGrid'),
+      sandboxMode: document.querySelector('#sandboxMode'), puzzleMode: document.querySelector('#puzzleMode'),
+      puzzleCard: document.querySelector('#puzzleCard'), puzzleKicker: document.querySelector('#puzzleKicker'),
+      puzzleTitle: document.querySelector('#puzzleTitle'), puzzleGoal: document.querySelector('#puzzleGoal'),
+      puzzleSupply: document.querySelector('#puzzleSupply'), puzzleHint: document.querySelector('#puzzleHint'),
+      puzzleStatus: document.querySelector('#puzzleStatus'), levelNav: document.querySelector('#levelNav'),
+      sandboxOnly: [...document.querySelectorAll('.sandbox-only')]
     };
     let nextId = 7;
     let pieces = [];
@@ -221,6 +257,62 @@
     let drag = null;
     let undoState = null;
     let rotationStart = null;
+    let mode = 'sandbox';
+    let levelIndex = 0;
+    let completedLevels = loadProgress();
+
+    const PUZZLES = [
+      {
+        id: 'single-reflection', title: 'Turn the Corner',
+        goal: 'Deliver 100% power to the receiver.', hint: 'A diagonal mirror turns a horizontal beam upward.',
+        supply: { mirror: 1 },
+        pieces: [
+          { id: 1, type: 'source', x: 110, y: 350, angle: 0, locked: true },
+          { id: 2, type: 'mirror', x: 430, y: 350, angle: 0 },
+          { id: 3, type: 'receiver', x: 430, y: 110, angle: 0, locked: true }
+        ],
+        targets: [{ receiverId: 3, min: .99, max: 1.01 }],
+        solution: { 2: -45 }
+      },
+      {
+        id: 'reflection-chain', title: 'Around the Block',
+        goal: 'Use both mirrors to route 100% power around the fixed blocker.', hint: 'Make two right-angle turns: up, then right.',
+        supply: { mirror: 2 },
+        pieces: [
+          { id: 1, type: 'source', x: 90, y: 420, angle: 0, locked: true },
+          { id: 2, type: 'mirror', x: 300, y: 420, angle: 0 },
+          { id: 3, type: 'mirror', x: 300, y: 170, angle: 0 },
+          { id: 4, type: 'blocker', x: 535, y: 420, angle: 0, locked: true },
+          { id: 5, type: 'receiver', x: 720, y: 170, angle: 0, locked: true }
+        ],
+        targets: [{ receiverId: 5, min: .99, max: 1.01 }],
+        solution: { 2: -45, 3: -45 }
+      },
+      {
+        id: 'split-balance', title: 'Share the Spark',
+        goal: 'Balance exactly 50% power into each receiver.', hint: 'The splitter passes half straight through and reflects half.',
+        supply: { splitter: 1 },
+        pieces: [
+          { id: 1, type: 'source', x: 100, y: 330, angle: 0, locked: true },
+          { id: 2, type: 'splitter', x: 420, y: 330, angle: 0 },
+          { id: 3, type: 'receiver', x: 720, y: 330, angle: 0, locked: true },
+          { id: 4, type: 'receiver', x: 420, y: 90, angle: 0, locked: true }
+        ],
+        targets: [
+          { receiverId: 3, min: .49, max: .51 },
+          { receiverId: 4, min: .49, max: .51 }
+        ],
+        solution: { 2: -45 }
+      }
+    ];
+
+    function loadProgress() {
+      try { return new Set(JSON.parse(localStorage.getItem('mirror-mischief-puzzles') || '[]')); }
+      catch { return new Set(); }
+    }
+    function saveProgress() {
+      try { localStorage.setItem('mirror-mischief-puzzles', JSON.stringify([...completedLevels])); } catch {}
+    }
 
     const tableSnapshot = () => ({ pieces: pieces.map(p=>({...p})), selectedId, nextId });
     function rememberTable(snapshot=tableSnapshot()) { undoState=snapshot; ui.undo.disabled=false; }
@@ -240,8 +332,60 @@
       { id: 6, type: 'receiver', x: 720, y: 130, angle: 0 },
       { id: 7, type: 'receiver', x: 680, y: 520, angle: 0 }
     ];
+    const activePuzzle = () => PUZZLES[levelIndex];
+    const puzzleUnlocked = index => index === 0 || completedLevels.has(PUZZLES[index - 1].id);
+    const formatSupply = supply => Object.entries(supply).map(([type, count]) => `${count} ${labels[type] || type}${count === 1 ? '' : 's'}`).join(' · ');
+    function goalState(puzzle=activePuzzle(), powers=trace.powers) {
+      const readings = puzzle.targets.map(target => {
+        const power = powers instanceof Map ? (powers.get(target.receiverId) || 0) : (powers[target.receiverId] || 0);
+        return { ...target, power, met: power >= target.min - EPS && power <= target.max + EPS };
+      });
+      return { complete: readings.every(reading => reading.met), readings };
+    }
+    function renderLevelNav() {
+      ui.levelNav.replaceChildren(...PUZZLES.map((puzzle, index) => {
+        const button = document.createElement('button');
+        const unlocked = puzzleUnlocked(index);
+        button.type = 'button'; button.textContent = completedLevels.has(puzzle.id) ? `✓ ${index + 1}` : `${index + 1}`;
+        button.disabled = !unlocked; button.title = unlocked ? puzzle.title : 'Complete the previous puzzle to unlock.';
+        if (index === levelIndex) button.setAttribute('aria-current', 'step');
+        button.addEventListener('click', () => loadLevel(index));
+        return button;
+      }));
+    }
+    function updatePuzzleUI() {
+      if (mode !== 'puzzle') return;
+      const puzzle = activePuzzle(), state = goalState(puzzle);
+      if (state.complete && !completedLevels.has(puzzle.id)) { completedLevels.add(puzzle.id); saveProgress(); }
+      ui.puzzleKicker.textContent = `Puzzle ${levelIndex + 1} of ${PUZZLES.length}`;
+      ui.puzzleTitle.textContent = puzzle.title; ui.puzzleGoal.textContent = puzzle.goal;
+      ui.puzzleSupply.textContent = `Supply: ${formatSupply(puzzle.supply)}. Fixed pieces are locked.`;
+      ui.puzzleHint.textContent = `Hint: ${puzzle.hint}`;
+      const readings = state.readings.map(reading => `${Math.round(reading.power * 100)}%`).join(' / ');
+      ui.puzzleStatus.textContent = state.complete ? `Solved! Receiver power: ${readings}.` : `Receiver power: ${readings}. Keep experimenting.`;
+      ui.puzzleStatus.classList.toggle('complete', state.complete);
+      renderLevelNav();
+    }
+    function loadLevel(index, force=false) {
+      if (!Number.isInteger(index) || index < 0 || index >= PUZZLES.length || (!force && !puzzleUnlocked(index))) return false;
+      mode = 'puzzle'; levelIndex = index;
+      pieces = PUZZLES[index].pieces.map(piece => ({ ...piece }));
+      nextId = Math.max(...pieces.map(piece => piece.id)); selectedId = pieces.find(piece => !piece.locked)?.id ?? pieces[0].id;
+      clearUndo(); updateModeUI(); update(); return true;
+    }
+    function enterSandbox() {
+      mode = 'sandbox'; pieces = initialPieces().map(piece => ({ ...piece })); nextId = 7; selectedId = 1;
+      clearUndo(); updateModeUI(); update();
+    }
+    function updateModeUI() {
+      const puzzling = mode === 'puzzle';
+      ui.sandboxMode.setAttribute('aria-pressed', String(!puzzling)); ui.puzzleMode.setAttribute('aria-pressed', String(puzzling));
+      ui.puzzleCard.hidden = !puzzling; ui.addGrid.hidden = puzzling; ui.sandboxOnly.forEach(node => { node.hidden = puzzling; });
+      ui.reset.textContent = puzzling ? 'Reset Puzzle' : 'Reset Table';
+      if (puzzling) updatePuzzleUI();
+    }
     const labels = { source: 'Light Source', mirror: 'Mirror', splitter: 'Beam Splitter', blocker: 'Blocker', receiver: 'Receiver' };
-    const rotatable = p => p && p.type !== 'receiver';
+    const rotatable = p => p && p.type !== 'receiver' && !p.locked;
     const selected = () => pieces.find(p => p.id === selectedId) || null;
     const rad = deg => deg * Math.PI / 180;
     const normAngle = deg => ((deg + 180) % 360 + 360) % 360 - 180;
@@ -464,7 +608,7 @@
     }
     function update() {
       trace = calculateTrace(); ui.traceLimit.textContent=trace.limited?'Ray trace safety limit reached':''; ui.traceLimit.classList.toggle('visible', trace.limited);
-      ui.whisper.textContent = benchMood(); updateControls(); draw();
+      ui.whisper.textContent = benchMood(); updateControls(); updatePuzzleUI(); draw();
     }
 
     // ----- Pointer interaction ---------------------------------------------
@@ -492,7 +636,9 @@
     }
     canvas.addEventListener('pointerdown', e => {
       const q=canvasPoint(e), p=hitTest(q); if(!p)return;
-      e.preventDefault(); selectedId=p.id; drag={pointerId:e.pointerId,dx:q.x-p.x,dy:q.y-p.y,before:tableSnapshot(),moved:false};
+      e.preventDefault(); selectedId=p.id;
+      if (p.locked) { updateControls(); draw(); announceSelected('locked in place'); return; }
+      drag={pointerId:e.pointerId,dx:q.x-p.x,dy:q.y-p.y,before:tableSnapshot(),moved:false};
       canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; updateControls(); draw();
     });
     canvas.addEventListener('pointermove', e => {
@@ -517,6 +663,7 @@
     }
     function moveSelectedBy(dx,dy) {
       const p=selected();if(!p)return;
+      if(p.locked){announceSelected('locked in place');return;}
       const before=tableSnapshot();
       p.x=Math.max(34,Math.min(W-34,p.x+dx));p.y=Math.max(34,Math.min(H-34,p.y+dy));
       rememberTable(before);
@@ -535,18 +682,18 @@
     // ----- Controls ---------------------------------------------------------
     function updateControls() {
       const p=selected(); if(!p)return;
-      ui.name.textContent=labels[p.type]; ui.rotationWrap.hidden=!rotatable(p); ui.del.disabled=p.type==='source';
+      ui.name.textContent=labels[p.type] + (p.locked ? ' (Fixed)' : ''); ui.rotationWrap.hidden=!rotatable(p); ui.del.disabled=p.type==='source'||p.locked||mode==='puzzle';
       if(rotatable(p)){ const a=Math.round(normAngle(p.angle)); ui.rotation.value=a; ui.rotationValue.value=a+'°'; ui.rotationValue.textContent=a+'°'; }
       const placed=pieces.filter(x=>x.type!=='source').length, atLimit=placed>=MAX_PIECES;
       ui.count.textContent=`${placed} of ${MAX_PIECES} pieces`; ui.limitNote.textContent=atLimit?'Table full':'';
-      ui.add.forEach(b=>{b.disabled=atLimit;b.title=atLimit?'The tabletop is limited to 16 placed pieces.':'';});
+      ui.add.forEach(b=>{b.disabled=atLimit||mode==='puzzle';b.title=mode==='puzzle'?'Puzzle supplies are fixed.':(atLimit?'The tabletop is limited to 16 placed pieces.':'');});
     }
     ui.rotation.addEventListener('input',()=>{const p=selected();if(rotatable(p)){if(!rotationStart)rotationStart=tableSnapshot();p.angle=Number(ui.rotation.value);update();}});
     function commitRotation(){if(rotationStart){rememberTable(rotationStart);rotationStart=null;}}
     ui.rotation.addEventListener('change',commitRotation);ui.rotation.addEventListener('blur',commitRotation);
     function rotateBy(amount){const p=selected();if(rotatable(p)){const before=tableSnapshot();p.angle=normAngle(p.angle+amount);rememberTable(before);update();}}
     ui.minus.addEventListener('click',()=>rotateBy(-5)); ui.plus.addEventListener('click',()=>rotateBy(5));
-    ui.del.addEventListener('click',()=>{const p=selected();if(!p||p.type==='source')return;rememberTable();pieces=pieces.filter(x=>x.id!==p.id);selectedId=pieces[0].id;update();});
+    ui.del.addEventListener('click',()=>{const p=selected();if(!p||p.type==='source'||p.locked||mode==='puzzle')return;rememberTable();pieces=pieces.filter(x=>x.id!==p.id);selectedId=pieces[0].id;update();});
     ui.add.forEach(button=>button.addEventListener('click',()=>{
       if(pieces.filter(p=>p.type!=='source').length>=MAX_PIECES)return;
       rememberTable();
@@ -554,9 +701,15 @@
       const p={id:++nextId,type,x:515+offset,y:225+(offset%90),angle:type==='splitter'?-25:0};
       pieces.push(p);selectedId=p.id;update();
     }));
-    function reset(record=false){if(record)rememberTable();pieces=initialPieces().map(p=>({...p}));nextId=7;selectedId=1;update();}
+    function reset(record=false){
+      if(record)rememberTable();
+      const scene=mode==='puzzle'?activePuzzle().pieces:initialPieces();
+      pieces=scene.map(p=>({...p}));nextId=Math.max(...pieces.map(p=>p.id));selectedId=(pieces.find(p=>!p.locked)||pieces[0]).id;update();
+    }
     ui.undo.addEventListener('click',undoLastChange);
     ui.reset.addEventListener('click',()=>reset(true));
+    ui.sandboxMode.addEventListener('click',enterSandbox);
+    ui.puzzleMode.addEventListener('click',()=>loadLevel(levelIndex, true));
     new ResizeObserver(resizeCanvas).observe(canvas);
     window.addEventListener('resize',resizeCanvas);
 
@@ -569,9 +722,17 @@
       reset: () => { reset(); clearUndo(); return window.__mirrorMischiefTest.snapshot(); },
       undo: undoLastChange,
       canUndo: () => Boolean(undoState),
+      puzzles: () => PUZZLES.map(puzzle => structuredClone(puzzle)),
+      mode: () => ({ mode, levelIndex, completed: [...completedLevels] }),
+      loadLevel: index => { const loaded=loadLevel(index, true); return {loaded, ...window.__mirrorMischiefTest.snapshot()}; },
+      setPieceAngle: (id, angle) => {
+        const piece=pieces.find(candidate=>candidate.id===id); if(!piece||!rotatable(piece))return false;
+        rememberTable();piece.angle=normAngle(angle);update();return true;
+      },
+      goal: () => mode==='puzzle' ? goalState() : null,
       traceScene: list => { const old=pieces; pieces=list.map(p=>({...p})); const result=calculateTrace(); pieces=old; return {segments:result.segments,powers:Object.fromEntries(result.powers),limited:result.limited}; }
     });
-    reset();clearUndo();resizeCanvas();
+    reset();clearUndo();updateModeUI();resizeCanvas();
   })();
   </script>
   <a class="lab-privacy-link" href="../../privacy.html">Privacy</a>

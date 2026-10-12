@@ -1,4 +1,12 @@
-import { StarfallSimulation, STARFALL_VERSION } from "./game-core.js";
+import {
+  StarfallSimulation,
+  STARFALL_VERSION,
+  TOUCH_COACH_SECONDS,
+  createTouchCoach,
+  advanceTouchCoach,
+  learnTouchCoachZone,
+  shouldShowTouchCoach,
+} from "./game-core.js";
 
 const elements = {
   canvas: document.querySelector("#game"),
@@ -37,6 +45,7 @@ let lastFrame = performance.now();
 let mouse = { x: simulation.width * 0.75, y: simulation.height / 2, down: false };
 let moveTouch = null;
 let aimTouch = null;
+let touchCoach = createTouchCoach();
 let shake = 0;
 let flash = 0;
 let announcementTimer = 0;
@@ -151,6 +160,7 @@ function startRun(seed = Date.now()) {
   rings.length = 0;
   shake = 0;
   flash = 0;
+  touchCoach = createTouchCoach();
   clearInput();
   hideOverlay();
   updateHud(simulation.snapshot());
@@ -242,8 +252,22 @@ function updateHud(snapshot) {
   elements.risk.textContent = `×${snapshot.risk.toFixed(1)}`;
   elements.phase.textContent = snapshot.state === "paused" ? "PAUSED" : snapshot.phase;
   elements.objective.textContent = snapshot.phase === "ECLIPSE" ? "Break the eclipse" : "Protect the light";
-  elements.flare.disabled = snapshot.state !== "running" || snapshot.flareCooldown > 0 || snapshot.light < simulation.config.flareCost;
-  elements.flareStatus.textContent = snapshot.flareCooldown > 0 ? `${snapshot.flareCooldown.toFixed(1)}s` : snapshot.light < simulation.config.flareCost ? "NO LIGHT" : "READY";
+  const flareCost = simulation.config.flareCost;
+  const flareReady = snapshot.flareCooldown <= 0 && snapshot.light >= flareCost;
+  const flareStatus = snapshot.flareCooldown > 0
+    ? `${snapshot.flareCooldown.toFixed(1)}s`
+    : snapshot.light < flareCost
+      ? `NEED ${flareCost} LIGHT`
+      : `COST ${flareCost} LIGHT`;
+  elements.flare.disabled = snapshot.state !== "running" || !flareReady;
+  elements.flareStatus.textContent = flareStatus;
+  const flareLabel = snapshot.flareCooldown > 0
+    ? `Emergency flare cooling down, ${snapshot.flareCooldown.toFixed(1)} seconds remaining`
+    : snapshot.light < flareCost
+      ? `Emergency flare needs ${flareCost} light`
+      : `Release emergency flare, costs ${flareCost} light`;
+  elements.flare.setAttribute("aria-label", flareLabel);
+  elements.flare.title = flareLabel;
   elements.pause.disabled = !["running", "paused"].includes(snapshot.state);
   elements.pause.textContent = snapshot.state === "paused" ? "▶" : "Ⅱ";
   elements.pause.setAttribute("aria-label", snapshot.state === "paused" ? "Resume game" : "Pause game");
@@ -633,6 +657,21 @@ function drawPlayer(snapshot) {
 function drawTouchGuides() {
   context.save();
   context.lineWidth = 2;
+  if (shouldShowTouchCoach(touchCoach, isTouchLayout())) {
+    const alpha = Math.min(1, TOUCH_COACH_SECONDS - touchCoach.elapsed);
+    context.setLineDash([8, 10]);
+    context.strokeStyle = `rgba(125,242,197,${0.28 * alpha})`;
+    context.strokeRect(18, 22, simulation.width * 0.48 - 36, simulation.height - 44);
+    context.strokeStyle = `rgba(255,111,145,${0.28 * alpha})`;
+    context.strokeRect(simulation.width * 0.52, 22, simulation.width * 0.48 - 18, simulation.height - 44);
+    context.setLineDash([]);
+    context.font = "800 18px ui-monospace, SFMono-Regular, Consolas, monospace";
+    context.textAlign = "center";
+    context.fillStyle = `rgba(184,255,229,${0.72 * alpha})`;
+    if (!touchCoach.move) context.fillText("MOVE", simulation.width * 0.24, simulation.height * 0.78);
+    context.fillStyle = `rgba(255,190,205,${0.72 * alpha})`;
+    if (!touchCoach.aim) context.fillText("AIM + FIRE", simulation.width * 0.76, simulation.height * 0.78);
+  }
   if (moveTouch) {
     context.strokeStyle = "#7df2c566";
     context.beginPath();
@@ -670,6 +709,7 @@ function drawVignette(width, height, lightRatio) {
 function frame(now) {
   const dt = Math.min(0.05, Math.max(0, (now - lastFrame) / 1000));
   lastFrame = now;
+  advanceTouchCoach(touchCoach, dt, simulation.state === "running");
   if (!manualTestMode && simulation.state === "running") simulation.step(dt, currentInput());
   handleEvents(simulation.consumeEvents());
   updateEffects(dt);
@@ -708,8 +748,10 @@ elements.canvas.addEventListener("pointerdown", (event) => {
   if (event.pointerType === "touch" || isTouchLayout()) {
     if (position.x < simulation.width * 0.48 && !moveTouch) {
       moveTouch = { id: event.pointerId, origin: position, current: position };
+      learnTouchCoachZone(touchCoach, "move");
     } else if (!aimTouch) {
       aimTouch = { id: event.pointerId, origin: position, current: position };
+      learnTouchCoachZone(touchCoach, "aim");
     }
   } else {
     mouse = { ...position, down: true };
@@ -774,6 +816,7 @@ window.__starfallTest = Object.freeze({
   version: STARFALL_VERSION,
   start(seed = 1) {
     manualTestMode = true;
+    touchCoach = createTouchCoach();
     simulation.start(seed);
     simulation.consumeEvents();
     return simulation.snapshot();
@@ -784,6 +827,7 @@ window.__starfallTest = Object.freeze({
     return simulation.snapshot();
   },
   snapshot: () => simulation.snapshot(),
+  touchCoach: () => ({ ...touchCoach }),
   setLight(value) { simulation.setLight(value); return simulation.snapshot(); },
   spawnEnemy(type, overrides = {}) { return simulation.spawnEnemy(type, overrides); },
   clearEntities() {

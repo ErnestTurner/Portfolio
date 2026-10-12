@@ -127,6 +127,7 @@
       .canvas-wrap { min-height: 260px; }
       .panel { grid-template-columns: 1fr; }
       .panel section + section { margin-top: 14px; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+      button { min-height: 44px; }
     }
   </style>
   <link rel="stylesheet" href="../lab-shell.css?v=1">
@@ -139,7 +140,7 @@
         <h1>Mirror <span>Mischief</span></h1>
         <p class="tagline">A small tabletop for large optical consequences and minor disobedience.</p>
       </div>
-      <div id="traceLimit" class="status-pill" role="status">Trace limit reached</div>
+      <div id="traceLimit" class="status-pill" role="status"></div>
     </header>
 
     <div class="layout">
@@ -184,6 +185,7 @@
 
         <section>
           <h2>Shared</h2>
+          <button id="undo" class="reset" disabled>Undo Last Change</button>
           <button id="reset" class="reset">Reset Table</button>
           <p class="microcopy">Branches below 0.5% power are not traced.</p>
           <p class="facts">Idealized ray optics. No interference or diffraction.</p>
@@ -206,7 +208,7 @@
       name: document.querySelector('#selectedName'), rotationWrap: document.querySelector('#rotationControls'),
       rotation: document.querySelector('#rotation'), rotationValue: document.querySelector('#rotationValue'),
       minus: document.querySelector('#rotateMinus'), plus: document.querySelector('#rotatePlus'),
-      del: document.querySelector('#deletePiece'), reset: document.querySelector('#reset'),
+      del: document.querySelector('#deletePiece'), undo: document.querySelector('#undo'), reset: document.querySelector('#reset'),
       count: document.querySelector('#pieceCount'), limitNote: document.querySelector('#limitNote'),
       traceLimit: document.querySelector('#traceLimit'), whisper: document.querySelector('#benchWhisper'),
       keyboardStatus: document.querySelector('#table-key-status'),
@@ -217,6 +219,17 @@
     let selectedId = 1;
     let trace = { segments: [], powers: new Map(), limited: false };
     let drag = null;
+    let undoState = null;
+    let rotationStart = null;
+
+    const tableSnapshot = () => ({ pieces: pieces.map(p=>({...p})), selectedId, nextId });
+    function rememberTable(snapshot=tableSnapshot()) { undoState=snapshot; ui.undo.disabled=false; }
+    function clearUndo() { undoState=null; ui.undo.disabled=true; }
+    function undoLastChange() {
+      if(!undoState)return false;
+      pieces=undoState.pieces.map(p=>({...p}));selectedId=undoState.selectedId;nextId=undoState.nextId;
+      clearUndo();update();return true;
+    }
 
     const initialPieces = () => [
       { id: 1, type: 'source',   x: 120, y: 330, angle: 0 },
@@ -450,7 +463,7 @@
       return 'Halves have developed opinions.';
     }
     function update() {
-      trace = calculateTrace(); ui.traceLimit.classList.toggle('visible', trace.limited);
+      trace = calculateTrace(); ui.traceLimit.textContent=trace.limited?'Ray trace safety limit reached':''; ui.traceLimit.classList.toggle('visible', trace.limited);
       ui.whisper.textContent = benchMood(); updateControls(); draw();
     }
 
@@ -479,16 +492,17 @@
     }
     canvas.addEventListener('pointerdown', e => {
       const q=canvasPoint(e), p=hitTest(q); if(!p)return;
-      e.preventDefault(); selectedId=p.id; drag={pointerId:e.pointerId,dx:q.x-p.x,dy:q.y-p.y};
+      e.preventDefault(); selectedId=p.id; drag={pointerId:e.pointerId,dx:q.x-p.x,dy:q.y-p.y,before:tableSnapshot(),moved:false};
       canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; updateControls(); draw();
     });
     canvas.addEventListener('pointermove', e => {
       if(!drag) { canvas.style.cursor=hitTest(canvasPoint(e))?'grab':'default'; return; }
       if(e.pointerId!==drag.pointerId)return; e.preventDefault();
       const p=selected(), q=canvasPoint(e); if(!p)return;
-      p.x=Math.max(34,Math.min(W-34,q.x-drag.dx)); p.y=Math.max(34,Math.min(H-34,q.y-drag.dy)); update();
+      const x=Math.max(34,Math.min(W-34,q.x-drag.dx)),y=Math.max(34,Math.min(H-34,q.y-drag.dy));
+      if(x!==p.x||y!==p.y)drag.moved=true;p.x=x;p.y=y;update();
     }, { passive:false });
-    function endDrag(e) { if(!drag||e.pointerId!==drag.pointerId)return; drag=null; canvas.style.cursor='grab'; }
+    function endDrag(e) { if(!drag||e.pointerId!==drag.pointerId)return; if(drag.moved)rememberTable(drag.before);drag=null;canvas.style.cursor='grab'; }
     canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
 
     // ----- Keyboard interaction --------------------------------------------
@@ -503,7 +517,9 @@
     }
     function moveSelectedBy(dx,dy) {
       const p=selected();if(!p)return;
+      const before=tableSnapshot();
       p.x=Math.max(34,Math.min(W-34,p.x+dx));p.y=Math.max(34,Math.min(H-34,p.y+dy));
+      rememberTable(before);
       update();announceSelected('moved');
     }
     canvas.addEventListener('keydown',event=>{
@@ -525,18 +541,22 @@
       ui.count.textContent=`${placed} of ${MAX_PIECES} pieces`; ui.limitNote.textContent=atLimit?'Table full':'';
       ui.add.forEach(b=>{b.disabled=atLimit;b.title=atLimit?'The tabletop is limited to 16 placed pieces.':'';});
     }
-    ui.rotation.addEventListener('input',()=>{const p=selected();if(rotatable(p)){p.angle=Number(ui.rotation.value);update();}});
-    function rotateBy(amount){const p=selected();if(rotatable(p)){p.angle=normAngle(p.angle+amount);update();}}
+    ui.rotation.addEventListener('input',()=>{const p=selected();if(rotatable(p)){if(!rotationStart)rotationStart=tableSnapshot();p.angle=Number(ui.rotation.value);update();}});
+    function commitRotation(){if(rotationStart){rememberTable(rotationStart);rotationStart=null;}}
+    ui.rotation.addEventListener('change',commitRotation);ui.rotation.addEventListener('blur',commitRotation);
+    function rotateBy(amount){const p=selected();if(rotatable(p)){const before=tableSnapshot();p.angle=normAngle(p.angle+amount);rememberTable(before);update();}}
     ui.minus.addEventListener('click',()=>rotateBy(-5)); ui.plus.addEventListener('click',()=>rotateBy(5));
-    ui.del.addEventListener('click',()=>{const p=selected();if(!p||p.type==='source')return;pieces=pieces.filter(x=>x.id!==p.id);selectedId=pieces[0].id;update();});
+    ui.del.addEventListener('click',()=>{const p=selected();if(!p||p.type==='source')return;rememberTable();pieces=pieces.filter(x=>x.id!==p.id);selectedId=pieces[0].id;update();});
     ui.add.forEach(button=>button.addEventListener('click',()=>{
       if(pieces.filter(p=>p.type!=='source').length>=MAX_PIECES)return;
+      rememberTable();
       const type=button.dataset.add, offset=(pieces.length*23)%150;
       const p={id:++nextId,type,x:515+offset,y:225+(offset%90),angle:type==='splitter'?-25:0};
       pieces.push(p);selectedId=p.id;update();
     }));
-    function reset(){pieces=initialPieces().map(p=>({...p}));nextId=7;selectedId=1;update();}
-    ui.reset.addEventListener('click',reset);
+    function reset(record=false){if(record)rememberTable();pieces=initialPieces().map(p=>({...p}));nextId=7;selectedId=1;update();}
+    ui.undo.addEventListener('click',undoLastChange);
+    ui.reset.addEventListener('click',()=>reset(true));
     new ResizeObserver(resizeCanvas).observe(canvas);
     window.addEventListener('resize',resizeCanvas);
 
@@ -545,11 +565,13 @@
       constants: { W,H,MAX_PIECES,MAX_INTERACTIONS,MAX_SEGMENTS,POWER_CUTOFF },
       reflect: (direction, angle) => reflectedDirection(direction, angle),
       snapshot: () => ({ pieces: pieces.map(p=>({...p})), segments: trace.segments.map(s=>structuredClone(s)), receiverPowers: Object.fromEntries(trace.powers), limited:trace.limited }),
-      replacePieces: list => { pieces=list.map(p=>({...p})); selectedId=pieces[0]?.id ?? null; update(); return window.__mirrorMischiefTest.snapshot(); },
-      reset: () => { reset(); return window.__mirrorMischiefTest.snapshot(); },
+      replacePieces: list => { pieces=list.map(p=>({...p})); selectedId=pieces[0]?.id ?? null; clearUndo(); update(); return window.__mirrorMischiefTest.snapshot(); },
+      reset: () => { reset(); clearUndo(); return window.__mirrorMischiefTest.snapshot(); },
+      undo: undoLastChange,
+      canUndo: () => Boolean(undoState),
       traceScene: list => { const old=pieces; pieces=list.map(p=>({...p})); const result=calculateTrace(); pieces=old; return {segments:result.segments,powers:Object.fromEntries(result.powers),limited:result.limited}; }
     });
-    reset(); resizeCanvas();
+    reset();clearUndo();resizeCanvas();
   })();
   </script>
   <a class="lab-privacy-link" href="../../privacy.html">Privacy</a>

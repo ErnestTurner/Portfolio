@@ -80,6 +80,8 @@
     .node text { fill: var(--text); text-anchor: middle; pointer-events: none; }
     .node .abbr { font-weight: 750; font-size: 12px; }
     .node .value { fill: var(--muted); font-size: 11px; }
+    .node.bias-control { cursor: pointer; outline: none; }
+    .node.bias-control.selected circle { stroke: #ffffff; stroke-width: 4; }
     .edge { cursor: pointer; outline: none; }
     .edge .hit { stroke: transparent; stroke-width: 14; }
     .edge .wire { fill: none; opacity: .75; transition: opacity .12s, stroke-width .12s; }
@@ -110,6 +112,7 @@
       .layout { grid-template-columns: minmax(0, 1fr); }
       .layout > .panel:last-child { overflow: visible; }
       .connections { grid-template-columns: 1fr; }
+      .connection-chip { min-height: 44px; }
       .panel-head { align-items: start; flex-direction: column; }
       .mobile-observer {
         display: block; position: sticky; top: 8px; z-index: 3; margin: -2px 0 12px; padding: 7px;
@@ -163,11 +166,12 @@
           <svg id="network" viewBox="0 0 600 350" role="img" aria-label="Four input, four hidden, two output neural network"></svg>
           <div class="legend"><span><i class="swatch pos"></i>positive</span><span><i class="swatch neg"></i>negative</span><span>thicker = stronger</span></div>
           <div class="editor">
-            <div class="editor-top"><span id="selected-name">Connection</span><output id="weight-readout" for="weight">+0.00</output></div>
+            <div class="editor-top"><span id="selected-name">Controller parameter</span><output id="weight-readout" for="weight">+0.00</output></div>
             <label class="range-row" for="weight"><span>−4.0</span><input id="weight" type="range" min="-4" max="4" step="0.05"><span>+4.0</span></label>
-            <button id="zero" type="button">Zero selected connection</button>
+            <button id="zero" type="button">Zero selected parameter</button>
+            <button id="restore-wiring" type="button">Restore original wiring</button>
           </div>
-          <div class="connection-title">All actual connections — select to edit</div>
+          <div class="connection-title">All controller parameters - select to edit</div>
           <div id="connections" class="connections"></div>
         </div>
       </section>
@@ -316,21 +320,29 @@
     const edgeData = [];
     for (let h = 0; h < 4; h++) for (let i = 0; i < 4; i++) edgeData.push({ layer:'ih', to:h, from:i });
     for (let o = 0; o < 2; o++) for (let h = 0; h < 4; h++) edgeData.push({ layer:'ho', to:o, from:h });
-    const weightOf = e => state.weights[e.layer][e.to][e.from];
-    const edgeLabel = e => e.layer === 'ih' ? `${inputNames[e.from]} → ${hiddenNames[e.to]}` : `${hiddenNames[e.from]} → ${outputNames[e.to]}`;
-    const isSelected = e => e.layer === state.selected.layer && e.to === state.selected.to && e.from === state.selected.from;
+    const biasData = [0,1,2,3].map(to=>({layer:'hb',to})).concat([0,1].map(to=>({layer:'ob',to})));
+    const parameterData = [...edgeData, ...biasData];
+    const valueOf = parameter => parameter.layer === 'ih' || parameter.layer === 'ho'
+      ? state.weights[parameter.layer][parameter.to][parameter.from]
+      : state.weights[parameter.layer][parameter.to];
+    const parameterLabel = parameter => parameter.layer === 'ih'
+      ? `${inputNames[parameter.from]} → ${hiddenNames[parameter.to]}`
+      : parameter.layer === 'ho'
+        ? `${hiddenNames[parameter.from]} → ${outputNames[parameter.to]}`
+        : `${parameter.layer === 'hb' ? hiddenNames[parameter.to] : outputNames[parameter.to]} bias`;
+    const isSelected = parameter => parameter.layer === state.selected.layer && parameter.to === state.selected.to && parameter.from === state.selected.from;
     function make(tag, attrs = {}) { const el = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); return el; }
-    function selectEdge(e) { state.selected = { ...e }; syncEditor(); renderConnections(); updateDiagram(); }
+    function selectParameter(parameter) { state.selected = { ...parameter }; syncEditor(); renderConnections(); updateDiagram(); }
     function buildDiagram() {
       svg.replaceChildren();
       [['SENSORS',72],['TANH HIDDEN',300],['SIGMOID MOTORS',528]].forEach(([label,x]) => { const t=make('text',{x,y:20,class:'layer-label'}); t.textContent=label; svg.append(t); });
       edgeData.forEach((e, index) => {
         const from = e.layer === 'ih' ? positions.input[e.from] : positions.hidden[e.from];
         const to = e.layer === 'ih' ? positions.hidden[e.to] : positions.output[e.to];
-        const g = make('g',{class:'edge',tabindex:'0',role:'button','aria-label':edgeLabel(e)}); g.dataset.index=index;
+        const g = make('g',{class:'edge',tabindex:'0',role:'button','aria-label':parameterLabel(e)}); g.dataset.index=index;
         const path = `M ${from[0]+25} ${from[1]} C ${(from[0]+to[0])/2} ${from[1]}, ${(from[0]+to[0])/2} ${to[1]}, ${to[0]-25} ${to[1]}`;
         g.append(make('path',{d:path,class:'hit'}), make('path',{d:path,class:'wire'}));
-        g.addEventListener('click',()=>selectEdge(e)); g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();selectEdge(e);}}); svg.append(g);
+        g.addEventListener('click',()=>selectParameter(e)); g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();selectParameter(e);}}); svg.append(g);
       });
       const layers = [
         { kind:'input', names:inputNames, values:()=>state.inputs, biases:null },
@@ -338,31 +350,32 @@
         { kind:'output', names:outputNames, values:()=>state.outputs, biases:()=>state.weights.ob }
       ];
       layers.forEach(layer => positions[layer.kind].forEach((p,i) => {
-        const g=make('g',{class:`node ${layer.kind==='input'?'sensor':layer.kind==='output'?'motor':''}`}); g.dataset.kind=layer.kind; g.dataset.index=i;
+        const biasParameter=layer.kind==='hidden'?{layer:'hb',to:i}:layer.kind==='output'?{layer:'ob',to:i}:null;
+        const g=make('g',{class:`node ${layer.kind==='input'?'sensor':layer.kind==='output'?'motor':''}${biasParameter?' bias-control':''}`}); g.dataset.kind=layer.kind; g.dataset.index=i;
         g.append(make('circle',{cx:p[0],cy:p[1],r:25}));
         const name=make('text',{x:p[0],y:p[1]-3,class:'abbr'}); name.textContent=layer.names[i];
         const val=make('text',{x:p[0],y:p[1]+13,class:'value'}); val.textContent='0.000';
         g.append(name,val);
-        if(layer.biases){ const b=make('text',{x:p[0],y:p[1]+39,class:'bias-label'}); b.textContent=`bias ${layer.biases()[i].toFixed(2)}`; g.append(b); }
+        if(layer.biases){ const b=make('text',{x:p[0],y:p[1]+39,class:'bias-label'}); b.textContent=`bias ${layer.biases()[i].toFixed(2)}`; g.append(b);g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',parameterLabel(biasParameter));g.addEventListener('click',()=>selectParameter(biasParameter));g.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectParameter(biasParameter);}}); }
         svg.append(g);
       }));
     }
     function updateDiagram() {
       svg.querySelectorAll('.edge').forEach((g,i) => {
-        const e=edgeData[i], w=weightOf(e), wire=g.querySelector('.wire');
+        const e=edgeData[i], w=valueOf(e), wire=g.querySelector('.wire');
         wire.setAttribute('stroke',w>0?'#59dfb3':w<0?'#ff7187':'#6f7e83'); wire.setAttribute('stroke-width',String(1+Math.abs(w)*1.25));
-        g.classList.toggle('selected',isSelected(e)); g.setAttribute('aria-label',`${edgeLabel(e)}, weight ${w.toFixed(2)}`);
+        g.classList.toggle('selected',isSelected(e)); g.setAttribute('aria-label',`${parameterLabel(e)}, weight ${w.toFixed(2)}`);
       });
       const layerValues={input:state.inputs,hidden:state.hidden,output:state.outputs};
-      svg.querySelectorAll('.node').forEach(g=>{ const v=layerValues[g.dataset.kind][Number(g.dataset.index)]; g.querySelector('.value').textContent=v.toFixed(3); });
+      svg.querySelectorAll('.node').forEach(g=>{ const index=Number(g.dataset.index),v=layerValues[g.dataset.kind][index];g.querySelector('.value').textContent=v.toFixed(3);const parameter=g.dataset.kind==='hidden'?{layer:'hb',to:index}:g.dataset.kind==='output'?{layer:'ob',to:index}:null;if(parameter){g.querySelector('.bias-label').textContent=`bias ${valueOf(parameter).toFixed(2)}`;g.classList.toggle('selected',isSelected(parameter));g.setAttribute('aria-label',`${parameterLabel(parameter)}, ${valueOf(parameter).toFixed(2)}`);}});
     }
     const chips=document.querySelector('#connections');
     function renderConnections() {
       chips.replaceChildren();
-      edgeData.forEach(e=>{ const w=weightOf(e), b=document.createElement('button'); b.type='button'; b.className=`connection-chip ${w>0?'positive':w<0?'negative':'zero'}${isSelected(e)?' selected':''}`; b.textContent=`${edgeLabel(e)}  ${w>=0?'+':''}${w.toFixed(2)}`; b.title=b.textContent; b.addEventListener('click',()=>selectEdge(e)); chips.append(b); });
+      parameterData.forEach(parameter=>{ const w=valueOf(parameter), b=document.createElement('button'); b.type='button'; b.className=`connection-chip ${w>0?'positive':w<0?'negative':'zero'}${isSelected(parameter)?' selected':''}`; b.textContent=`${parameterLabel(parameter)}  ${w>=0?'+':''}${w.toFixed(2)}`; b.title=b.textContent; b.addEventListener('click',()=>selectParameter(parameter)); chips.append(b); });
     }
-    function syncEditor() { const e=state.selected,w=weightOf(e); document.querySelector('#selected-name').textContent=edgeLabel(e); document.querySelector('#weight').value=String(w); document.querySelector('#weight-readout').value=`${w>=0?'+':''}${w.toFixed(2)}`; }
-    function setSelectedWeight(value) { const e=state.selected; state.weights[e.layer][e.to][e.from]=clamp(Number(value),-4,4); state.inputs=sampleSensors(); Object.assign(state,evaluateNetwork(state.inputs)); syncEditor(); renderConnections(); updateDiagram(); }
+    function syncEditor() { const parameter=state.selected,w=valueOf(parameter); document.querySelector('#selected-name').textContent=parameterLabel(parameter); document.querySelector('#weight').value=String(w); document.querySelector('#weight-readout').value=`${w>=0?'+':''}${w.toFixed(2)}`; }
+    function setSelectedWeight(value) { const parameter=state.selected,next=clamp(Number(value),-4,4);if(parameter.layer==='ih'||parameter.layer==='ho')state.weights[parameter.layer][parameter.to][parameter.from]=next;else state.weights[parameter.layer][parameter.to]=next;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncEditor();renderConnections();updateDiagram(); }
 
     // ----- Controls and pointer input -----
     const pauseButton=document.querySelector('#pause'), stepButton=document.querySelector('#step'), swapButton=document.querySelector('#swap');
@@ -373,6 +386,8 @@
     document.querySelector('#reset').addEventListener('click',resetEverything);
     document.querySelector('#weight').addEventListener('input',e=>setSelectedWeight(e.target.value));
     document.querySelector('#zero').addEventListener('click',()=>setSelectedWeight(0));
+    document.querySelector('#restore-wiring').addEventListener('click',restoreWiring);
+    function restoreWiring(){ state.weights=cloneWeights();state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncEditor();renderConnections();refresh(); }
     function resetEverything(){ state.creature={x:255,y:330,angle:-0.25};state.light={x:535,y:180};state.weights=cloneWeights();state.paused=false;state.swapped=false;state.dragging=false;state.selected={layer:'ih',to:0,from:0};state.tickCount=0;state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();syncEditor();renderConnections();refresh(); }
     function pointerPosition(event){const r=canvas.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height};}
     function moveLightTo(x,y){state.light.x=clamp(x,12,W-12);state.light.y=clamp(y,12,H-12);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));refresh();}
@@ -401,9 +416,11 @@
       evaluate:(inputs,weights=state.weights)=>evaluateNetwork(inputs,weights),
       tick:simulationTick,
       reset:resetEverything,
+      restoreWiring,
       setPaused:value=>{state.paused=Boolean(value);syncControls();},
       setSwapped:value=>{state.swapped=Boolean(value);state.inputs=sampleSensors();Object.assign(state,evaluateNetwork(state.inputs));syncControls();refresh();},
-      setWeight:(layer,to,from,value)=>{state.selected={layer,to,from};setSelectedWeight(value);}
+      setWeight:(layer,to,from,value)=>{state.selected={layer,to,from};setSelectedWeight(value);},
+      setBias:(layer,to,value)=>{if(!['hb','ob'].includes(layer))return;state.selected={layer,to};setSelectedWeight(value);}
     });
   })();
   </script>

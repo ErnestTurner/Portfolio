@@ -283,6 +283,7 @@
       main { grid-template-columns: 1fr; align-items: start; }
       .road-wrap { width: 100%; }
       aside { padding: 20px; }
+      input[type="range"] { height: 44px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -326,6 +327,11 @@
         <label for="braking"><span>Braking firmness b</span><output id="brakingValue">3.0 m/s²</output></label>
         <input id="braking" type="range" min="1" max="4" step="0.1" value="3">
       </div>
+      <div class="control">
+        <label for="brakePulse"><span title="How long the tapped car supplies the cause">Brake pulse</span><output id="brakePulseValue">2.0 s</output></label>
+        <input id="brakePulse" type="range" min="0.5" max="4" step="0.1" value="2" aria-describedby="brakePulseHelp">
+        <small id="brakePulseHelp">How long the tapped car supplies the cause.</small>
+      </div>
 
       <div class="buttons">
         <button id="pause" type="button">Pause</button>
@@ -351,7 +357,7 @@
     const DESIRED_SPEED = 15;
     const MINIMUM_GAP = 2;
     const DT = 0.02;
-    const DEFAULTS = Object.freeze({ T: 1.1, a: 0.5, b: 3 });
+    const DEFAULTS = Object.freeze({ T: 1.1, a: 0.5, b: 3, pulse: 2 });
     const params = { ...DEFAULTS };
 
     const mod = (n, m) => ((n % m) + m) % m;
@@ -406,7 +412,7 @@
     }
 
     function beginIntervention(carId) {
-      intervention = { carId, remaining: 2 };
+      intervention = { carId, remaining: params.pulse };
       trackedCarId = carId;
       keyboardCarId = carId;
     }
@@ -483,7 +489,8 @@
     const sliderConfig = [
       ['timeGap', 'timeGapValue', 'T', value => `${value.toFixed(1)} s`],
       ['acceleration', 'accelerationValue', 'a', value => `${value.toFixed(1)} m/s²`],
-      ['braking', 'brakingValue', 'b', value => `${value.toFixed(1)} m/s²`]
+      ['braking', 'brakingValue', 'b', value => `${value.toFixed(1)} m/s²`],
+      ['brakePulse', 'brakePulseValue', 'pulse', value => `${value.toFixed(1)} s`]
     ];
 
     for (const [inputId, outputId, key, format] of sliderConfig) {
@@ -553,7 +560,7 @@
         event.preventDefault();
         keyboardMode = true;
         beginIntervention(keyboardCarId);
-        keyboardStatusEl.textContent = `Car ${keyboardCarId + 1} is braking for two simulation seconds.`;
+        keyboardStatusEl.textContent = `Car ${keyboardCarId + 1} is braking for ${params.pulse.toFixed(1)} simulation seconds.`;
       }
     });
 

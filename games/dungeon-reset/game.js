@@ -4,7 +4,8 @@
   const C=globalThis.DungeonCore,run=new C.Run(),$=id=>document.getElementById(id);
   let storage;try{storage=localStorage;}catch{storage={getItem(){return null;},setItem(){throw new Error('Unavailable');}};}
   let save=C.readSave(storage),selected=null,scene=null,modalKind=null,previousFocus=null;
-  let toastTimer=0,lastUI=0,reportDelay=0,savedRun=false,spaceDown=false;
+  let toastTimer=0,lastUI=0,savedRun=false,spaceDown=false;
+  const workEstimateElement=document.createElement('p');workEstimateElement.id='work-estimate';workEstimateElement.className='work-estimate';workEstimateElement.setAttribute('aria-live','polite');$('work-progress').parentElement.before(workEstimateElement);
   const escaped=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const formatTime=t=>`${String(Math.floor(Math.ceil(t)/60)).padStart(2,'0')}:${String(Math.ceil(t)%60).padStart(2,'0')}`;
   const persist=()=>C.writeSave(storage,save);
@@ -37,10 +38,16 @@
   const audio=new Sound();
   function toast(message){$('toast').textContent=message;$('toast').classList.add('visible');toastTimer=3.3;}
   function status(e){if(e.kind==='monster')return !e.stationed?'RETURN':e.morale>=1?'HAPPY ✓':`MORALE ${Math.round(e.morale*100)}%`;if(e.condition>=1)return e.kind==='mess'?'CLEAN ✓':'READY ✓';return `${Math.round(e.condition*100)}%`;}
+  function workEstimate(e){
+    if(run.phase!=='repair'||!e||run.complete(e))return{label:'',warning:false};
+    if(e.kind==='monster'&&!e.stationed)return{label:'RETURN FIRST',warning:false};
+    const progress=e.kind==='monster'?e.morale:e.condition,seconds=Math.max(0,Math.ceil(e.seconds*(1-progress))),door=Math.max(0,Math.ceil(run.time));
+    return{label:`~${seconds} SEC WORK · ${door} SEC UNTIL DOORS`,warning:seconds>door};
+  }
   function select(id){selected=id;renderUI(true);scene?.targetCaretaker(run.entity(id));}
   function actionDown(){audio.unlock();if(modalKind||run.paused)return;const e=run.entity(selected);if(!e)return;if(e.kind==='monster'&&!e.stationed){run.moveMonster(e.id,...e.home);processEvents();renderUI(true);return;}run.beginWork(e.id);}
   function actionUp(){run.stopWork();spaceDown=false;}
-  function startRun(){closeModal();audio.unlock();run.start();savedRun=false;selected=null;reportDelay=0;scene?.rebuild();processEvents();renderUI(true);toast('First job: drag each monster onto its matching station.');}
+  function startRun(){closeModal();audio.unlock();run.start();savedRun=false;selected=null;scene?.rebuild();processEvents();renderUI(true);toast('First job: drag each monster onto its matching station.');}
   function renderUI(force=false){
     if(!force&&performance.now()-lastUI<90)return;lastUI=performance.now();
     const title=run.phase==='title',repair=run.phase==='repair',raid=run.phase==='raid';
@@ -62,6 +69,7 @@
     }
     const e=run.entity(selected);$('inspect-type').textContent=e?(e.kind==='monster'?'STAFF WELFARE':e.kind==='mess'?'HYGIENE':'DUNGEON MAINTENANCE'):'SELECT A JOB';$('inspect-name').textContent=e?e.name:raid?'Performance review.':'One mess at a time.';
     $('inspect-description').textContent=e?(e.kind==='monster'?(!e.stationed?`Drag ${e.name} onto the matching ring above, or use Return below.`:e.morale<1?`${e.complaint} ${e.solution}.`:'Complaint resolved. Ready to ruin someone’s quest.'):e.flavor):raid?'The heroes will test every defense along the way.':'Select a job. Hold to work. You can stop and return later.';
+    const estimate=workEstimate(e);workEstimateElement.textContent=estimate.label;workEstimateElement.classList.toggle('warning',estimate.warning);
     $('work-progress').style.width=e?`${(e.kind==='monster'?e.morale:e.condition)*100}%`:'0%';
     const done=e&&run.complete(e),returning=e&&e.kind==='monster'&&!e.stationed;$('work-button').disabled=!repair||!e||done||run.paused;
     $('work-button').innerHTML=done?'JOB DONE ✓':returning?'RETURN TO STATION <kbd>SPACE</kbd>':e?.kind==='monster'?'HOLD TO REASSURE <kbd>SPACE</kbd>':e?.kind==='mess'?'HOLD TO SWEEP <kbd>SPACE</kbd>':e?.kind==='chest'?'HOLD TO REFILL <kbd>SPACE</kbd>':'HOLD TO REPAIR <kbd>SPACE</kbd>';
@@ -87,8 +95,9 @@
     openModal('credits',`<span class="eyebrow">DEPARTMENT OF AFTERMATH</span><h2 id="modal-title">Dungeon Reset</h2><p><b>Created and owned by Ernest Turner.</b><br>Game concept and creative direction: Ernest Turner.<br>Design, programming, original artwork direction, and testing: Codex in collaboration with Ernest.</p><p>Original dungeon and character artwork generated with OpenAI ImageGen for this game. Original procedural score “After Hours in D Minor” and sound effects synthesized in Web Audio. No stock music or borrowed characters.</p><p>Phaser 3.90.0 by Phaser Studio Inc., MIT licensed. See the bundled credits and license files for full provenance.</p><p class="muted">Build ${C.VERSION} · Browser edition · September 2026<br>Local high scores only. No accounts, analytics, or online services.</p><button class="primary" id="credits-done">BACK TO THE DUNGEON <span>→</span></button>`);$('credits-done').onclick=closeModal;
   }
   function showReport(){
-    const s=run.raidSnapshot;reportDelay=9;
+    const s=run.raidSnapshot;
     openModal('report',`<span class="eyebrow">RAID ${run.wave+1} / 5 · DAMAGE ASSESSMENT</span><h2 id="modal-title">${s.defeated===C.PARTIES[run.wave].count?'An excellent inconvenience.':s.defeated?'Mostly up to code.':'They made themselves at home.'}</h2><p>${s.defeated?'The party has filed a formal complaint. Management considers this a success.':'The heroes walked out smiling. We can do something about that next time.'}</p><div class="report-grid"><div><span>HEROES SENT PACKING</span><strong>${s.defeated} / ${C.PARTIES[run.wave].count}</strong></div><div><span>PREPARATION BONUS</span><strong>+${s.setupBonus}</strong></div></div><p>${s.ready<65?'Tip: return all three monsters first. Even without a morale boost they can fight.':s.byId.door<.6?'Tip: repairing the door boosts every trap and monster by up to 20%.':'A tidy floor and a sturdy door multiply the value of your other repairs.'}</p><button class="primary" id="next-shift">BACK TO THE MESS <span>→</span></button><p class="muted" id="report-countdown">Next repair phase in 9 seconds.</p>`);$('next-shift').onclick=nextWave;
+    $('report-countdown').textContent='The next repair phase starts when you are ready.';
   }
   function nextWave(){if(run.phase!=='report')return;closeModal();run.nextWave();selected=null;scene?.rebuild();processEvents();renderUI(true);}
   function showResults(){
@@ -152,7 +161,6 @@
     speech(text){if(this.speechTimer>1.1)return;this.speechLabel.setText(text).setVisible(true);this.speechTimer=3.3;}
     update(time,delta){
       const dt=Math.min(delta/1000,.1);if(!modalKind||modalKind==='report'||modalKind==='results')run.tick(dt);
-      if(modalKind==='report'){reportDelay-=dt;$('report-countdown').textContent=`Next repair phase in ${Math.ceil(reportDelay)} seconds.`;if(reportDelay<=0)nextWave();}
       audio.update(dt);processEvents();renderUI();if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('toast').classList.remove('visible');}
       if(run.paused){this.tweens.pauseAll();return;}this.tweens.resumeAll();if(this.speechTimer>0){this.speechTimer-=dt;if(this.speechTimer<=0)this.speechLabel.setVisible(false);}
       const title=run.phase==='title',repair=run.phase==='repair';this.caretaker.setVisible(run.phase!=='raid');this.stationLabels.forEach(l=>l.setVisible(repair));
@@ -188,7 +196,7 @@
   document.addEventListener('keyup',e=>{if(e.code==='Space')actionUp();});window.addEventListener('blur',()=>{actionUp();if(['repair','raid'].includes(run.phase)&&!modalKind)showPause();});document.addEventListener('visibilitychange',()=>{if(document.hidden){actionUp();if(['repair','raid'].includes(run.phase)&&!modalKind)showPause();}});
   $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{toast('Fullscreen is unavailable in this browser view.');}};
   const inspect=()=>({...run.summary(),entities:run.entities.map(e=>({id:e.id,x:e.x,y:e.y,home:e.home,kind:e.kind,condition:e.condition,stationed:e.stationed,morale:e.morale})),history:run.history,settings:{...save},selected,audio:{state:audio.ctx?.state??'not-started',notesPlayed:audio.notesPlayed,gain:audio.master?.gain.value??0}});
-  window.dungeonReset={inspect};
+  window.dungeonReset={inspect,workEstimate:id=>workEstimate(run.entity(id))};
   if(new URLSearchParams(location.search).has('qa'))window.dungeonReset.qa={run,game,step(seconds){for(let t=0;t<seconds;t+=.1){run.tick(Math.min(.1,seconds-t));processEvents();}renderUI(true);},start:startRun,scene:()=>scene};
   if(document.modelContext?.registerTool){const lifecycle=new AbortController();try{Promise.resolve(document.modelContext.registerTool({name:'inspect_dungeon_shift',description:'Read the current Dungeon Reset score, phase, timer, and repair state.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute(input){if(!input||Object.keys(input).length)throw new Error('Expected an empty object.');return inspect();}},{signal:lifecycle.signal})).catch(()=>{});window.addEventListener('pagehide',()=>lifecycle.abort(),{once:true});}catch{}}
   renderUI(true);

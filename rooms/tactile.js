@@ -47,7 +47,7 @@ function specimens(host, api) {
       <label>Move the light <input id="sp-light-control" type="range" min="0" max="100" value="20"><output id="sp-light-value">left</output></label>
       <label>Warm the shelf <input id="sp-warmth-control" type="range" min="0" max="100" value="15"><output id="sp-warmth-value">15%</output></label>
       <button id="sp-tap" type="button">Tap the glass</button>
-      <p class="tactile-caption" id="sp-response" aria-live="polite">Three specimens. Three different ideas of a response.</p>
+      <p class="tactile-caption" id="sp-response" aria-live="polite">Light, warmth and vibration. Three distinct responses.</p>
     </div>` + api.game('brain-in-a-jar', 'Brain in a Jar', 'Open the full neural-controller toy. Inspect how its sensors and connections shape behavior.');
   let taps = 0;
   const light = q(host,'#sp-light-control');
@@ -57,7 +57,7 @@ function specimens(host, api) {
     q(host,'#sp-photophile').setAttribute('transform',`translate(${(n-50)*.55} 288) rotate(${(n-50)*.16})`);
     q(host,'#sp-eye').setAttribute('cx',n>50?'20':'6');
     q(host,'#sp-light-value').textContent = n<35?'left':n>65?'right':'overhead';
-    q(host,'#sp-response').textContent = 'The blue one follows. The other two have their own interests.';
+    q(host,'#sp-response').textContent = 'The blue specimen follows the light.';
   });
   const warmth = q(host,'#sp-warmth-control');
   const warm = () => {
@@ -107,8 +107,8 @@ function soft(host, api) {
   `, 'A coral gel, a blue spring cap, and a lilac ribbon sit beneath a shared press. Compress or release them to compare their responses.') + `
     <div class="controls tactile-controls">
       <label>Lower the press <input id="sf-compress" type="range" min="0" max="100" value="0"><output id="sf-amount">0%</output></label>
-      <button id="sf-release" type="button">Release the press</button><button id="sf-pluck" type="button">Give them a pluck</button>
-      <p class="tactile-caption" id="sf-response" aria-live="polite">The gel spreads. The spring stores. The ribbon finds another way.</p>
+      <button id="sf-release" type="button">Release the press</button><button id="sf-pluck" type="button">Pluck the materials</button>
+      <p class="tactile-caption" id="sf-response" aria-live="polite">Gel spreads, the spring compresses, and the ribbon bends.</p>
     </div>` + api.game('jelly-bench','Jelly Bench','Pull and tune a springy soft body, or guide it through the snack maze.');
   let frame = 0, disposed = false, value = 0, velocity = 0, last = 0;
   const slider = q(host,'#sf-compress');
@@ -139,7 +139,7 @@ function soft(host, api) {
   slider.addEventListener('input',()=>{
     stop();value=Number(slider.value)/100;velocity=0;draw(value);
     q(host,'#sf-amount').textContent=`${slider.value}%`;q(host,'#sf-readout').textContent=`PRESS ${slider.value}%`;
-    q(host,'#sf-response').textContent='One press, three different deformations. Release to see what each remembers.';
+    q(host,'#sf-response').textContent='One press, three deformations. Release to observe recovery.';
   });
   function release(pluck=false){
     stop();slider.value='0';q(host,'#sf-amount').textContent='0%';
@@ -194,7 +194,7 @@ function mirrors(host,api){
     q(host,'#mi-stretch').setAttribute('transform',`translate(${pos*.45} 0) translate(500 220) scale(${1+Math.abs(pos)/180} ${1-Math.abs(pos)/250}) rotate(${angle}) translate(-500 -220)`);
     q(host,'#mi-position-value').textContent=pos===0?'center':`${Math.abs(pos)}% ${pos<0?'left':'right'}`;
     q(host,'#mi-angle-value').textContent=`${angle}°`;
-    q(host,'#mi-response').textContent=api.paused()?'Motion is paused. The late reflection now updates immediately.':'The far mirror catches up in its own time.';
+    q(host,'#mi-response').textContent=api.paused()?'Motion is paused. The late reflection now updates immediately.':'The far reflection follows with a delay.';
     if(!frame)frame=requestAnimationFrame(catchUp);
   }
   q(host,'#mi-position').addEventListener('input',e=>{pos=Number(e.target.value);draw();});
@@ -257,8 +257,8 @@ function traffic(host,api){
 }
 
 export const tactileRooms={
-  specimens:{title:'The specimen room',kicker:'06 / DIFFERENT KINDS OF ALIVE',description:'A shelf of small, particular creatures. Change one thing. Watch who notices.',color:'#c2caff',render:specimens},
-  soft:{title:'Soft materials lab',kicker:'07 / PLEASE SQUISH',description:'Nothing here has entirely committed to its shape.',color:'#c2e8c9',render:soft},
-  mirrors:{title:'The mirror room',kicker:'08 / AGREEMENT IS OPTIONAL',description:'Put one thing in front of three mirrors. Get three opinions.',color:'#bfc5e7',render:mirrors},
-  traffic:{title:'Traffic control',kicker:'09 / SOMEONE LEFT THE SWITCHBOARD ON',description:'A satisfying signal route. A less cooperative road, waiting on the screen.',color:'#f1bd75',render:traffic}
+  specimens:{title:'The specimen room',kicker:'06 / SPECIMEN STUDIES',description:'A shelf of small, particular creatures. Change one thing. Watch who notices.',color:'#c2caff',render:specimens},
+  soft:{title:'Soft materials lab',kicker:'07 / MATERIAL STUDIES',description:'Nothing here has entirely committed to its shape.',color:'#c2e8c9',render:soft},
+  mirrors:{title:'The mirror room',kicker:'08 / OPTICAL STUDIES',description:'Put one thing in front of three mirrors. Get three opinions.',color:'#bfc5e7',render:mirrors},
+  traffic:{title:'Traffic control',kicker:'09 / ROUTING STUDIES',description:'A satisfying signal route. A less cooperative road, waiting on the screen.',color:'#f1bd75',render:traffic}
 };

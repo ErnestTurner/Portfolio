@@ -1,3 +1,4 @@
+import {spatialRoom} from './spatial-rooms.js';
 import {ROOM_IDS,readState,writeState,rewoundState} from './state.js';
 import {mechanicalRooms} from './mechanical.js';
 import {wonderRooms} from './wonder.js';
@@ -25,8 +26,8 @@ function render(focus=false,recordVisit=true){
   $('room-number').textContent=`ROOM ${String(index+1).padStart(2,'0')} / 12`;$('room-select').value=current;
   $('previous').href='#/'+ROOM_IDS[(index+11)%12];$('previous').setAttribute('aria-label',`Previous room: ${rooms[ROOM_IDS[(index+11)%12]].title}`);
   $('next').href='#/'+ROOM_IDS[(index+1)%12];$('next').setAttribute('aria-label',`Next room: ${rooms[ROOM_IDS[(index+1)%12]].title}`);
-  announce(current==='hall'?`${state.visited.length} of 12 rooms visited. Choose a doorway or open the room index.`:current==='workbench'?'Choose the instrument or drafting sheet on the bench.':'Try the controls beneath the scene. Every room is always open.');
-  room.render($('room-stage'),api);syncMotion();
+  announce(current==='hall'?`${state.visited.length} of 12 rooms visited. Choose a doorway or open the room index.`:current==='workbench'?'Choose the instrument or drafting sheet on the bench.':'Explore the marked objects or use the controls beneath the room.');
+  room.render($('room-stage'),api);spatialRoom(current,$('room-stage'),api);syncMotion();
   if(focus){$('room-title').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}
 }
 $('room-select').innerHTML=ROOM_IDS.map((id,i)=>`<option value="${id}">${String(i+1).padStart(2,'0')} / ${rooms[id].title}</option>`).join('');

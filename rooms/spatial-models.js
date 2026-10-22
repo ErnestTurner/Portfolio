@@ -1,16 +1,17 @@
 // Scene geometry only. Sizes are box extents or [radius, height, radius].
 // Openings are gaps between independent wall segments, never painted-on doors.
 const P = {
-  plaster: '#e2dfcd', plasterLight: '#eeead9', sage: '#b7c3ae', sageLight: '#d0d8c4',
-  teal: '#477b73', deepTeal: '#365e58', oak: '#b88d60', oakEdge: '#936e4c',
-  floor: '#c6c8b5', seam: '#afb6a2', shadow: '#9ca891', cream: '#f4ebcf',
-  metal: '#879b8a', brass: '#c4a66b', coral: '#bd795e'
+  plaster: '#aaa99b', plasterLight: '#c1baaa', sage: '#89988d', sageLight: '#9a9e90',
+  teal: '#4b7470', deepTeal: '#384e4b', oak: '#a97b50', oakEdge: '#79583f',
+  floor: '#aaa696', seam: '#8c9183', shadow: '#7d897a', cream: '#eadfc8',
+  metal: '#83968a', brass: '#b89a64', coral: '#b56d4e'
 };
 
 function sceneBuilder() {
   const objects = [];
   const add = (type, position, size, color, rotation) => {
-    const value = { type, position, size, color };
+    const material=[P.oak,P.oakEdge].includes(color)?'wood':[P.metal,P.brass,P.teal,P.deepTeal].includes(color)?'metal':[P.plaster,P.plasterLight,P.sage,P.sageLight,P.floor].includes(color)?'plaster':color===P.cream?'paper':undefined;
+    const value = { type, position, size, color, ...(material?{material}:{}) };
     if (rotation) value.rotation = rotation;
     objects.push(value);
     return value;
@@ -30,14 +31,22 @@ function floorAndCeiling(b, { depth = 16, back = -7.5, skylight = true } = {}) {
   for (const x of [-4.65, -2.3, 0, 2.3, 4.65]) b.box([x, .006, center], [.018, .012, depth], P.seam);
   for (let z = back + 1.7; z < back + depth; z += 2.4) b.box([0, .007, z], [14, .014, .018], P.seam);
   if (skylight) {
-    // Four solid ceiling panels surround a real rectangular skylight aperture.
-    b.box([-5.15, 7.04, center], [3.7, .22, depth], P.sageLight);
-    b.box([5.15, 7.04, center], [3.7, .22, depth], P.sageLight);
-    b.box([0, 7.04, -5.7], [6.6, .22, 3.6], P.sageLight);
-    b.box([0, 7.04, 6.3], [6.6, .22, 4.4], P.sageLight);
-    b.box([0, 7.16, -.8], [6.4, .06, 9.7], '#f6f0d2');
-    for (const x of [-3.3, 0, 3.3]) b.box([x, 6.96, -.8], [.13, .15, 10], P.teal);
-    for (const z of [-5.75, -2.5, .75, 4.1]) b.box([0, 6.95, z], [6.7, .16, .13], P.teal);
+    // A circular glazed roof lantern, with physical radial frame segments.
+    b.box([-5.25, 7.04, center], [3.9, .22, depth], P.sageLight);
+    b.box([5.25, 7.04, center], [3.9, .22, depth], P.sageLight);
+    b.box([0, 7.04, -5.95], [6.6, .22, 3.1], P.sageLight);
+    b.box([0, 7.04, 5.45], [6.6, .22, 6.1], P.sageLight);
+    // Frosted glazing is opaque to detail but admits light. A solid illuminated
+    // surface avoids sorting the nearly coincident caps of a thin glass volume.
+    Object.assign(b.cylinder([0,7.16,-1],[3.38,.06,3.38],'#a8cbd3'),{material:'metal',emissive:.45,castShadow:false});
+    for(let i=0;i<24;i++){const a=(i+.5)*Math.PI/12;b.box([Math.cos(a)*3.35,7.02,-1+Math.sin(a)*3.35],[.9,.2,.16],P.deepTeal,[0,-a-Math.PI/2,0]);}
+    b.box([0,7.0,-1],[6.65,.14,.09],P.metal);b.box([0,7.0,-1],[.09,.14,6.65],P.metal);
+    // Suspended planets recall the original lab without filling every surface.
+    for(const[x,y,z,r,c]of[[-1.1,5.9,-1.9,.53,'#c39a59'],[1.25,5.3,-.8,.38,'#6fa6b1'],[-.25,5.75,1,.24,'#ad776e']]){
+      b.cylinder([x,(7+y+r)/2,z],[.015,7-y-r,.015],P.metal);
+      Object.assign(b.sphere([x,y,z],[r,r,r],c),{material:'metal'});
+    }
+    b.cylinder([1.25,5.3,-.8],[.64,.025,.64],'#9fb8af',[.16,0,.16]);
   } else {
     b.box([0, 7.04, center], [14.4, .22, depth], P.sageLight);
     b.box([0, 6.87, -2.1], [14, .28, .22], '#9fab98');
@@ -150,7 +159,6 @@ export function makeHall(state = {}) {
   const bobY = 7 - Math.cos(plumbAngle) * plumbLength;
   b.cylinder([(4.2 + bobX) / 2, (7 + bobY) / 2, 5.2], [.022, plumbLength, .022], '#698175', [0, 0, plumbAngle]);
   b.sphere([bobX, bobY, 5.2], [.18, .34, .18], P.brass);
-  b.cylinder([bobX, .012, 5.2], [.34, .014, .25], P.shadow);
 
   // A small registration desk in the near left corner provides human scale.
   b.box([-4.25, .012, 6.45], [3.3, .018, 1.65], P.shadow);
@@ -158,6 +166,26 @@ export function makeHall(state = {}) {
   for (const x of [-5.48, -3.02]) b.box([x, .82, 6.45], [.16, 1.64, .85], P.deepTeal);
   b.box([-4.3, 1.81, 6.35], [.9, .025, .65], P.cream, [0, -.15, 0]);
   b.box([-3.55, 1.84, 6.32], [.08, .06, .7], '#bd795e', [0, .25, 0]);
+
+  // A worn runner makes this a room people inhabit, rather than a corridor grid.
+  b.box([0,.028,-.15],[4.65,.025,5.8],'#846056');
+  b.box([0,.044,-.15],[4.39,.013,5.54],'#c1a077');
+  b.box([0,.055,-.15],[4.17,.012,5.3],'#5a6e68');
+  for(const z of[-2.45,2.15])b.box([0,.067,z],[3.75,.01,.08],'#bda57d');
+  // The registration desk has a small brass bell and a practical pool of light.
+  b.cylinder([-4.85,1.85,6.37],[.17,.07,.17],P.deepTeal);
+  b.sphere([-4.85,1.94,6.37],[.15,.11,.15],P.brass);
+  b.cylinder([-4.85,2.06,6.37],[.025,.1,.025],P.brass);
+  b.cylinder([-4.15,5.7,5.6],[.025,2.6,.025],P.deepTeal);
+  b.sphere([-4.15,4.35,5.6],[.63,.26,.63],P.deepTeal);
+  Object.assign(b.cylinder([-4.15,4.18,5.6],[.54,.035,.54],'#ffe1a6'),{emissive:.8,castShadow:false});
+  // An archive cabinet fits between existing apertures; doors remain unobstructed.
+  b.box([2.25,.95,-6.95],[1.35,1.9,.7],P.deepTeal);
+  for(let i=0;i<3;i++){
+    b.box([2.25,.37+i*.57,-6.57],[1.2,.49,.04],P.metal);
+    b.box([2.03,.41+i*.57,-6.53],[.38,.16,.025],P.cream);
+    b.box([2.58,.37+i*.57,-6.49],[.23,.05,.08],P.brass);
+  }
 
   const water = Math.min(100, Math.max(0, Number(state.hallWater) || 0));
   if (water > 0) {
@@ -173,7 +201,8 @@ export function makeHall(state = {}) {
     b.box([3.3, .39, -.55], [.11, .76, .025], '#628b82', [0, -.18, 0]);
   }
   return {
-    objects: b.objects, hotspots,
+    objects: b.objects, hotspots, sun:[-.65,1,.4], ambient:.43, fogColor:'#aaa99b',
+    lights:[{position:[-4.15,4.05,5.6],color:'#ffdb9d',intensity:1.4},{position:[2.4,4.6,-4.5],color:'#d9e3dd',intensity:.35}],
     camera: { eye: [0, 4.8, 12.6], target: [0, 2.65, -3.4] },
     cameras: {
       center: { eye: [0, 4.8, 12.6], target: [0, 2.65, -3.4] },
@@ -278,8 +307,35 @@ export function makeWorkbench(state = {}) {
   for (const [x, z] of [[-5.15, 4.4], [-4.45, 4.4], [-4.8, 5]]) b.box([x, .55, z], [.11, 1.1, .11], P.deepTeal);
   b.cylinder([-4.8, .017, 4.65], [.65, .014, .57], P.shadow);
 
+  // The archive wall and evidence board carry the history of a working place.
+  b.box([4.85,1.95,-6.7],[2.5,3.9,1.05],P.deepTeal);
+  b.box([4.85,3.96,-6.7],[2.68,.17,1.2],P.oak);
+  for(let row=0;row<4;row++)for(let col=0;col<2;col++){
+    const x=4.27+col*1.16,y=.52+row*.91;
+    b.box([x,y,-6.14],[1.04,.77,.045],row===2?'#7b8580':P.metal);
+    b.box([x-.14,y+.08,-6.10],[.37,.18,.02],P.cream);
+    b.box([x+.22,y-.13,-6.05],[.24,.05,.08],P.brass);
+  }
+  b.box([-4.65,3.75,-7.28],[1.65,2.65,.12],P.oakEdge);
+  b.box([-4.65,3.75,-7.19],[1.48,2.48,.04],'#4f6058');
+  for(const[x,y,a]of[[-4.9,4.3,-.1],[-4.4,3.6,.12],[-4.9,3.05,.07]]){
+    b.box([x,y,-7.14],[.58,.65,.025],P.cream,[0,0,a]);
+    b.box([x,y+.12,-7.11],[.4,.27,.01],'#8b9f99',[0,0,a]);
+    b.sphere([x,y+.27,-7.08],[.035,.035,.02],P.coral);
+  }
+  // A dark rug, a bound notebook and a useful cup frame the drawing apparatus.
+  b.box([.25,.035,3.8],[6.25,.025,2.1],'#7d5850');
+  b.box([.25,.052,3.8],[5.95,.012,1.8],'#c0a17a');
+  b.box([.25,.062,3.8],[5.75,.01,1.6],'#65665c');
+  b.box([-3.1,2.55,-.1],[1.35,.16,.87],P.deepTeal,[0,.08,0]);
+  b.box([-3.1,2.65,-.1],[1.23,.04,.79],P.cream,[0,.08,0]);
+  b.cylinder([-4.04,2.69,.38],[.17,.45,.17],'#c0ad85');
+  b.cylinder([-4.04,2.924,.38],[.135,.008,.135],'#5e594b');
+  Object.assign(b.objects.find(o=>o.position[0]===2.62&&o.position[1]===3.7),{emissive:.8,castShadow:false});
+
   return {
-    objects: b.objects,
+    objects: b.objects, sun:[-1,.28,-.45], ambient:.43, fogColor:'#aaa99b',
+    lights:[{position:[2.62,3.66,-.06],color:'#ffdda4',intensity:1.3},{position:[-5.7,3.8,-3],color:'#d9e5eb',intensity:.4}],
     hotspots: [
       { id: 'instrument', label: 'Use Scribble Engine', position: [1.65, 2.97, 1.1], href: '/games/scribble-engine/' },
       { id: 'draft', label: 'Open drafting sheet', position: [-2.34, 2.64, 1.38], href: '#draft-sheet' }

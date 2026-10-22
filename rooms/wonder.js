@@ -52,7 +52,7 @@ function library(host, api) {
   <g id="library-world">${worlds[0]}</g>
   <path d="m508 486 25-3-2 45-12-10-12 11Z" fill="#dc9a72"/>
   <g fill="#f2e5d2" font-family="ui-monospace,monospace" font-size="12" letter-spacing="3"><text x="52" y="58">THE FOLDING COLLECTION</text><text x="805" y="521">VOL. <tspan id="library-volume">01</tspan></text></g>`, 'An open paper book becomes a layered miniature landscape as its pages unfold.') + controls(`
-  <fieldset class="wonder-book-picker"><legend>Take a book off the shelf</legend><div class="wonder-button-row">${names.map((name, i) => `<button type="button" data-book="${i}" aria-pressed="${i === 0}"><span class="wonder-book-icon book-${i}" aria-hidden="true"></span>${name}</button>`).join('')}</div></fieldset>
+  <fieldset class="wonder-book-picker"><legend>Choose a volume</legend><div class="wonder-button-row">${names.map((name, i) => `<button type="button" data-book="${i}" aria-pressed="${i === 0}"><span class="wonder-book-icon book-${i}" aria-hidden="true"></span>${name}</button>`).join('')}</div></fieldset>
   <label class="wonder-range">Unfold the pages <output id="library-open-output">${opening}%</output><input id="library-open" type="range" min="0" max="100" value="${opening}"/></label>
   <p class="wonder-caption" id="library-note">A tide small enough to keep between pages.</p>`);
   const world = host.querySelector('#library-world');
@@ -101,7 +101,7 @@ function observatory(host, api) {
   <g fill="#b4c7cc" font-family="ui-monospace,monospace" font-size="12" letter-spacing="3"><text x="48" y="48">A WINDOW LEFT OPEN</text><text x="780" y="526">NO ROOF REQUIRED</text></g>`, 'A telescope, a changing constellation, and a luminous marble beneath a wide, quiet night sky.') + controls(`
   <label class="wonder-range">Turn the sky <output id="observatory-bearing">${bearing}°</output><input type="range" id="observatory-turn" min="0" max="360" value="${bearing}"/></label>
   <button type="button" id="observatory-drop">Drop the luminous marble ↓</button>
-  <p class="wonder-caption" id="observatory-note">Gravity has a surprisingly good return policy.</p>`) + api.game('starfall', 'Starfall', 'Spend light, recover fragments, and survive the eclipse.');
+  <p class="wonder-caption" id="observatory-note">Drop the marble. Watch above the table.</p>`) + api.game('starfall', 'Starfall', 'Spend light, recover fragments, and survive the eclipse.');
   function paintSky() {
     const positions = Array.from({ length: 7 }, (_, i) => {
       const angle = i * .77 + bearing * Math.PI / 180;
@@ -180,7 +180,7 @@ function conservatory(host, api) {
   <label class="wonder-range">Clouds <output id="garden-cloud-output">${clouds}</output><input type="range" id="garden-cloud-control" min="0" max="3" step="1" value="${clouds}"/></label>
   <label class="wonder-range">Rain <output id="garden-rain-output">${rain}%</output><input type="range" id="garden-rain-control" min="0" max="100" value="${rain}"/></label>
   <button type="button" id="garden-grow">Change plants: ${plantNames[(plant + 1) % 3]}</button><button type="button" id="garden-drain">Drain the floor → Hall</button>
-  <p class="wonder-caption" id="garden-note">${gardenDrained ? 'The floor has drained into the <a href="#/hall">Hall</a>. Change the rain to collect more water.' : 'Choose the weather. The plants will find a use for it.'}</p>`) + api.game('moon-snail', 'Moon Snail', 'Catch marshmallows in bubbles and feed the moon.');
+  <p class="wonder-caption" id="garden-note">${gardenDrained ? 'The floor has drained into the <a href="#/hall">Hall</a>. Change the rain to collect more water.' : 'Set the clouds and rain, then change the planting.'}</p>`) + api.game('moon-snail', 'Moon Snail', 'Catch marshmallows in bubbles and feed the moon.');
   function plantArt(x, y, index) {
     const growth = 0.76 + rain * .0024;
     const kind = (plant + index) % 3;
@@ -299,8 +299,8 @@ function portal(host, api) {
 }
 
 export const wonderRooms = {
-  library: { title: 'The Library', kicker: '04 / A LITTLE LIGHT READING', description: 'Some books are better left open.', color: '#b999b7', render: library },
-  observatory: { title: 'The Observatory', kicker: '05 / UP IS A SUGGESTION', description: 'Stay a minute. Something will come back to you.', color: '#829caf', render: observatory },
+  library: { title: 'The Library', kicker: '04 / THE FOLDING COLLECTION', description: 'Some books are better left open.', color: '#b999b7', render: library },
+  observatory: { title: 'The Observatory', kicker: '05 / CELESTIAL OBSERVATIONS', description: 'Stay a minute. Something will come back to you.', color: '#829caf', render: observatory },
   conservatory: { title: 'Indoor Weather', kicker: '10 / THE CONSERVATORY', description: 'A small climate, entirely in your hands.', color: '#84b79d', render: conservatory },
   portal: { title: 'Somewhere Else', kicker: '12 / THE DOOR WITHOUT A ROOM', description: 'Three views. One very reliable way back.', color: '#bba0bc', render: portal }
 };

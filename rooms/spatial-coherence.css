@@ -1,0 +1,47 @@
+/* The navigation keeps the existing Trikzik identity. Scene accents vary by room. */
+body[data-room] .brand{gap:11px;letter-spacing:.5px;font-weight:700}
+.brand-icon{display:block;width:40px;height:43px;object-fit:contain;flex:none}
+.brand-wordmark{white-space:nowrap;font-size:16px;line-height:1.1}
+.brand-wordmark>span{color:#a65d35;padding:0 3px}
+body[data-room] .room-heading{max-width:calc(100% - 220px);border-color:#9d7045;background:#eee8dceF}
+body[data-room] .room-rail{background:#eee8dced;color:#37483e}
+.experiment-scene .scene-world .room-art{width:100%;height:100%;object-fit:contain}
+.room-camera-controls{background:#dcd7c9;border-color:#b4ad9b;justify-content:space-between}
+.room-camera-controls .view-controls{display:flex;gap:6px}
+.room-camera-controls>p{max-width:450px}
+body[data-room] .controls{background:#eee9dd;padding:18px 4vw;border-color:#c2b9a7;gap:14px 24px}
+body[data-room] .controls button{border-radius:2px;font-weight:500;border-color:#9b9e8d}
+body[data-room] .controls button[aria-pressed=true]{background:#425c50;color:#fff;border-color:#425c50}
+body[data-room] .controls label{font-weight:500;font-size:12px}
+body[data-room] .controls input{accent-color:#45675b}
+body[data-room] .wonder-book-icon{display:none}
+body[data-room] .game-link{padding:14px 4vw;background:#e0dfd2;min-height:80px;border-color:#b8bcab}
+body[data-room] .game-link img{width:76px;height:49px;border-radius:1px}
+body[data-room] .game-link strong{font-size:14px}
+body[data-room] .game-link small{font-size:9px;color:#465b4d}
+body[data-room] .game-link p{max-width:600px;color:#455a4a}
+body[data-room] .tactile-caption,body[data-room] .wonder-caption{color:#4a5d50;font-size:12px;line-height:1.6}
+.experiment-scene .scene-hotspot .hotspot-dot{width:11px;height:11px;border-color:#fff4d6;background:#684f35;box-shadow:0 0 0 5px #f4e6c321}
+.experiment-scene .scene-hotspot:hover .hotspot-dot,.experiment-scene .scene-hotspot:focus-visible .hotspot-dot{background:#dabf78}
+.experiment-scene .hotspot-label{background:#f2ebdb;color:#243c30;border-color:#857b65}
+.experiment-scene.webgl-fallback .scene-world{visibility:visible}
+.experiment-scene.webgl-fallback .room-art{background:#e8e3d7}
+.spatial-scene:not(.webgl-ready)>.webgl-scene{display:none}
+.rewinding .webgl-scene{animation:rewind .65s ease-in-out}
+.room-camera-controls[hidden]{display:none}
+@media(max-width:700px){
+ body[data-room] .brand{gap:7px}.brand-icon{width:31px;height:33px}.brand-wordmark{font-size:12px;letter-spacing:0}.brand-wordmark>span{padding:0 1px}
+ body[data-room] .masthead nav button{padding:8px 7px;font-size:10px}
+ body[data-room] .room-heading{max-width:calc(100% - 30px)}
+ body[data-room] .room-heading h1{font-size:27px}
+ .experiment-scene{height:570px}.experiment-scene .scene-world{width:100%;left:0;margin-left:0;display:flex;align-items:center}
+ .room-camera-controls{padding:12px 16px;gap:10px}.room-camera-controls .view-controls{flex-basis:100%}.room-camera-controls>p{margin:0;font-size:11px}
+ body[data-room] .controls{padding:15px 16px;gap:10px 14px}
+ body[data-room] .controls label{font-size:12px;max-width:100%}
+ body[data-room] .controls input[type=range]{width:160px}
+ body[data-room] .controls button{font-size:12px}
+ body[data-room] .game-link{padding:14px 16px}
+ body[data-room] .wonder-book-picker{min-width:0;width:100%}
+ body[data-room] .wonder-button-row{flex-wrap:wrap}
+}
+@media(max-width:350px){.brand-wordmark{font-size:11px}.brand-icon{width:25px;height:28px}body[data-room] .masthead{gap:5px;margin:0 12px}body[data-room] .masthead nav button{padding:6px;font-size:10px}}

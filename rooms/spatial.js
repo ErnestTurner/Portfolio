@@ -1,6 +1,7 @@
+import {getInstrument} from './instrument-view.js';
 import {mountScene} from './spatial-renderer.js';
 import {makeHall,makeWorkbench} from './spatial-models.js';
-// Fixed-camera scenes: ordinary SVG geometry, no renderer or external assets.
+// SVG illustrations are retained as the explicit WebGL fallback.
 const doors=[['workbench','Workbench'],['museum','Museum'],['library','Library'],['observatory','Observatory'],['specimens','Specimens'],['soft','Soft materials'],['mirrors','Mirrors'],['traffic','Traffic control'],['conservatory','Conservatory'],['counterweight','Behind the walls'],['portal','Somewhere else']];
 const svg=(content,label)=>`<svg class="spatial-art" viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="${label}">${content}</svg>`;
 const defs=`<defs>
@@ -66,14 +67,6 @@ export function spatialHall(host,api){
  const readout=host.querySelector('#door-readout');host.querySelectorAll('.spatial-door').forEach(a=>{a.addEventListener('pointerenter',()=>readout.textContent=a.dataset.name);a.addEventListener('focus',()=>readout.textContent=a.dataset.name);a.addEventListener('pointerleave',()=>readout.textContent='Choose a doorway');});
  host.querySelector('#hall-unusual').onclick=()=>{const unseen=doors.filter(([id])=>!api.state.visited.includes(id));location.hash='/'+(unseen.length?unseen:doors)[Math.floor(Math.random()*(unseen.length||doors.length))][0];};if(!host.querySelector('.webgl-ready'))cameraControls(host);
 }
-function getInstrument(){
- let dialog=document.getElementById('instrument-view');if(dialog)return dialog;
- dialog=document.createElement('dialog');dialog.id='instrument-view';dialog.className='instrument-view';dialog.setAttribute('aria-labelledby','instrument-title');
- dialog.innerHTML='<header><h2 id="instrument-title">Scribble Engine <span>Instrument 02</span></h2><div class="instrument-toolbar"><a href="/games/scribble-engine/" target="_blank" rel="noopener" aria-label="Open a separate Scribble Engine session in a new tab">Separate window</a><button id="step-back">Step back</button></div></header><iframe title="Scribble Engine instrument" data-src="/games/scribble-engine/index.html?instrument=1"></iframe>';
- document.body.append(dialog);
- const close=()=>{try{const doc=dialog.querySelector('iframe').contentDocument,button=doc?.getElementById('mobilePause');if(button?.textContent.includes('Pause'))button.click();}catch{}dialog.close();document.body.classList.remove('instrument-open');dialog.returnToRoom?.();};
- dialog.querySelector('#step-back').onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});return dialog;
-}
 export function spatialWorkbench(host,api,renderDraft){
  host.innerHTML=`<div class="spatial-scene bench-scene" data-view="center"><div class="scene-world">${svg(`${defs}
  <rect width="1200" height="720" fill="#d4d4c6"/><path d="M0 0H1200L967 106H239Z" fill="#899a8d"/><path d="M0 0L239 106V478L0 720Z" fill="#9caea0"/><path d="M239 106H967V478H239Z" fill="url(#plaster)"/><path d="M1200 0L967 106V478L1200 720Z" fill="#b7bcac"/><path d="M0 720L239 478H967L1200 720Z" fill="url(#stone)"/>
@@ -92,7 +85,7 @@ export function spatialWorkbench(host,api,renderDraft){
  <section id="draft-sheet" class="draft-sheet" hidden aria-label="Drafting sheet"><div class="draft-header"><h2>Drafting sheet</h2><button id="close-draft">Put down sheet</button></div><div id="draft-surface"></div></section>`;
  renderDraft(host.querySelector('#draft-surface'),api);
  const rendered=mountScene(host.querySelector('.spatial-scene'),makeWorkbench(api.state),api);
- let approachTimer;api.cleanup(()=>clearTimeout(approachTimer));const open=event=>{event?.preventDefault();clearTimeout(approachTimer);rendered?.setCamera('instrument');document.body.classList.add('instrument-open');const enter=()=>{const dialog=getInstrument();dialog.returnToRoom=()=>rendered?.setCamera('center');if(!dialog.open)dialog.showModal();const frame=dialog.querySelector('iframe');if(!frame.getAttribute('src'))frame.src=frame.dataset.src;api.announce('Scribble Engine is open. Step back returns to this workbench and keeps the instrument session.');};if(api.paused())enter();else approachTimer=setTimeout(enter,560);};
+ let approachTimer,instrument;api.cleanup(()=>{clearTimeout(approachTimer);instrument?.close();});const open=event=>{event?.preventDefault();clearTimeout(approachTimer);instrument=getInstrument();instrument.start();rendered?.setCamera('instrument');document.body.classList.add('instrument-open');const enter=()=>{instrument.show(()=>rendered?.setCamera('center'));api.announce('Instrument view opened. Step back returns to this workbench and keeps the session. Separate window remains available.');};if(api.paused())enter();else approachTimer=setTimeout(enter,560);};
  rendered?.links.find(h=>h.id==='instrument')?.link.addEventListener('click',open);host.querySelector('#bench-instrument').onclick=open;host.querySelector('#use-instrument').onclick=open;
  const sheet=host.querySelector('#draft-sheet');const openSheet=event=>{event?.preventDefault();sheet.hidden=false;host.querySelector('#close-draft').focus({preventScroll:true});sheet.scrollIntoView({behavior:api.paused()?'instant':'smooth',block:'start'});};
  rendered?.links.find(h=>h.id==='draft')?.link.addEventListener('click',openSheet);host.querySelector('#bench-paper').onclick=openSheet;host.querySelector('#open-draft').onclick=openSheet;host.querySelector('#close-draft').onclick=()=>{sheet.hidden=true;host.querySelector('#open-draft').focus();};

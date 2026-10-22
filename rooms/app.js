@@ -25,7 +25,7 @@ function render(focus=false,recordVisit=true){
   $('room-number').textContent=`ROOM ${String(index+1).padStart(2,'0')} / 12`;$('room-select').value=current;
   $('previous').href='#/'+ROOM_IDS[(index+11)%12];$('previous').setAttribute('aria-label',`Previous room: ${rooms[ROOM_IDS[(index+11)%12]].title}`);
   $('next').href='#/'+ROOM_IDS[(index+1)%12];$('next').setAttribute('aria-label',`Next room: ${rooms[ROOM_IDS[(index+1)%12]].title}`);
-  announce(current==='hall'?`${state.visited.length} of 12 rooms visited. The doors remember being opened.`:'Try the controls beneath the scene. Every room is always open.');
+  announce(current==='hall'?`${state.visited.length} of 12 rooms visited. Choose a doorway or open the room index.`:current==='workbench'?'Choose the instrument or drafting sheet on the bench.':'Try the controls beneath the scene. Every room is always open.');
   room.render($('room-stage'),api);syncMotion();
   if(focus){$('room-title').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});}
 }

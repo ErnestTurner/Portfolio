@@ -95,7 +95,7 @@
     }
 
     .controls::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--mint) 0 36%, var(--pink) 36% 69%, var(--blue) 69%); }
-    .controls::after { content: "MEDDLING PERMITTED"; position: absolute; top: 17px; right: -35px; width: 142px; padding: 4px 0; transform: rotate(35deg); border-top: 1px solid #ffafcc66; border-bottom: 1px solid #ffafcc66; color: #ffafcc99; font: 700 8px/1 "Courier New", monospace; letter-spacing: .14em; text-align: center; pointer-events: none; }
+    .controls::after { content: none; }
     .arcade-back { display: inline-block; margin: 0 0 18px; color: var(--mint); font: 700 10px/1 "Courier New", monospace; letter-spacing: .14em; text-decoration: none; text-transform: uppercase; }
     .arcade-back:focus-visible { outline: 3px solid var(--focus); outline-offset: 5px; }
     .eyebrow { margin: 0 0 8px; color: var(--mint); font: 700 11px/1.2 "Courier New", monospace; letter-spacing: .18em; text-transform: uppercase; }
@@ -409,20 +409,22 @@
     }
   </style>
   <link rel="stylesheet" href="../lab-shell.css?v=1">
+  <link rel="stylesheet" href="./instrument.css?v=1">
 </head>
 <body class="lab-themed-game game-scribble">
   <main>
     <section class="drawing-wrap" aria-label="Scribble Engine drawing area">
-      <span class="apparatus-label" aria-hidden="true">Live consequence window</span>
+      <span class="apparatus-label" aria-hidden="true">SE—02 / Kinematic drawing instrument</span>
       <canvas id="view" width="600" height="600"></canvas>
+      <div class="instrument-scale" aria-hidden="true"><span>600 × 600 / Drawing field</span><span>Two axes. One continuous record.</span></div>
     </section>
 
     <section class="controls lab-shell-panel" aria-label="Scribble Engine controls">
       <a class="arcade-back lab-back-link" href="../../#experiments" target="_top" aria-label="Back to the lab">← Trikzik's Lab</a>
-      <p class="eyebrow">Trikzik Labs · Experimental apparatus 02</p>
+      <p class="eyebrow">Trikzik Labs / Instrument 02</p>
       <h1>Scribble <em>Engine</em></h1>
-      <p class="invitation">Can you draw a straight line using two things that only rotate?</p>
-      <p class="designation">Dual-orbit mark maker · Please interfere</p>
+      <p class="invitation">Two rotating arms. A pen at the end. The line is a matter of settings.</p>
+      <p class="designation">Independent rotation / Coupled trace</p>
 
       <div class="mobile-quick" aria-label="Quick drawing controls">
         <button id="mobilePause" type="button">Pause</button>
@@ -539,7 +541,7 @@
         <div class="section-body">
       <fieldset class="score-tools" data-workspace-content="replay" hidden>
         <legend>Cue Score</legend>
-        <p class="setup-note">Give the machine a tiny score: timed ink changes and pen lifts that replay exactly.</p>
+        <p class="setup-note">Sequence timed ink changes and pen lifts. Replay the same record exactly.</p>
         <div class="score-presets" aria-label="Authored score presets">
           <button class="score-preset" type="button" data-score-preset="neon-bloom">Neon Bloom<span>layered petals</span></button>
           <button class="score-preset" type="button" data-score-preset="solar-weave">Solar Weave<span>warm woven orbit</span></button>
@@ -556,7 +558,7 @@
 
       <fieldset class="recipe-tools" data-workspace-content="recipe" hidden>
         <legend>Recipe Bench</legend>
-        <p class="setup-note">Build repeated drawing instructions without turning the bench into a wall of controls. Geometry time and playback speed stay separate.</p>
+        <p class="setup-note">Compose repeated drawing instructions. Geometry time and playback speed remain independent.</p>
         <div class="recipe-presets" aria-label="Recipe examples">
           <button class="recipe-preset" type="button" data-recipe-preset="orbit-rosette">Orbit Rosette</button>
           <button class="recipe-preset" type="button" data-recipe-preset="lantern-shift">Lantern Shift</button>
@@ -685,7 +687,7 @@
     <section class="export-panel">
       <header class="export-head">
         <div>
-          <p class="eyebrow">Clean consequence record</p>
+          <p class="eyebrow">Drawing record / Export</p>
           <h2 id="exportTitle">Export Preview</h2>
           <p id="exportDescription">Artwork only · 600 × 600 PNG</p>
         </div>
@@ -703,7 +705,7 @@
 
   <dialog class="confirm-dialog" id="checkpointDialog" aria-labelledby="checkpointDialogTitle">
     <section class="export-panel">
-      <p class="eyebrow">Checkpoint interference</p>
+      <p class="eyebrow">Checkpoint / Current session</p>
       <h2 id="checkpointDialogTitle">Confirm action</h2>
       <p id="checkpointDialogMessage"></p>
       <div class="export-actions">
@@ -715,7 +717,7 @@
 
   <dialog class="confirm-dialog" id="setupDialog" aria-labelledby="setupDialogTitle">
     <section class="export-panel">
-      <p class="eyebrow">Fresh paper protocol</p>
+      <p class="eyebrow">Setup / New drawing</p>
       <h2 id="setupDialogTitle">Load setup?</h2>
       <p id="setupDialogMessage"></p>
       <div class="export-actions">
@@ -727,6 +729,11 @@
 
   <script>
     'use strict';
+
+    // The room's instrument viewer supplies the return control; drawing state is unchanged.
+    if (new URLSearchParams(window.location.search).get('instrument') === '1') {
+      document.documentElement.setAttribute('data-instrument', '');
+    }
 
     // State: logical units live in a fixed 600 × 600 drawing space.
     const SIZE = 600;
@@ -2253,7 +2260,7 @@
         viewContext.moveTo(0, line);
         viewContext.lineTo(SIZE, line);
       }
-      viewContext.strokeStyle = '#a2c8ff0a';
+      viewContext.strokeStyle = '#c8c4af12';
       viewContext.lineWidth = 1;
       viewContext.stroke();
 
@@ -2265,18 +2272,18 @@
       viewContext.beginPath();
       viewContext.moveTo(CENTER.x, CENTER.y);
       viewContext.lineTo(point.elbowX, point.elbowY);
-      viewContext.strokeStyle = '#ffafcc';
+      viewContext.strokeStyle = '#b99a60';
       viewContext.lineWidth = 7;
       viewContext.stroke();
 
       viewContext.beginPath();
       viewContext.moveTo(point.elbowX, point.elbowY);
       viewContext.lineTo(point.penX, point.penY);
-      viewContext.strokeStyle = '#b4f7a7';
+      viewContext.strokeStyle = '#7b9f98';
       viewContext.lineWidth = 6;
       viewContext.stroke();
 
-      joint(CENTER.x, CENTER.y, 8, '#ffd4e3');
+      joint(CENTER.x, CENTER.y, 8, '#dad9c9');
       cyclopsBearing(point.elbowX, point.elbowY, point.penX, point.penY);
       penUfo(point.penX, point.penY);
     }
@@ -2291,59 +2298,59 @@
       viewContext.stroke();
     }
 
-    // The elbow is technically a bearing. It is also keeping an eye on the pen.
+    // Live mechanism overlay only: the bearing and pen never enter the artwork.
     function cyclopsBearing(x, y, targetX, targetY) {
       const direction = Math.atan2(targetY - y, targetX - x);
       viewContext.save();
       viewContext.translate(x, y);
       viewContext.beginPath();
       viewContext.arc(0, 0, 11, 0, Math.PI * 2);
-      viewContext.fillStyle = '#ffafcc';
+      viewContext.fillStyle = '#d5d3c4';
       viewContext.fill();
       viewContext.strokeStyle = '#0b1425';
       viewContext.lineWidth = 2.5;
       viewContext.stroke();
       viewContext.beginPath();
-      viewContext.ellipse(0, 0, 6.2, 5, direction, 0, Math.PI * 2);
-      viewContext.fillStyle = '#eff5fa';
-      viewContext.fill();
+      viewContext.arc(0, 0, 5.5, 0, Math.PI * 2);
+      viewContext.strokeStyle = '#66716e';
+      viewContext.lineWidth = 1.5;
+      viewContext.stroke();
       viewContext.beginPath();
-      viewContext.arc(Math.cos(direction) * 2.2, Math.sin(direction) * 2.2, 2.2, 0, Math.PI * 2);
-      viewContext.fillStyle = '#101d2b';
-      viewContext.fill();
+      viewContext.moveTo(-Math.cos(direction) * 3.8, -Math.sin(direction) * 3.8);
+      viewContext.lineTo(Math.cos(direction) * 3.8, Math.sin(direction) * 3.8);
+      viewContext.strokeStyle = '#35403e';
+      viewContext.lineWidth = 2;
+      viewContext.stroke();
       viewContext.restore();
     }
 
-    // A very small UFO performs the serious business of putting ink on paper.
+    // The pen's crosshair stays centered on its mathematical coordinate.
     function penUfo(x, y) {
       viewContext.save();
       viewContext.translate(x, y);
       viewContext.beginPath();
-      viewContext.moveTo(-8, -2);
-      viewContext.quadraticCurveTo(0, -11, 8, -2);
+      viewContext.moveTo(-7, -7);
+      viewContext.lineTo(7, -7);
+      viewContext.lineTo(7, 7);
+      viewContext.lineTo(-7, 7);
       viewContext.closePath();
-      viewContext.fillStyle = '#a2c8ff';
+      viewContext.fillStyle = '#c9d1c8';
       viewContext.fill();
       viewContext.strokeStyle = '#0b1425';
       viewContext.lineWidth = 2;
       viewContext.stroke();
       viewContext.beginPath();
-      viewContext.ellipse(0, 0, 12, 4.8, 0, 0, Math.PI * 2);
-      viewContext.fillStyle = '#b4f7a7';
-      viewContext.fill();
-      viewContext.strokeStyle = '#0b1425';
+      viewContext.moveTo(-11, 0);
+      viewContext.lineTo(11, 0);
+      viewContext.moveTo(0, -11);
+      viewContext.lineTo(0, 11);
+      viewContext.strokeStyle = '#758e89';
+      viewContext.lineWidth = 1;
       viewContext.stroke();
-      viewContext.beginPath();
-      viewContext.arc(-4, 0, 1.2, 0, Math.PI * 2);
-      viewContext.arc(4, 0, 1.2, 0, Math.PI * 2);
-      viewContext.fillStyle = '#ffafcc';
-      viewContext.fill();
       // The bright center remains exactly on the mathematical pen coordinate.
       viewContext.beginPath();
       viewContext.arc(0, 0, 2.4, 0, Math.PI * 2);
-      viewContext.fillStyle = '#eff5fa';
-      viewContext.shadowColor = '#eff5fa';
-      viewContext.shadowBlur = 8;
+      viewContext.fillStyle = '#f2e9d5';
       viewContext.fill();
       viewContext.restore();
     }

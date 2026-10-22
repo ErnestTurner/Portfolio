@@ -1,0 +1,57 @@
+/* This study is deliberately limited to the hall and workbench. */
+body:is([data-room=hall],[data-room=workbench]){background:#e7e5da;color:#293d36}
+body:is([data-room=hall],[data-room=workbench]) .masthead{height:80px;margin:0 4vw;border-color:#bcc2b3}
+body:is([data-room=hall],[data-room=workbench]) .brand-mark{display:none}
+body:is([data-room=hall],[data-room=workbench]) .brand{font-size:18px;letter-spacing:1px;gap:0;font-weight:600}
+body:is([data-room=hall],[data-room=workbench]) .brand-labs{display:inline;font-size:18px;letter-spacing:1px;margin-left:7px}
+body:is([data-room=hall],[data-room=workbench]) .edition{font-size:0}
+body:is([data-room=hall],[data-room=workbench]) .edition:after{content:'PRIVATE LABORATORY / SPATIAL STUDY 01';font-size:10px;letter-spacing:1.6px}
+body:is([data-room=hall],[data-room=workbench]) main{max-width:none;padding:0;position:relative}
+body:is([data-room=hall],[data-room=workbench]) .room-heading{position:absolute;z-index:2;left:5%;top:28px;display:block;pointer-events:none;min-height:0;margin:0}
+body:is([data-room=hall],[data-room=workbench]) h1{font-family:Georgia,serif;font-size:clamp(30px,3vw,43px);letter-spacing:-1.4px;color:#203c31;text-shadow:0 1px 15px #edeadb}
+body:is([data-room=hall],[data-room=workbench]) .eyebrow{font-size:9px;color:#334f40;margin-bottom:8px}
+body:is([data-room=hall],[data-room=workbench]) #room-description{display:none}
+body:is([data-room=hall],[data-room=workbench]) .room-shell{border:0;border-radius:0;background:#d9d9cb}
+body:is([data-room=hall],[data-room=workbench]) .room-rail{position:absolute;right:4%;top:30px;z-index:3;height:auto;background:#eeebd8d9;padding:0 12px;border:1px solid #b8c1af;gap:28px}
+body:is([data-room=hall],[data-room=workbench]) #room-position{display:none}
+body:is([data-room=hall],[data-room=workbench]) .below-room{padding:12px 4vw;min-height:72px}
+body:is([data-room=hall],[data-room=workbench]) footer{max-width:none;padding:20px 4vw;margin:0}
+.spatial-scene{position:relative;overflow:hidden;height:min(65vw,730px);min-height:470px;background:#b9c2b4;isolation:isolate}
+.scene-world{width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.7,.2,1);transform-origin:63% 65%}
+.spatial-art{display:block;width:100%;height:100%;object-fit:cover}
+.spatial-art text{font-family:'Courier New',monospace}
+.door-plate{font-size:12px;fill:#314b3c}
+.spatial-door .door-leaf{transform-box:view-box;transition:filter .2s}
+.spatial-door:hover .door-aperture,.spatial-door:focus-visible .door-aperture{stroke:#d0ad64;stroke-width:5;filter:brightness(1.2)}
+.spatial-door:focus-visible,.physical-object:focus-visible{outline:none}
+.physical-object:focus-visible path,.physical-object:hover path{stroke:#d7bd78;stroke-width:3}
+.spatial-door{cursor:pointer}
+.scene-caption{position:absolute;left:4%;right:4%;bottom:20px;display:flex;justify-content:space-between;gap:15px;font:11px 'Courier New',monospace;letter-spacing:1px;pointer-events:none;color:#273e33}
+.scene-caption span{padding:10px 12px;background:#eae6d3e8;border:1px solid #9fae97;min-width:165px}
+.spatial-controls{position:relative;z-index:4;display:flex;align-items:center;gap:12px 24px;flex-wrap:wrap;padding:15px 4vw;background:#dedfd2;border-top:1px solid #a5b09e;font-size:12px}
+.spatial-controls button{border-radius:2px;border-color:#8a9b87;font-size:12px;min-height:44px}
+.spatial-controls>p{max-width:420px;font-size:11px;line-height:1.5;color:#53634f;margin:0}
+.spatial-controls a{min-height:44px;display:inline-flex;align-items:center;font-size:12px}
+.view-controls{display:none;gap:6px}
+.hall-door-list summary{cursor:pointer;min-height:44px;display:flex;align-items:center;text-decoration:underline;text-underline-offset:4px}
+.hall-door-list[open]{align-self:flex-start}
+.hall-door-list .hall-mobile-doors{display:grid;position:absolute;z-index:6;background:#efecdf;box-shadow:0 15px 40px #233e3233;border:1px solid #a6b29d;padding:12px 20px;grid-template-columns:1fr 1fr;gap:0 25px;max-width:calc(100vw - 30px);left:4vw}
+.hall-door-list .hall-mobile-doors a{border-bottom:1px solid #c5cbbc;font-size:12px;display:flex;gap:15px;text-decoration:none;min-height:48px}
+.hall-door-list .hall-mobile-doors a span{width:auto;height:auto;background:none;color:#6c7d63;font-family:monospace;border-radius:0}
+.draft-sheet{padding:25px 5%;background:#c3cabc}.draft-sheet[hidden]{display:none}.draft-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.draft-header h2{font-family:Georgia,serif;font-weight:400}.draft-sheet .game-link{display:none}.draft-sheet .room-art{max-height:520px;background:#d4d5c6}.draft-sheet .controls{background:#edeadf}.draft-sheet .museum-mark{stroke:#956044}
+.instrument-open .bench-scene .scene-world{transform:scale(1.16)}
+.instrument-view{padding:0;border-radius:3px;width:min(1320px,96vw);max-width:none;height:94dvh;max-height:94dvh;overflow:hidden;background:#ece9dd;border:1px solid #9ba393;box-shadow:0 30px 120px #163c3377}
+.instrument-view::backdrop{background:#354d4070;backdrop-filter:blur(4px)}
+.instrument-view>header{height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:7px 18px;border-bottom:1px solid #b0b7a8;background:#e3e3d7}
+.instrument-view h2{font-size:16px;font-weight:500;margin:0;letter-spacing:-.3px}.instrument-view h2 span{font:10px 'Courier New',monospace;color:#5c6c57;margin-left:20px;letter-spacing:1px}.instrument-view button{min-height:42px;border-radius:2px;font-size:12px}.instrument-view iframe{display:block;width:100%;height:calc(100% - 58px);border:0;background:#e6e4d9}
+@media(min-width:1500px){body:is([data-room=hall],[data-room=workbench]) .masthead{max-width:none}.spatial-scene{height:760px}}
+@media(max-width:700px){body:is([data-room=hall],[data-room=workbench]) .masthead{height:66px;margin:0 4vw}body:is([data-room=hall],[data-room=workbench]) .brand,body:is([data-room=hall],[data-room=workbench]) .brand-labs{font-size:12px;letter-spacing:.8px}body:is([data-room=hall],[data-room=workbench]) .brand-labs{margin-left:4px}body:is([data-room=hall],[data-room=workbench]) .masthead nav button{font-size:11px}body:is([data-room=hall],[data-room=workbench]) .room-heading{left:20px;top:22px}body:is([data-room=hall],[data-room=workbench]) h1{font-size:32px}body:is([data-room=hall],[data-room=workbench]) .room-rail{top:97px;right:20px;font-size:9px;background:#eceadae0}.spatial-scene{height:560px;min-height:0}.scene-world{width:934px;position:relative;left:50%;margin-left:-467px;transition:transform .5s}.hall-scene[data-view=left] .scene-world{transform:translateX(250px)}.hall-scene[data-view=right] .scene-world{transform:translateX(-250px)}.scene-caption{left:14px;right:14px;bottom:14px;font-size:10px;letter-spacing:.3px}.scene-caption span{min-width:0;padding:8px}.view-controls{display:flex;flex-basis:100%;justify-content:space-between}.view-controls button{flex:1;font-size:11px;padding:9px 5px}.view-controls button[aria-pressed=true]{background:#425f50;color:#fff;border-color:#425f50}.spatial-controls{gap:8px 18px;padding:12px 16px}.spatial-controls button,.spatial-controls a{font-size:11px}.hall-door-list .hall-mobile-doors{left:15px;right:15px;grid-template-columns:1fr 1fr;padding:10px 15px;gap:0 15px}.bench-scene .scene-world{width:900px;margin-left:-560px}.bench-scene{height:540px}.bench-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bench-actions>a,.bench-actions>p{grid-column:1/-1}.bench-actions>p{font-size:11px}.draft-sheet{padding:15px}.draft-sheet .room-art{min-height:0}.instrument-view{width:100%;height:100dvh;max-height:100dvh;margin:0;border:0;border-radius:0}.instrument-view>header{height:55px;padding:5px 12px}.instrument-view h2{font-size:14px}.instrument-view h2 span{display:none}.instrument-view iframe{height:calc(100% - 55px)}body:is([data-room=hall],[data-room=workbench]) .below-room{padding:8px 16px}body:is([data-room=hall],[data-room=workbench]) footer{padding:20px 16px}.instrument-open .bench-scene .scene-world{transform:scale(1.1)}}
+@media(prefers-reduced-motion:no-preference){body:is([data-room=hall],[data-room=workbench]):not(.motion-paused) .scene-world{animation:arrive .65s ease-out}@keyframes arrive{from{opacity:.6;filter:blur(1px)}to{opacity:1;filter:none}}}
+.webgl-scene{position:absolute;inset:0;width:100%;height:100%;display:block}.webgl-ready .scene-world{visibility:hidden}.scene-caption{z-index:3}.scene-hotspot{position:absolute;z-index:2;width:44px;height:44px;margin:-22px;display:grid;place-items:center;text-decoration:none;color:#f6f1dd;outline-offset:1px}.scene-hotspot[hidden]{display:none}.hotspot-dot{width:13px;height:13px;border:1px solid #f3edd6;background:#354f44;box-shadow:0 0 0 5px #e4e6d321;border-radius:50%}.hotspot-label{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#eee9d9;color:#213c30;padding:10px 14px;border:1px solid #81947e;font-size:12px;box-shadow:0 4px 20px #25452e33;opacity:0;pointer-events:none}.scene-hotspot:hover .hotspot-label,.scene-hotspot:focus-visible .hotspot-label{opacity:1}.scene-hotspot:hover .hotspot-dot,.scene-hotspot:focus-visible .hotspot-dot{background:#b59550;box-shadow:0 0 0 7px #f1e7c84d}.spatial-controls .view-controls{display:flex}.webgl-ready .scene-hotspot:focus-visible{outline:2px solid #e8d49b}.webgl-ready .scene-hotspot[data-pick=instrument] .hotspot-label,.webgl-ready .scene-hotspot[data-pick=draft] .hotspot-label{opacity:1;font-size:11px}.webgl-fallback:after{content:'Illustrated view · 3D is unavailable on this device';position:absolute;bottom:68px;left:4%;font-size:11px;background:#eee9d9;padding:8px}
+body:is([data-room=hall],[data-room=workbench]) .room-heading{background:#eae7d5ed;padding:12px 18px;border-left:2px solid #748b71}body:is([data-room=hall],[data-room=workbench]) .room-heading h1{font-size:clamp(28px,2.5vw,37px)}.spatial-controls button[aria-pressed=true]{background:#3f604f;color:#fff;border-color:#3f604f}@media(max-width:700px){body:is([data-room=hall],[data-room=workbench]) .room-heading{padding:9px 12px;left:15px;top:15px}body:is([data-room=hall],[data-room=workbench]) .room-heading h1{font-size:28px}.hotspot-label{max-width:170px;white-space:normal;text-align:center}.bench-scene .scene-hotspot[data-pick=draft] .hotspot-label{bottom:-45px}}
+
+.hotspot-label{width:max-content;max-width:180px}
+
+.instrument-toolbar{display:flex;gap:18px;align-items:center}.instrument-toolbar a{font-size:11px;min-height:44px;display:flex;align-items:center}@media(max-width:500px){.instrument-toolbar{gap:10px}.instrument-toolbar a{font-size:10px}.instrument-view h2{font-size:12px}}
+
+.scene-hotspot.is-identified .hotspot-label{opacity:1}.scene-hotspot.is-identified .hotspot-dot{background:#b59550}

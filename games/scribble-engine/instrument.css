@@ -1,0 +1,130 @@
+/* Instrument surfaces only. Paper, ink palettes and exported artwork are page-owned. */
+body.lab-themed-game.game-scribble {
+  color-scheme: light;
+  --bench: #dfdfd5;
+  --panel: #f2f0e7;
+  --panel-deep: #e8e8dd;
+  --edge: #aab2a8;
+  --ink: #28322e;
+  --muted: #5b675f;
+  --mint: #376b60;
+  --pink: #85612c;
+  --blue: #365e63;
+  --arm-one: var(--pink);
+  --arm-two: var(--mint);
+  --focus: #785221;
+  --lab-black: var(--bench);
+  --lab-panel: var(--panel);
+  --lab-panel-raised: #e5e8dd;
+  --lab-line: var(--edge);
+  --lab-white: var(--ink);
+  --lab-muted: var(--muted);
+  --lab-green: var(--mint);
+  --lab-focus: var(--focus);
+  background: #dfdfd5;
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.game-scribble main { gap: 20px; }
+.game-scribble .drawing-wrap {
+  padding: 38px 16px 30px;
+  background: linear-gradient(110deg, #e0e2d8, #bfc8be 48%, #d6dbd0);
+  border: 1px solid #8e9a8d;
+  border-radius: 3px;
+  box-shadow: inset 0 1px #ffffffe0, 0 3px 0 #a0aa9f, 0 14px 24px #28322e17;
+}
+.game-scribble .drawing-wrap::before {
+  inset: 9px 16px auto auto;
+  width: 72px;
+  height: 9px;
+  border: 0;
+  border-bottom: 1px solid #68776b;
+  background: repeating-linear-gradient(90deg, #68776b 0 1px, transparent 1px 8px);
+  opacity: .65;
+}
+.game-scribble .drawing-wrap::after { content: none; }
+.game-scribble .apparatus-label { top: 15px; left: 17px; color: #3c4b42; font: 700 10px/1.1 "Cascadia Mono", Consolas, monospace; letter-spacing: .07em; }
+.game-scribble .apparatus-label::before { content: none; }
+.game-scribble #view { border: 1px solid #69776c; border-radius: 1px; box-shadow: 0 0 0 4px #566259, 0 0 0 5px #f4f2dfb3; }
+.game-scribble .instrument-scale { position: absolute; inset: auto 17px 9px; display: flex; justify-content: space-between; gap: 12px; color: #47574b; font: 10px/1.2 "Cascadia Mono", Consolas, monospace; }
+.game-scribble .controls.lab-shell-panel { padding: 22px 20px 18px; border-radius: 3px; background-image: none; box-shadow: inset 0 1px #fffdf0, 0 3px 0 #b6beb0, 0 14px 24px #28322e12; }
+.game-scribble .controls::before { height: 3px; background: #4d6151; }
+.game-scribble .controls::after { content: none; }
+.game-scribble .arcade-back.lab-back-link { margin-bottom: 18px; border-radius: 2px; color: #425a4a !important; }
+.game-scribble .eyebrow { color: #476452; font-size: 10px; letter-spacing: .12em; }
+.game-scribble h1 { font-family: "Bahnschrift", "Arial Narrow", Arial, sans-serif; font-size: clamp(1.9rem, 3vw, 2.6rem); line-height: 1; letter-spacing: -.045em; font-weight: 700; text-transform: none; }
+.game-scribble h1 em { color: inherit; }
+.game-scribble .invitation { margin: 12px 0; max-width: 35ch; color: #515e54; font-size: .88rem; line-height: 1.5; }
+.game-scribble .designation { display: block; margin: 0 0 18px; padding: 0 0 12px; border: 0; border-bottom: 1px solid #b6c0b0; border-radius: 0; color: #677164; font-size: 9px; line-height: 1.4; letter-spacing: .06em; transform: none; }
+.game-scribble fieldset { border-radius: 2px; padding: 13px; background: #f9f7ed70; }
+.game-scribble fieldset::after { content: none; }
+.game-scribble legend { color: var(--ink); font-size: .71rem; letter-spacing: .1em; }
+.game-scribble label, .game-scribble .compact-label, .game-scribble .setup-name span, .game-scribble .replay-link-wrap span { color: #3b4b41; }
+.game-scribble label { font-size: .88rem; }
+.game-scribble output { font-size: .83rem; }
+.game-scribble :is(input[type="range"], input[type="checkbox"], input[type="radio"]) { accent-color: var(--mint); }
+.game-scribble .arm-one input[type="range"] { accent-color: var(--pink); }
+.game-scribble input[type="range"] { min-height: 34px; }
+.game-scribble button { border-radius: 3px; border-color: #a3aea0; background: linear-gradient(#faf9f0, #e4e8db); color: #334a3d; box-shadow: inset 0 1px #ffffffb3, 0 1px 0 #b8c1b2; font-size: .83rem; line-height: 1.25; }
+.game-scribble button:hover:not(:disabled) { background: #dce4d6; color: #1e3d2d; }
+.game-scribble button:disabled { opacity: .48; }
+.game-scribble .controls button:hover:not(:disabled) { border-color: #58745d !important; }
+.game-scribble :is(select, input[type="text"], input[type="number"], input[type="color"], #replayLink, #replayDuration), .game-scribble .recipe-grid :is(input, select), .game-scribble .cue-field input[type="number"] { border: 1px solid #a3aea0; border-radius: 2px; background: #fffef4; color: #2b4033; box-shadow: inset 0 1px 2px #293d3210; }
+.game-scribble input[type="color"] { min-height: 36px; }
+.game-scribble button.swatch, .game-scribble button.swatch:hover:not(:disabled) { border-radius: 50%; background: var(--swatch); box-shadow: inset 0 0 0 2px #f6f3e7; }
+.game-scribble .mobile-tabs { gap: 0; border-bottom: 1px solid #aab6a6; }
+.game-scribble .mobile-tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; box-shadow: none; color: #5a6c5e; font-weight: 700; }
+.game-scribble .mobile-tabs button[aria-selected="true"] { border-color: #8c703d !important; background: #e5e7da; color: #243d2d; box-shadow: none; }
+.game-scribble .workspace-status { color: #556d58; font-size: 10px; font-weight: 400; }
+.game-scribble .workspace-stage { scrollbar-color: #9daa98 #e7e9dd; }
+.game-scribble .mobile-quick #mobilePause, .game-scribble .mobile-quick #mobilePlayScore, .game-scribble #playRecipe, .game-scribble #playScore, .game-scribble .shared button:first-child { background: #3c6254; color: #fffef2; border-color: #3c6254 !important; }
+.game-scribble :is(#mobilePause, #mobilePlayScore, #playRecipe, #playScore):hover:not(:disabled), .game-scribble .shared button:first-child:hover:not(:disabled) { background: #2c4d40; color: #fffef2; }
+.game-scribble .cue-row, .game-scribble .recipe-inspector { border-color: #b1bcaa; border-radius: 2px; background: #e9eddf; }
+.game-scribble .cue-row.active { border-color: #527158; box-shadow: inset 3px 0 #527158; }
+.game-scribble .cue-summary-color { border-color: #9da995; }
+.game-scribble .score-preset span { margin-top: 4px; color: #73623f; }
+.game-scribble .recipe-section-row[aria-pressed="true"] { background: #dfe7d6; box-shadow: inset 3px 0 #527158; }
+.game-scribble .recipe-inspector h3 { color: #755a31; }
+.game-scribble .setup-note, .game-scribble .note { color: #5b675f; }
+.game-scribble :is(.recipe-status, .score-status, .setup-status).error { color: #8b3c25; }
+.game-scribble .shared #reset, .game-scribble .cue-remove { color: #7e482c; }
+.game-scribble .control-section { border-radius: 2px; }
+.game-scribble dialog { border-color: #9ca996; border-radius: 3px; background: #f2f0e7; color: #28392d; box-shadow: 0 20px 70px #10231c55; }
+.game-scribble dialog::backdrop { background: #1c2a23b3; backdrop-filter: blur(3px); }
+.game-scribble .export-head h2, .game-scribble .confirm-dialog h2 { font-family: "Bahnschrift", Arial, sans-serif; text-transform: none; }
+.game-scribble .confirm-dialog p { color: #4b5b4e; }
+.game-scribble .preview-shell { border-color: #9ca996; border-radius: 2px; }
+.game-scribble .download-button { background: #3c6254; border-color: #3c6254; color: #fffef2; }
+.game-scribble .download-button:hover:not(:disabled) { background: #2c4d40; color: #fffef2; }
+.game-scribble .lab-privacy-link { border-color: #a8b49e; background: #e9ecdf; color: #52644f; border-radius: 2px; }
+
+/* Desktop leaves the drawing visible while each workspace scrolls independently. */
+@media (min-width: 761px) and (min-height: 521px) and (hover: hover) {
+  .game-scribble main { width: min(1380px, 100%); height: 100dvh; min-height: 0; padding: 20px; grid-template-columns: minmax(0, 1fr) minmax(320px, 390px); align-items: stretch; }
+  .game-scribble .drawing-wrap { position: relative; top: auto; align-self: center; justify-self: center; width: min(100%, calc(100dvh - 100px)); }
+  .game-scribble #view { width: 100%; }
+  .game-scribble .controls { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .game-scribble .controls > :not(.workspace-stage) { flex: 0 0 auto; }
+  .game-scribble .workspace-stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+}
+@media (max-width: 760px), (max-width: 900px) and (max-height: 520px), (max-width: 1100px) and (hover: none) and (pointer: coarse) {
+  .game-scribble main { gap: 7px; }
+  .game-scribble .drawing-wrap { padding: 4px; border-radius: 2px; }
+  .game-scribble .drawing-wrap::before, .game-scribble .instrument-scale { display: none; }
+  .game-scribble .apparatus-label { top: 12px; left: 12px; color: #c8d0bb; font-size: 8px; }
+  .game-scribble .controls.lab-shell-panel { padding: 9px 9px max(6px, env(safe-area-inset-bottom)); }
+  .game-scribble .arcade-back.lab-back-link { margin-bottom: 3px; }
+  .game-scribble h1 { margin-bottom: 5px; font-size: clamp(1.35rem, 6vw, 1.75rem); }
+  .game-scribble .designation { display: none; }
+  .game-scribble .mobile-tabs { gap: 0; }
+  .game-scribble .mobile-tabs button { border-radius: 0; }
+  .game-scribble .control-section > .section-body { padding: 7px; }
+  .game-scribble fieldset { padding: 11px; }
+}
+/* The room dialog provides its own persistent return control. */
+html[data-instrument] .game-scribble .arcade-back { display: none !important; }
+html[data-instrument] .game-scribble .lab-privacy-link { margin-block: 8px; }
+@media (max-height: 520px) and (max-width: 900px), (max-height: 520px) and (max-width: 1100px) and (hover: none) and (pointer: coarse) {
+  .game-scribble h1 { font-size: 1.1rem; }
+  html[data-instrument] .game-scribble h1 { position: static; margin-bottom: 5px; }
+}

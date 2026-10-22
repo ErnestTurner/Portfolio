@@ -1,5 +1,7 @@
 # Twelve-room preview
 
+This document describes the original twelve-room baseline. The subsequent bounded hall/workbench/Scribble presentation revision is documented in [spatial-study.md](spatial-study.md).
+
 The separate `/rooms/` wing adds twelve illustrated interactions to the existing preview. The original homepage, its real gameplay screenshots and surprise selector, all game files, and the existing Pages Functions remain unchanged.
 
 This work is based on `preview/interactive-playground` at `f37b0d8abb47ff14374771be0c2f0185c48e0c0d`. That preview contains toy improvements beyond production; starting from it preserves those improvements. Deploy only to the existing `ernest-turner` Pages project with branch `preview/interactive-playground`. Production branch `main` is outside this change.

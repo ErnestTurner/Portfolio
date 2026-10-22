@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Twelve rooms of small wonders. A separate Trikzik Labs preview by Ernest Turner.">
+  <title>The Concerned Hall · Trikzik Labs</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="./rooms.css">
+  <link rel="stylesheet" href="./wonder.css">
+  <link rel="stylesheet" href="./tactile.css">
+</head>
+<body>
+  <a class="skip" href="#room-title">Skip to the room</a>
+  <header class="masthead">
+    <a class="brand" href="#/hall" aria-label="Trikzik Labs, return to the hall"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>TRIKZIK<span class="brand-labs">LABS</span></span></a>
+    <span class="edition">TWELVE ROOMS / ONE QUESTIONABLE BUILDING</span>
+    <nav aria-label="Lab navigation"><button id="pause" aria-pressed="false">Pause motion</button><button id="directory-open">Directory <span aria-hidden="true">↗</span></button></nav>
+  </header>
+  <main>
+    <div class="room-heading"><div><p class="eyebrow" id="room-kicker"></p><h1 id="room-title" tabindex="-1"></h1></div><p id="room-description"></p></div>
+    <div class="room-shell"><div class="room-rail"><span id="room-number"></span><span id="room-position">EVERY DOOR OPENS</span><a href="#/hall">Floor plan <span aria-hidden="true">↗</span></a></div><section id="room-stage" aria-labelledby="room-title"></section></div>
+    <div class="below-room"><p id="status" role="status" aria-live="polite">Welcome in. Touch something.</p><nav class="room-sequence" aria-label="Browse rooms"><a id="previous" href="#/portal" aria-label="Previous room">←</a><label class="sr-only" for="room-select">Choose a room</label><select id="room-select"></select><a id="next" href="#/workbench" aria-label="Next room">→</a></nav></div>
+  </main>
+  <footer><p>AN OPEN EXPERIMENT BY <a href="https://github.com/ErnestTurner" target="_blank" rel="noopener">ERNEST TURNER</a><span>Preview · <a href="/">Original toy bench</a></span></p><button id="reset-open">↶ Rewind the building</button></footer>
+  <dialog id="directory" aria-labelledby="directory-title"><div class="dialog-top"><div><p class="eyebrow">NO SECRET HANDSHAKE REQUIRED</p><h2 id="directory-title">The directory</h2></div><button data-close="directory" aria-label="Close directory">×</button></div><div class="directory-columns"><section><h3>Find a room</h3><div id="room-directory"></div></section><section><h3>Go straight to a game</h3><p class="muted">Full experiments open in a new tab. Your room stays here.</p><div id="game-directory"></div></section></div></dialog>
+  <dialog id="reset-dialog" aria-labelledby="reset-title"><div class="dialog-top"><h2 id="reset-title">Wind it all back?</h2><button data-close="reset-dialog" aria-label="Cancel rewind">×</button></div><p>The rain drains, the parcel returns, the light resets, and the hall stands straight again.</p><p><strong>Your drawing and museum exhibit stay.</strong> Game saves belong to the games and are never touched.</p><div class="dialog-actions"><button data-close="reset-dialog">Leave things odd</button><button class="primary" id="reset-confirm">Pull the rewind lever</button></div></dialog>
+  <noscript><p class="noscript">The room experiments need JavaScript. All eight games remain available at the <a href="/#experiments">original toy bench</a>.</p></noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

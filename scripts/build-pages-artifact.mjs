@@ -31,6 +31,7 @@ export const PUBLIC_FILES = Object.freeze([
 
 export const PUBLIC_DIRECTORIES = Object.freeze([
   "assets",
+  "rooms",
   "games/brain-in-a-jar",
   "games/dungeon-reset/assets",
   "games/jelly-bench",
